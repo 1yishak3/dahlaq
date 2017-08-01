@@ -1,5 +1,8 @@
-import { Component } from '@angular/core';
-import { NavController } from 'ionic-angular';
+import { Component, ViewChild } from '@angular/core';
+import { NavController, Nav, Events } from 'ionic-angular';
+import { PostPage } from '../post/post'
+import { FirebaseService } from '../../providers/firebase'
+import { WelcomePage } from '../welcome/welcome'
 
 @Component({
   selector: 'page-cards',
@@ -7,8 +10,9 @@ import { NavController } from 'ionic-angular';
 })
 export class CardsPage {
   cardItems: any[];
+  @ViewChild(Nav) nav: Nav;
 
-  constructor(public navCtrl: NavController) {
+  constructor(public navCtrl: NavController, public events : Events ,public fbs:FirebaseService) {
     this.cardItems = [
       {
         user: {
@@ -38,6 +42,28 @@ export class CardsPage {
         content: 'Your scientists were so preoccupied with whether or not they could, that they didn\'t stop to think if they should.'
       }
     ];
+
+  }
+  detailPost(post:any){
+    this.navCtrl.push(PostPage,{
+      post:post
+    })
+  }
+  doLogout(){
+    this.fbs.logout().then((res)=>{
+      console.log("I'm here")
+
+      this.events.publish('dude')
+      //this.nav.popToRoot()
+
+    }).catch((err)=>{
+      console.log("Can't logout")
+    })/*
+    this.events.subscribe('dude',()=>{
+      var user = this.fbs.currentUser()
+      console.log("this is you",user)
+      this.nav.setRoot(WelcomePage)
+    })*/
 
   }
 }

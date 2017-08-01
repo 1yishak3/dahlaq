@@ -11,11 +11,13 @@ $font-path: "../assets/fonts";
 // the Sass variables found in Ionic's source scss files.
 // To view all the possible Ionic variables, see:
 // http://ionicframework.com/docs/v2/theming/overriding-ionic-variables/
-
+$searchbar-ios-input-background-color: #1a1a1a;
+$fab-list-margin: 10px;
 $text-color:        #000;
 $background-color:  #fff;
 
-
+$searchbar-ios-background-color: #1a1a1a;
+$searchbar-ios-toolbar-input-background: #1a1a1a;
 // Named Color Variables
 // --------------------------------------------------
 // Named colors makes it easy to reuse colors on various components.
@@ -43,7 +45,11 @@ $colors: (
 // App Material Design Variables
 // --------------------------------------------------
 // Material Design only Sass variables can go here
+$RobotoDraftFontPath: "../fonts"; // REMINDER: edit as appropriate!
+$RobotoDraftFontName: "RobotoDraft";
+$RobotoDraftFontVersion: "1.0.0";
 
+@import "../../bower_components/robotodraft/sass/robotodraft.scss";
 
 
 
@@ -61,7 +67,7 @@ $colors: (
 // so that the above variables are used and Ionic's
 // default are overridden.
 
-@import "ionic.theme.default";
+@import "ionic.theme.dark";
 
 
 // Ionicons

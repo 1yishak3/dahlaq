@@ -11,7 +11,8 @@ import { Camera } from '@ionic-native/camera';
 })
 export class ItemCreatePage {
   @ViewChild('fileInput') fileInput;
-
+  @ViewChild('fileInput1') fileInput1;
+  @ViewChild('fileInput2') fileInput2;
   isReadyToSave: boolean;
 
   item: any;
@@ -22,7 +23,9 @@ export class ItemCreatePage {
     this.form = formBuilder.group({
       profilePic: [''],
       name: ['', Validators.required],
-      about: ['']
+      postText:['',Validators.required],
+      desiredReach:['', Validators.required],
+      postData:['']
     });
 
     // Watch the form for changes, and
@@ -36,18 +39,50 @@ export class ItemCreatePage {
   }
 
   getPicture() {
+    console.log(this.camera)
     if (Camera['installed']()) {
       this.camera.getPicture({
         destinationType: this.camera.DestinationType.DATA_URL,
-        targetWidth: 96,
-        targetHeight: 96
+        targetWidth: 150,
+        targetHeight: 150
       }).then((data) => {
-        this.form.patchValue({ 'profilePic': 'data:image/jpg;base64,' + data });
+        this.form.patchValue({ 'postData': 'data:image/jpg;base64,' + data });
       }, (err) => {
         alert('Unable to take photo');
       })
     } else {
       this.fileInput.nativeElement.click();
+    }
+  }
+  getVideo() {
+
+    if (Camera['installed']()) {
+      this.camera.getPicture({
+        destinationType: this.camera.DestinationType.DATA_URL,
+        targetWidth: 150,
+        targetHeight: 150
+      }).then((data) => {
+        this.form.patchValue({ 'postData': 'data:image/jpg;base64,' + data });
+      }, (err) => {
+        alert('Unable to take photo');
+      })
+    } else {
+      this.fileInput1.nativeElement.click();
+    }
+  }
+  getAttache() {
+    if (Camera['installed']()) {
+      this.camera.getPicture({
+        destinationType: this.camera.DestinationType.DATA_URL,
+        targetWidth: 150,
+        targetHeight: 150
+      }).then((data) => {
+        this.form.patchValue({ 'postData': 'data:image/jpg;base64,' + data });
+      }, (err) => {
+        alert('Unable to take photo');
+      })
+    } else {
+      this.fileInput2.nativeElement.click();
     }
   }
 
@@ -56,14 +91,14 @@ export class ItemCreatePage {
     reader.onload = (readerEvent) => {
 
       let imageData = (readerEvent.target as any).result;
-      this.form.patchValue({ 'profilePic': imageData });
+      this.form.patchValue({ 'postData': imageData });
     };
 
     reader.readAsDataURL(event.target.files[0]);
   }
 
   getProfileImageStyle() {
-    return 'url(' + this.form.controls['profilePic'].value + ')'
+    return 'url(' + this.form.controls['postData'].value + ')'
   }
 
   /**
@@ -78,7 +113,6 @@ export class ItemCreatePage {
    * back to the presenter.
    */
   done() {
-    if (!this.form.valid) { return; }
-    this.viewCtrl.dismiss(this.form.value);
+    console.log(this.form.value)
   }
 }

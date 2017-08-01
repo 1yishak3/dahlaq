@@ -34,6 +34,28 @@ export class User {
    * Send a POST request to our login endpoint with the data
    * the user entered on the form.
    */
+  passwordGen(num){
+    var time= new Date();
+    return "ran_"+time+num+"_pass"
+  }
+  checkify(num){
+    if ((num.length===10&&num[0]==='0'&&num[1]!=='0')||(num.length===9&&num[0]!==0)){
+      if(num.length===10){
+        return "+251"+num.substring(1,num.lastIndexOf(''))
+      }
+      else{
+        return "+251"+num
+      }
+    }
+    else{
+      return null
+    }
+  }
+  emailify(num){
+    var foomail = "@yitzhaqm.com"
+    var number = num.substring(4,num.lastIndexOf(''))
+    return number+foomail
+  }
   login(accountInfo: any) {
     let seq = this.api.post('login', accountInfo).share();
 

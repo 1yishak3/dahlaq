@@ -2,47 +2,52 @@
 
   <ion-navbar>
     <ion-title>{{ 'CARDS_TITLE' | translate }}</ion-title>
+    <ion-buttons end>
+      <button ion-button clear (click)="doLogout()">Root</button>
+    </ion-buttons>
   </ion-navbar>
 
 </ion-header>
 
 
-<ion-content>
+<ion-content style="background:black;">
 
-  <ion-card *ngFor="let item of cardItems">
+    <ion-card  *ngFor="let item of cardItems">
+      <a (click)="detailPost(item)" style="background:black;" clear>
+      <ion-item>
+        <ion-avatar item-start>
+          <img [src]="item.user.avatar">
+        </ion-avatar>
+        <h2 style="color:white">{{item.user.name}}</h2>
+        <p item-end style="color:grey">{{item.date}}</p>
+      </ion-item>
+      <div padding style="color:grey;"><ion-icon item-start name='ios-eye'></ion-icon>1</div>
 
-    <ion-item>
-      <ion-avatar item-start>
-        <img [src]="item.user.avatar">
-      </ion-avatar>
-      <h2>{{item.user.name}}</h2>
-      <p>{{item.date}}</p>
-    </ion-item>
+      <img [src]="item.image">
 
-    <img [src]="item.image">
-
-    <ion-card-content>
-      <p>{{item.content}}</p>
-    </ion-card-content>
-
-    <ion-row>
-      <ion-col>
-        <button ion-button color="primary" clear small icon-start>
-            <ion-icon name='thumbs-up'></ion-icon>
-            12 Likes
+      <ion-card-content>
+        <p style="color:white">{{item.content}}</p>
+      </ion-card-content>
+      </a>
+      <ion-row>
+        <ion-col>
+          <button ion-button color="light" clear small icon-start block>
+              <ion-icon name='thumbs-up'></ion-icon>
+              12| Like
+            </button>
+        </ion-col>
+        <ion-col>
+          <button ion-button color="light" clear small icon-start block>
+              <ion-icon name='thumbs-down'></ion-icon>
+              4| Dislike
+            </button>
+        </ion-col>
+        <ion-col center text-center>
+          <button ion-button color="light" clear small icon-start block>
+              <ion-icon name='ios-redo'></ion-icon>
+              25| Boost
           </button>
-      </ion-col>
-      <ion-col>
-        <button ion-button color="primary" clear small icon-start>
-            <ion-icon name='text'></ion-icon>
-            4 Comments
-          </button>
-      </ion-col>
-      <ion-col center text-center>
-        <ion-note>
-          11h ago
-        </ion-note>
-      </ion-col>
-    </ion-row>
-  </ion-card>
+        </ion-col>
+      </ion-row>
+    </ion-card>
 </ion-content>

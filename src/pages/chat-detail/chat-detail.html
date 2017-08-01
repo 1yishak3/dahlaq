@@ -1,0 +1,45 @@
+<ion-header>
+  <ion-navbar>
+    <ion-buttons start>
+      <button ion-button (tap)="cancel()" clear>
+        <ion-icon color="light" (tap)="cancel()" name="close"></ion-icon>
+      </button>
+    </ion-buttons>
+    <ion-title>
+      Chat Name
+    </ion-title>
+  </ion-navbar>
+</ion-header>
+
+<ion-content style="background:black">
+  <ion-footer style="background:transparent">
+    <!--ion-row style="background:#1a1a1a;">
+      <ion-col>
+        <ion-textarea #textt id="textarea" block [(ngModel)]="message" autosize style="width:275px;background:#1a1a1a;color:grey;overflow:scroll;max-height:100px; min-height:25px" placeholder="Message"></ion-textarea>
+      </ion-col>
+      <ion-col>
+        <ion-buttons end>
+          <button ion-button clear><ion-icon color="light" style="font-size:25px;" name="send"></ion-icon></button>
+        </ion-buttons>
+      </ion-col>
+    </ion-row-->
+    <ion-grid style="background:#1a1a1a">
+      <ion-row wrap>
+        <ion-col col-1>
+          <div>
+            <ion-icon color="light" style="position:relative;top:0px;font-size:20px;" name="happy"></ion-icon>
+          </div>
+        </ion-col>
+        <ion-col col-10>
+          <ion-textarea item-content #textt id="textarea" block [(ngModel)]="message" autosize
+          style="background:#121212;color:white;overflow:auto;max-height:100px;" placeholder="Message">
+          </ion-textarea>
+        </ion-col>
+        <ion-col col-1>
+          <ion-icon color="light" style="font-size:25px;" name="send"></ion-icon>
+        </ion-col>
+      </ion-row>
+    </ion-grid>
+
+  </ion-footer>
+</ion-content>

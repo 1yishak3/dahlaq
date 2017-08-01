@@ -1,12 +1,39 @@
 <ion-header>
-
   <ion-navbar>
-    <ion-title>{{ 'MAP_TITLE' | translate }}</ion-title>
+    <ion-title *ngIf="!search">Chats</ion-title>
+    <ion-buttons *ngIf="!search"end>
+      <button ion-button icon-only (click)="searchOn()">
+        <ion-icon name="search"></ion-icon>
+      </button>
+    </ion-buttons>
+    <ion-buttons *ngIf="search" end>
+      <button ion-button icon-only (click)="searchOn()">
+        <ion-icon name="close"></ion-icon>
+      </button>
+    </ion-buttons>
+    <ion-searchbar *ngIf="search" (ionInput)="getItems($event)" placeholder="Search for Chats"></ion-searchbar>
   </ion-navbar>
-
 </ion-header>
 
 
-<ion-content>
-  <div #map id="map"></div>
+<ion-content style="background:black;">
+  <ion-list>
+    <ion-item-sliding *ngFor="let item of items">
+      <button ion-item (tap)="openItem(item)">
+        <ion-avatar item-start>
+          <img [src]="item.profilePic" />
+        </ion-avatar>
+        <div style="color:white;">
+          <h2>{{item.name}}</h2>
+          <p>{{item.about}}</p>
+        </div>
+      </button>
+
+      <ion-item-options>
+        <button ion-button color="danger" (click)="deleteItem(item)">
+          {{ 'DELETE_BUTTON' | translate }}
+        </button>
+      </ion-item-options>
+    </ion-item-sliding>
+  </ion-list>
 </ion-content>

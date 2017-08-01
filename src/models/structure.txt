@@ -1,0 +1,58 @@
+What the data will look like.
+
+
+Legend: txt=text
+        #=number/unique identification system
+        bool=boolean
+a post ID will be represented by
+
+{{uid}}+{{time}}
+
+
+
+Users will have the following properties
+
+ User: {
+   "preferences":[{"uid":"//likiliness(normal probability=0.5)"},{}],
+   "likes":[{
+     "postId":"",
+     "time":"the time it was liked"
+     },{}
+   ],
+   "dislikes":[{
+     "postId":"",
+     "time":"the time it was disliked"
+     },{}
+   ],
+   "reports":[{"postId":"","time":"time it was reported"],
+   "userPosts":["postId"],
+   "properties":{
+     "username":"txt",
+     "digits":"txt",
+     "fame":"#",
+     "bio":"txt",
+     "city":"txt",
+     "food":"txt",
+     "rank":"#",
+     "education":"txt",
+     "relationshipStatus":"txt"
+   },
+   "people":[{
+     "username":"txt",
+     "digits":"#",
+     "lastMessage":"txt",
+
+   },{}],
+   "chats":{"username":{
+     "messages_+day":[
+       {
+         "sender":"username",
+         "receiver":"username",
+         "content":"ABC",
+         "time":"time"
+       }
+     ]
+   },
+   "viewables":[{"post"},{}]
+ }
+ }

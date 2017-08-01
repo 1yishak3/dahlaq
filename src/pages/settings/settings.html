@@ -6,21 +6,21 @@
 
 </ion-header>
 
-<ion-content>
+<ion-content style="background:black;">
 
   <form [formGroup]="form" *ngIf="settingsReady">
-    <ion-list *ngIf="page == 'main'">
-      <ion-item>
+    <ion-list  *ngIf="page == 'main'">
+      <ion-item style="color:white;">
         <ion-label>{{ 'SETTINGS_OPTION1' | translate }}</ion-label>
-        <ion-toggle formControlName="option1"></ion-toggle>
+        <ion-toggle color="dark" formControlName="option1"></ion-toggle>
       </ion-item>
 
-      <ion-item>
+      <ion-item style="color:white;">
         <ion-label>{{ 'SETTINGS_OPTION2' | translate }}</ion-label>
-        <ion-input formControlName="option2"></ion-input>
+        <ion-input  formControlName="option2"></ion-input>
       </ion-item>
 
-      <ion-item>
+      <ion-item style="color:white;">
         <ion-label>{{ 'SETTINGS_OPTION3' | translate }}</ion-label>
         <ion-select formControlName="option3">
           <ion-option value="1" checked="true">1</ion-option>
@@ -29,7 +29,7 @@
         </ion-select>
       </ion-item>
 
-      <button ion-item [navPush]="subSettings" [navParams]="profileSettings">
+      <button style="color:white;" ion-item [navPush]="subSettings" [navParams]="profileSettings">
         {{ 'SETTINGS_PROFILE_BUTTON' | translate }}
       </button>
     </ion-list>

@@ -14,7 +14,7 @@ import { Item } from '../../models/item';
 })
 export class ListMasterPage {
   currentItems: Item[];
-
+  search:boolean=false
   constructor(public navCtrl: NavController, public items: Items, public modalCtrl: ModalController) {
     this.currentItems = this.items.query();
   }
@@ -38,7 +38,9 @@ export class ListMasterPage {
     })
     addModal.present();
   }
-
+  searchOn(){
+    this.search=!this.search
+  }
   /**
    * Delete an item from the list of items.
    */

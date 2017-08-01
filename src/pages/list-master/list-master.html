@@ -1,28 +1,41 @@
 <ion-header>
 
   <ion-navbar>
-    <ion-title>{{ 'LIST_MASTER_TITLE' | translate }}</ion-title>
-
-    <ion-buttons end>
-      <button ion-button icon-only (click)="addItem()">
-        <ion-icon name="add"></ion-icon>
+    <ion-title *ngIf="!search">The Ranks</ion-title>
+    <ion-buttons *ngIf="!search"end>
+      <button ion-button icon-only (click)="searchOn()">
+        <ion-icon name="search"></ion-icon>
       </button>
     </ion-buttons>
+    <ion-buttons *ngIf="search" end>
+      <button ion-button icon-only (click)="searchOn()">
+        <ion-icon name="close"></ion-icon>
+      </button>
+    </ion-buttons>
+    <ion-searchbar *ngIf="search"  (ionInput)="getItems($event)" placeholder="Search the ranks"></ion-searchbar>
   </ion-navbar>
 
 </ion-header>
 
-<ion-content>
-
+<ion-content style="background-color:black;">
+  <ion-item>
+    <ion-label>Rank on</ion-label>
+    <ion-select>
+      <ion-option value="1">Fame</ion-option>
+      <ion-option value="2">Notoreity</ion-option>
+    </ion-select>
+  </ion-item>
   <ion-list>
-    <ion-item-sliding *ngFor="let item of currentItems">
+    <ion-item-sliding *ngFor="let item of currentItems;let i = index">
       <button ion-item (click)="openItem(item)">
-        <ion-avatar item-start>
-          <img [src]="item.profilePic" />
-        </ion-avatar>
-        <h2>{{item.name}}</h2>
-        <p>{{item.about}}</p>
-        <ion-note item-end *ngIf="item.note">{{item.note}}</ion-note>
+          <ion-avatar item-start>
+            <img [src]="item.profilePic"/>
+          </ion-avatar>
+        <div style="color:white;">
+          <h2>{{item.name}}</h2>
+          <h3>#{{i + 1}}</h3>
+        </div>
+        <div item-end icon-right><ion-icon color="light" name="star" >{{3*1/i}}</ion-icon></div>
       </button>
 
       <ion-item-options>

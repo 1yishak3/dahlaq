@@ -1,7 +1,7 @@
 import { Component, ViewChild } from '@angular/core';
 import { NavController, Nav } from 'ionic-angular';
 
-import { ContentPage } from '../content/content';
+//import { ContentPage } from '../content/content';
 import { LoginPage } from '../login/login';
 import { SignupPage } from '../signup/signup';
 
@@ -14,7 +14,7 @@ export class MenuPage {
   // A reference to the ion-nav in our component
   @ViewChild(Nav) nav: Nav;
 
-  rootPage: any = ContentPage;
+//  rootPage: any = ContentPage;
 
   pages: Array<{ title: string, component: any }>;
 

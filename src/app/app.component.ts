@@ -5,12 +5,12 @@ import { StatusBar } from '@ionic-native/status-bar';
 import { SplashScreen } from '@ionic-native/splash-screen';
 
 import { CardsPage } from '../pages/cards/cards';
-import { ContentPage } from '../pages/content/content';
+import { ChatPage } from '../pages/chat-detail/chat-detail';
 import { FirstRunPage } from '../pages/pages';
 import { ListMasterPage } from '../pages/list-master/list-master';
 import { LoginPage } from '../pages/login/login';
 import { MapPage } from '../pages/map/map';
-import { MenuPage } from '../pages/menu/menu';
+//import { MenuPage } from '../pages/menu/menu';
 import { SearchPage } from '../pages/search/search';
 import { SettingsPage } from '../pages/settings/settings';
 import { SignupPage } from '../pages/signup/signup';
@@ -21,9 +21,10 @@ import { WelcomePage } from '../pages/welcome/welcome';
 import { Settings } from '../providers/providers';
 
 import { TranslateService } from '@ngx-translate/core'
+import {FirebaseService} from '../providers/firebase'
 
 @Component({
-  template: `<ion-menu [content]="content">
+  /*template: `<ion-menu [content]="content">
     <ion-header>
       <ion-toolbar>
         <ion-title>Pages</ion-title>
@@ -39,10 +40,13 @@ import { TranslateService } from '@ngx-translate/core'
     </ion-content>
 
   </ion-menu>
-  <ion-nav #content [root]="rootPage"></ion-nav>`
+  <ion-nav #content [root]="rootPage"></ion-nav>`*/
+  template:`<ion-nav #content [root]="rootPage"></ion-nav>`,
+  providers:[FirebaseService]
 })
 export class MyApp {
-  rootPage = FirstRunPage;
+  rootPage:any
+  user:any
 
   @ViewChild(Nav) nav: Nav;
 
@@ -51,20 +55,28 @@ export class MyApp {
     { title: 'Welcome', component: WelcomePage },
     { title: 'Tabs', component: TabsPage },
     { title: 'Cards', component: CardsPage },
-    { title: 'Content', component: ContentPage },
+    { title: 'Content', component: ChatPage },
     { title: 'Login', component: LoginPage },
     { title: 'Signup', component: SignupPage },
     { title: 'Map', component: MapPage },
     { title: 'Master Detail', component: ListMasterPage },
-    { title: 'Menu', component: MenuPage },
+  //  { title: 'Menu', component: MenuPage },
     { title: 'Settings', component: SettingsPage },
     { title: 'Search', component: SearchPage }
   ]
 
-  constructor(private translate: TranslateService, private platform: Platform, settings: Settings, private config: Config, private statusBar: StatusBar, private splashScreen: SplashScreen) {
+  constructor(private translate: TranslateService, private platform: Platform,public fbs: FirebaseService, settings: Settings, private config: Config, private statusBar: StatusBar, private splashScreen: SplashScreen) {
     this.initTranslate();
+    this.user = this.fbs.currentUser()
+    console.log("this is you", this.user)
+    if(this.user===null){
+      this.rootPage=WelcomePage
+    }
+    else{
+      this.rootPage=TabsPage
+    }
+    console.log(this.rootPage)
   }
-
   ionViewDidLoad() {
     this.platform.ready().then(() => {
       // Okay, so the platform is ready and our plugins are available.

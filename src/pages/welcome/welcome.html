@@ -1,13 +1,24 @@
-<ion-content scroll="false">
-  <div class="splash-bg"></div>
+<ion-content style="background:black;color:white" scroll="false">
+  <!--div class="splash-bg"></div>
   <div class="splash-info">
     <div class="splash-logo"></div>
-    <div class="splash-intro">
+    <div style="color:white;" class="splash-intro">
       {{ 'WELCOME_INTRO' | translate }}
     </div>
-  </div>
+  </div-->
   <div padding>
-    <button ion-button block (click)="signup()" class="signup">{{ 'SIGNUP' | translate }}</button>
-    <button ion-button block (click)="login()" class="login">{{ 'LOGIN' | translate }}</button>
+    <ion-list>
+      <ion-item style="color:white">
+        <ion-label fixed>+251</ion-label>
+        <ion-input type="tel" [(ngModel)]="creds.digits" name="phone" placeholder="Your Phone Number"></ion-input>
+      </ion-item>
+
+    </ion-list>
   </div>
 </ion-content>
+<ion-footer>
+  <div padding>
+    <button ion-button color="secondary" block id="signup-button" (click)="signup()" class="signup">{{ 'SIGNUP' | translate }}</button>
+    <button ion-button color="light" block id="login-button" (click)="login()" class="login">{{ 'LOGIN' | translate }}</button>
+  </div>
+</ion-footer>

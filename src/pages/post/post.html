@@ -1,0 +1,38 @@
+<ion-header>
+  <ion-navbar>
+    Post Title
+  </ion-navbar>
+</ion-header>
+<ion-content style="background:black;">
+  <div>
+    <ion-row style="color:white">
+      <ion-col>
+        <ion-avatar>
+          <img [src]="post.user.avatar">
+        </ion-avatar>
+      </ion-col>
+      <ion-col>
+        <ion-row>
+          <ion-col>
+            <h3>{{post.user.name}}</h3>
+          </ion-col>
+        </ion-row>
+        <ion-row>
+          <ion-col style="color:grey">
+            {{post.date}}
+          </ion-col>
+        </ion-row>
+      </ion-col>
+    </ion-row>
+  </div>
+  <ion-item>
+    <img [src]="post.image">
+  </ion-item>
+  <ion-item style="color:white">{{post.content}}</ion-item>
+  <ion-item>
+    <ion-label fixed>Post Stats</ion-label>
+  </ion-item>
+  <ion-footer>
+    <!--button ion-button *ngIf="post.user.digits===self.digits" color="danger" block>Delete Post</button-->
+  </ion-footer>
+</ion-content>
