@@ -1,7 +1,7 @@
 <ion-header>
 
   <ion-navbar>
-    <ion-title>{{ item.name }}</ion-title>
+    <ion-title>Profile</ion-title>
   </ion-navbar>
 
 </ion-header>
@@ -11,7 +11,7 @@
   <!--div class="item-profile" text-center #profilePic [style.background-image]="'url(' + item.profilePic + ')'">
   </div-->
   <ion-fab bottom left>
-    <button ion-button (tap)="openSettings($event)" color="light" clear><ion-icon style="font-size:40px" color="light" name="ios-cog"></ion-icon></button>
+    <button *ngIf="isUser"ion-button (tap)="openSettings($event)" color="light" clear><ion-icon style="font-size:40px" color="light" name="ios-cog"></ion-icon></button>
   </ion-fab>
   <div style="background:#1a1a1a;color:white" padding>
     <ion-row>
@@ -24,12 +24,12 @@
         <ion-row><ion-col></ion-col></ion-row>
         <ion-row>
           <ion-col>
-            <h2>{{item.name}}</h2>
+            <h2>{{ profile.username }}</h2>
           </ion-col>
         </ion-row>
         <ion-row>
           <ion-col>
-            <h4>Bio: "{{item.about}}"</h4>
+            <h4>"{{profile.bio}}"</h4>
           </ion-col>
         </ion-row>
       </ion-col>
@@ -38,9 +38,51 @@
   <div>
     <ion-list style="color:white">
       <!--there will be an *ngFor here once you finish building the whole user. You will list the title and then the info provided.-->
-      <ion-item>
-        Test Property 1
+      <ion-item *ngFor="let property in Object.keys(profile.properties)" *ngIf="property!=='profilePics'">
+        <ion-label fixed>{{property}}</ion-label>
+        {{profile.properties[property]}}
       </ion-item>
     </ion-list>
+
+    <!--Definitely EDIT THIS-->
+    <ion-card  *ngFor="let item of cardItems">
+      <a (click)="detailPost(item)" style="background:black;" clear>
+      <ion-item>
+        <ion-avatar item-start>
+          <img [src]="item.user.avatar">
+        </ion-avatar>
+        <h2 style="color:white">{{item.user.name}}</h2>
+        <p item-end style="color:grey">{{item.date}}</p>
+      </ion-item>
+      <div padding style="color:grey;"><ion-icon item-start name='ios-eye'></ion-icon>1</div>
+
+      <img [src]="item.image">
+
+      <ion-card-content>
+        <p style="color:white">{{item.content}}</p>
+      </ion-card-content>
+      </a>
+      <ion-row>
+        <ion-col>
+          <button ion-button color="light" clear small icon-start block>
+              <ion-icon name='thumbs-up'></ion-icon>
+              12| Like
+            </button>
+        </ion-col>
+        <ion-col>
+          <button ion-button color="light" clear small icon-start block>
+              <ion-icon name='thumbs-down'></ion-icon>
+              4| Dislike
+            </button>
+        </ion-col>
+        <ion-col center text-center>
+          <button ion-button color="light" clear small icon-start block>
+              <ion-icon name='ios-redo'></ion-icon>
+              25| Boost
+          </button>
+        </ion-col>
+      </ion-row>
+    </ion-card>
+
   </div>
 </ion-content>

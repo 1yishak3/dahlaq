@@ -1,8 +1,9 @@
-import {Injectable} from '@angular/core';
+import {Injectable, EventEmitter} from '@angular/core';
 import 'rxjs/Rx';
 import {Observable} from "rxjs/Observable";
 import { User } from './user'
 import { Events } from 'ionic-angular'
+import { Uzer } from '../models/uzer'
 
 import * as firebase from "firebase";
 import 'firebase/auth'
@@ -15,7 +16,7 @@ import 'firebase/messaging'
 
 @Injectable()
 export class FirebaseService {
-
+  userCheck: EventEmitter<Boolean>
   authCallback: any;
   user:any
   ev:any
@@ -32,20 +33,16 @@ export class FirebaseService {
     firebase.initializeApp(config);
     this.user=usr
     this.ev=events
+    this.userCheck=new EventEmitter
     // check for changes in auth status
 
 
   }
-  doStuff(data) {
-    var db = firebase.database();
-    db.ref('users/dude').set(data)
 
-  }
-
-  /*onAuthStateChanged(_function) {
+  onAuthStateChanged(_function) {
       return firebase.auth().onAuthStateChanged((_currentUser) => {
           if (_currentUser) {
-              console.log("User " + _currentUser.uid + " is logged in with " + _currentUser.provider);
+              console.log("User " + _currentUser.uid + " is logged in with " + _currentUser.providerData);
               _function(_currentUser);
           } else {
               console.log("User is logged out");
@@ -58,21 +55,81 @@ export class FirebaseService {
 
 
 
-  createEmailUser(credentials) {
-
-      return new Observable(observer => {
-          return firebase.auth().createUserWithEmailAndPassword(credentials.email, credentials.password)
-              .then((authData) => {
-                  console.log("User created successfully with payload-", authData);
-                  observer.next(authData)
-              }).catch((_error) => {
-                  console.log("Login Failed!", _error);
-                  observer.error(_error)
-              })
-      });
-  }*/
-  //dataGetter()
-  //dataWriter()
+  getDatabase(url,once,uidn){
+    if(uidn!==this.currentUser().uid){
+      this.userCheck.emit(false)
+    }else{
+      this.userCheck.emit(true)
+    }
+    return new Promise(function(resolve,reject){
+      if(!once){
+      firebase.database().ref(url).on('value',function(snapshot){
+        console.log(snapshot)
+        resolve(snapshot)
+      },function(err){
+        console.log(err)
+        reject(err)
+      })
+    }else{
+      firebase.database().ref(url).once('value').then(function(res){
+        console.log(res)
+        resolve(res)
+      }).catch(function(err){
+        console.log(err)
+        reject(err)
+      })
+    }
+    })
+  }
+  setDatabase(url,value,set){
+    return new Promise(function(resolve,reject){
+      if(set){
+      firebase.database().ref(url).set(value).then(function(res){
+        console.log(res)
+        resolve(res)
+      }).catch(function(err){
+        console.log(err)
+        reject(err)
+      })
+    }else{
+      firebase.database().ref(url).update(value).then(function(res){
+        console.log(res)
+        resolve(res)
+      }).catch(function(err){
+        console.log(err)
+        reject(err)
+      })
+    }
+    })
+  }
+  // getStorageUrl(url,){
+  //   return new Promise(function(resolve,reject){
+  //
+  //   })
+  // }
+  getStorage(url){
+    return new Promise(function(resolve,reject){
+      var ref = firebase.storage().ref().child(url)
+      ref.getDownloadURL().then(function(res){
+        console.log(res)
+        resolve(res)
+      }).catch(function(err){
+        console.log(err)
+        reject(err)
+      })
+    })
+  }
+  setStorage(url,value){
+    return new Promise(function(resolve,reject){
+      firebase.storage().ref().child(url).put(value).then(function(res){
+        console.log(res)
+        resolve(res)
+      }).catch(function(err){
+        console.log(err)
+        reject(err)
+      })
+    })
+  }
   currentUser() {
       return firebase.auth().currentUser
   }
@@ -84,7 +141,8 @@ export class FirebaseService {
     var vm = this.linkToNumber
     var cr;
     console.log(email+"---"+password)
-    return new Promise(function(resolve, reject){firebase.auth().createUserWithEmailAndPassword(email,password).then(function(d){
+    return new Promise(function(resolve, reject){
+      firebase.auth().createUserWithEmailAndPassword(email,password).then(function(d){
       console.log("Account creation successful, proceeding with phone number verification,",d)
       var user = firebase.auth().currentUser
       vm(num,veri).then(function(res){
@@ -109,7 +167,11 @@ export class FirebaseService {
       console.log("Linked", result)
       resolve(cr)
     }).catch(function(err){
-
+      user.delete().then(function(res){
+        console.log("Account Deleted", res)
+      }).catch(function(err){
+        console.log("Error Deleteing account. Check Connection",err)
+      })
       console.log("Link error",err)
       reject(null)
     })})

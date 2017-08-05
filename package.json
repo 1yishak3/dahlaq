@@ -24,6 +24,7 @@
     "@ionic-native/base64-to-gallery": "^4.1.0",
     "@ionic-native/camera": "3.12.1",
     "@ionic-native/core": "3.12.1",
+    "@ionic-native/file": "^4.1.0",
     "@ionic-native/google-maps": "3.12.1",
     "@ionic-native/media-capture": "^4.1.0",
     "@ionic-native/photo-viewer": "^4.1.0",
@@ -40,6 +41,7 @@
     "cordova-base64-to-gallery": "^4.1.2",
     "cordova-plugin-appminimize": "^1.0.0",
     "cordova-plugin-fcm": "^2.1.2",
+    "cordova-plugin-file": "^4.3.3",
     "cordova-plugin-inappbrowser": "^1.7.1",
     "cordova-plugin-media-capture": "^1.4.3",
     "cordova-plugin-velda-devicefeedback": "0.0.2",
@@ -50,6 +52,7 @@
     "ionic-angular": "3.5.0",
     "ionic2-autosize": "^1.0.0",
     "ionicons": "3.0.0",
+    "localforage": "^1.5.0",
     "rxjs": "5.4.0",
     "sw-toolbox": "3.6.0",
     "zone.js": "0.8.12"
@@ -71,7 +74,8 @@
       "com-sarriaroman-photoviewer": {},
       "cordova-plugin-appminimize": {},
       "cordova-plugin-video-picture-preview-picker-V2": {},
-      "cordova-base64-to-gallery": {}
+      "cordova-base64-to-gallery": {},
+      "cordova-plugin-file": {}
     }
   }
 }

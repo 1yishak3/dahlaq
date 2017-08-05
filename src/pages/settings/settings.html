@@ -1,6 +1,115 @@
 <ion-header>
 
   <ion-navbar>
+    <ion-title>Edit Your Profile</ion-title>
+  </ion-navbar>
+
+</ion-header>
+
+
+<ion-content style="background-color:black;">
+  <!--div class="item-profile" text-center #profilePic [style.background-image]="'url(' + item.profilePic + ')'">
+  </div-->
+  <input type="file" #fileInput style="height: 0px;width:0px" accept="image/*"name="files[]" (change)="onChangeInput($event)" />
+
+  <ion-fab bottom left>
+    <button *ngIf="isUser "ion-button (tap)="saveExit($event)" color="light" clear><ion-icon style="font-size:40px" color="light" name="save"></ion-icon></button>
+    <ion-fab-list side="right">
+      <button ion-fab color="light" (click)="saveAndGoToProfile()"><ion-icon color="dark"name="upload"></ion-icon></button>
+      <button ion-fab color="light" (click)="exitToProfileWithoutSaving($event)"><ion-icon color="dark" name="close"></ion-icon></button>
+    </ion-fab-list>
+    <ion-fab-list>
+
+    </ion-fab-list>
+  </ion-fab>
+  <div style="background:#1a1a1a;color:white" padding>
+    <ion-row>
+      <ion-col>
+        <a (click)=showChoices($event)>
+          <ion-avatar *ngIf="profilec.currentPic!==''">
+            <img style="border-radius:100%"[src]="profilec.currentPic"/>
+          </ion-avatar>
+          <div class="profile-image-placeholder" *ngIf="profilec.currentPic===''">
+            <ion-icon name="add"></ion-icon>
+            <div>
+              Add A Profile Pic
+            </div>
+          </div>
+        </a>
+      </ion-col>
+      <ion-col>
+        <ion-row><ion-col></ion-col></ion-row>
+        <ion-row>
+          <ion-col>
+            <h2>{{ profile.username }}</h2>
+          </ion-col>
+        </ion-row>
+        <ion-row>
+          <ion-col>
+            <ion-textarea ([ngModel])="profilec.bio" item-content #textt id="textarea" block ([ngModel])="post.content.desciption" autosize style="background:#121212;color:white;overflow:auto;max-height:200px;min-height:100px">
+            </ion-textarea>
+          </ion-col>
+        </ion-row>
+      </ion-col>
+    </ion-row>
+  </div>
+  <div>
+    <ion-list style="color:white">
+      <!--there will be an *ngFor here once you finish building the whole user. You will list the title and then the info provided.-->
+      <ion-item *ngFor="let property in Object.keys(profilec.properties)" *ngIf="property!=='profilePics'">
+        <ion-label fixed>{{property}}</ion-label>
+        <ion-input type="text" ([ngModel])="profilec.properties[property]"><ion-input>
+      </ion-item>
+    </ion-list>
+
+
+    <ion-card  *ngFor="let item of cardItems">
+      <a (click)="detailPost(item)" style="background:black;" clear>
+      <ion-item>
+        <ion-avatar item-start>
+          <img [src]="item.user.avatar">
+        </ion-avatar>
+        <h2 style="color:white">{{item.user.name}}</h2>
+        <p item-end style="color:grey">{{item.date}}</p>
+      </ion-item>
+      <div padding style="color:grey;"><ion-icon item-start name='ios-eye'></ion-icon>1</div>
+
+      <img [src]="item.image">
+
+      <ion-card-content>
+        <p style="color:white">{{item.content}}</p>
+      </ion-card-content>
+      </a>
+      <ion-row>
+        <ion-col>
+          <button ion-button color="light" clear small icon-start block>
+              <ion-icon name='thumbs-up'></ion-icon>
+              12| Like
+            </button>
+        </ion-col>
+        <ion-col>
+          <button ion-button color="light" clear small icon-start block>
+              <ion-icon name='thumbs-down'></ion-icon>
+              4| Dislike
+            </button>
+        </ion-col>
+        <ion-col center text-center>
+          <button ion-button color="light" clear small icon-start block>
+              <ion-icon name='ios-redo'></ion-icon>
+              25| Boost
+          </button>
+        </ion-col>
+      </ion-row>
+    </ion-card>
+
+  </div>
+</ion-content>
+
+
+
+<!--ion-header>
+
+  <ion-navbar>
     <ion-title>{{ pageTitle }}</ion-title>
   </ion-navbar>
 
@@ -42,4 +151,4 @@
     </ion-list>
   </form>
 
-</ion-content>
+</ion-content-->

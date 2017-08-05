@@ -92,4 +92,5 @@
     <plugin name="cordova-plugin-appminimize" spec="^1.0.0" />
     <plugin name="cordova-plugin-video-picture-preview-picker-V2" spec="https://github.com/newsof1111/cordova-plugin-video-picture-preview-picker-V2.git" />
     <plugin name="cordova-base64-to-gallery" spec="^4.1.2" />
+    <plugin name="cordova-plugin-file" spec="^4.3.3" />
 </widget>

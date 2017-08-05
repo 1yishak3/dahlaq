@@ -6,6 +6,7 @@ import { User } from '../../providers/user';
 
 import { TranslateService } from '@ngx-translate/core';
 import { FirebaseService } from '../../providers/firebase'
+import { Uzer } from '../../models/uzer'
 
 
 @Component({
@@ -16,6 +17,7 @@ export class SignupPage {
   // The account fields for the login form.
   // If you're using the username field with or without email, make
   // sure to add it to the type
+  person:Uzer
   account: { username: string, password: string, code: string } = {
     username: '',
     password: '',
@@ -26,7 +28,8 @@ export class SignupPage {
   once:number=0;
   private signupErrorString: string;
   confirmationResult: any
-  constructor(public navCtrl: NavController,
+  constructor(public fbs:FirebaseService,
+    public navCtrl: NavController,
     public user: User,
     public toastCtrl: ToastController,
     public translateService: TranslateService,
@@ -39,13 +42,19 @@ export class SignupPage {
   }
   doSignup() {
     this.once=this.once+1
+    var vm=this.fbs
     // Attempt to login in through our User service
     console.log(this.confirmationResult)
     if (this.once<2){
       console.log("I got here...then something happened")
       this.confirmationResult.confirm(this.account.code).then((resp) => {
-        this.navCtrl.push(MainPage);
-        console.log("Login Succesful!")
+        this.person.properties.digits=vm.currentUser().phoneNumber
+        vm.setDatabase("users/"+vm.currentUser().uid,this.person,true).then(function(res){
+          this.navCtrl.push(MainPage);
+          console.log("Login Succesful!")
+        }).catch(function(err){
+          console.log("User Creation ERROR in Database",err)
+        })
       }).catch( (err) => {
 
         //this.navCtrl.push(MainPage); // TODO: Remove this when you add your signup endpoint
