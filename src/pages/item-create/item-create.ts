@@ -1,9 +1,10 @@
 import { Component, ViewChild,ElementRef } from '@angular/core';
 import { Validators, FormBuilder, FormGroup } from '@angular/forms';
-import { NavController, ViewController } from 'ionic-angular';
+import { NavController, ViewController,PopoverController } from 'ionic-angular';
 import { Post } from '../../models/post'
 import { Camera } from '../../providers/camera';
 import { FirebaseService } from '../../providers/firebase'
+import { PopoverPage } from '../popovers/propop'
 
 
 @Component({
@@ -18,11 +19,20 @@ export class ItemCreatePage {
   post:Post
   item: any;
   postId:any
-
-  constructor(public fbs: FirebaseService, public navCtrl: NavController, public viewCtrl: ViewController, formBuilder: FormBuilder, public camera: Camera) {
+  bool:any
+  get:number
+  constructor(public popCtrl:PopoverController,public fbs: FirebaseService, public navCtrl: NavController, public viewCtrl: ViewController, formBuilder: FormBuilder, public camera: Camera) {
 
   }
 
+  showChoices(e,bool, num){
+    this.bool=bool
+    this.get=num
+    let pop = this.popCtrl.create(PopoverPage)
+    pop.present({
+      ev:e
+    })
+  }
 
   ionViewDidLoad() {
 
@@ -30,12 +40,18 @@ export class ItemCreatePage {
   generatePostId(){
     var uid = this.fbs.currentUser().uid
     var time = Date.now();
+    console.log(uid+time)
     this.post.postId = uid+time
   }
   submitPost(){
+    var vm=this.fbs
     if(!this.post.postId){
       this.generatePostId()
     }
+    this.post.poster.username=this.fbs.currentUser().displayName
+    this.post.poster.digits=this.fbs.currentUser().phoneNumber
+    this.post.poster.uId=this.fbs.currentUser().uid
+    this.post.poster.profilePic=this.fbs.currentUser().photoURL
     this.fbs.setDatabase("posts/"+this.post.postId,this.post,true).then(function(res){
       console.log("Success with, ",res)
       //pop up notifying success
@@ -43,6 +59,18 @@ export class ItemCreatePage {
     }).catch(function(err){
       console.log(err)
 
+    })
+    vm.getDatabase("adminsLists/posts",true, vm.currentUser().uid).then(function(res){
+      var list=[]
+      for(let i in res){
+        list.push(res[i])
+      }
+      list.push(vm.currentUser().uid)
+      vm.setDatabase("adminsLists/posts",list,true).then(function(res){
+        console.log("Successfully added to admin's list")
+      }).catch(function(err){
+        console.log("Soory, couldn't add you to the list", err)
+      })
     })
   }
   generateFileName(typ){
@@ -111,7 +139,7 @@ export class ItemCreatePage {
     }
   }
 
-  getAttache(upload) {
+  getAttache() {
     this.fileInput2._elementRef.nativeElement.click();
   }
   onChangeInput(e){
@@ -123,7 +151,13 @@ export class ItemCreatePage {
     this.fbs.setStorage(url,file).then(function(res){
       this.fbs.getStorage(url).then(function(res){
         console.log(res)
-        pst.content.imageUrl=res
+        if(this.get===1){
+          pst.content.imageUrl=res
+        }else if(this.get===2){
+          pst.content.videoUrl=res
+        }else if(this.get===3){
+          pst.content.fileUrl=res
+        }
       }).catch(function(err){
         console.log("URL get error", err)
       })
@@ -137,7 +171,13 @@ export class ItemCreatePage {
       vm.setStorage(url,file).then(function(res){
         vm.getStorage(url).then(function(res){
           console.log(res)
-          pst.content.imageUrl=res
+          if(this.get===1){
+            pst.content.imageUrl=res
+          }else if(this.get===2){
+            pst.content.videoUrl=res
+          }else if(this.get===3){
+            pst.content.fileUrl=res
+          }
         }).catch(function(err){
           console.log("URL get error", err)
         })

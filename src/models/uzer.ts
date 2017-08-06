@@ -3,11 +3,11 @@ export class Uzer {
   likes=[]
   dislikes=[]
   reports:Array<Object>
-  userPosts=[]
+  userPosts:Array<String>
   username=""
   bio=""
   rank=0
-  fame:0
+  fame=0
   properties={
     profilePics:[],
     digits:"",
@@ -15,6 +15,7 @@ export class Uzer {
     food:"",
     relationshipStatus:"",
     education:"",
+    refers:{}
   }
   currrentPic=""
   people={}

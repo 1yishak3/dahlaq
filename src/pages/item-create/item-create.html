@@ -38,17 +38,17 @@
           </ion-row>
           <ion-row text-center>
             <ion-col>
-              <button ion-button clear (click)="getPicture()">
+              <button ion-button clear (click)="showChoices($event,true, 1)">
                 <ion-icon color="light" name="ios-camera"></ion-icon>
               </button>
             </ion-col>
             <ion-col>
-              <button ion-button clear (click)="getVideo()">
+              <button ion-button clear (click)="showChoices($event,false,2)">
                 <ion-icon color="light" name="ios-videocam"></ion-icon>
               </button>
             </ion-col>
             <ion-col>
-              <button ion-button clear (click)="getAttache()">
+              <button ion-button clear (click)="showChoices($event, null,3)">
                 <ion-icon color="light" name="document"></ion-icon>
               </button>
             </ion-col>

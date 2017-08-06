@@ -23,7 +23,9 @@ export class SettingsPage {
   @ViewChild('fileInput') fileInput:any
   profile:any
   profilec:any
-
+  saved:boolean=false
+  bool:any
+  thisPage:boolean=false
   constructor(public popCtrl:PopoverController,
     public camera:Camera,
     public navCtrl: NavController,
@@ -34,10 +36,16 @@ export class SettingsPage {
     this.profile= navParams.get('user')
     this.profilec= _.cloneDeep(this.profile)
   }
+  ionViewWillEnter(){
+    this.profile= this.navParams.get('user')
+    this.profilec = _.cloneDeep(this.profile)
+  }
   removePhoto(){
     this.profilec.currentPic=""
   }
-  showChoices(e){
+  showChoices(e,bool){
+    this.thisPage=true
+    this.bool=bool
     let pop = this.popCtrl.create(PopoverPage)
     pop.present({
       ev:e
@@ -53,12 +61,14 @@ export class SettingsPage {
     //display a uploading spinner fot the user to wait until it finishes
     var file=e.target.files[0]
     var pic= this.generateFileName(file)
-    var url=this.fbs.currentUser().uid+"/videos/"+pic
+    var url="/"+this.fbs.currentUser().uid+"/videos/"+pic
     var pst = this.profilec
+    var saved = this.fbs
     this.fbs.setStorage(url,file).then(function(res){
-      this.fbs.getStorage(url).then(function(res){
+      saved.getStorage(url).then(function(res){
         console.log(res)
-        pst.profile.profilePics.push(res)
+        pst.properties.profilePics.push(res)
+        pst.currentPic=res
       }).catch(function(err){
         console.log("URL get error", err)
       })
@@ -74,6 +84,7 @@ export class SettingsPage {
           console.log(res)
           pst.properties.profilePics.push(res)
           pst.currentPic=pst.properties.profilePics[pst.properties.profilePics.length-1]
+          vm.currentUser().photoURL=pst.currentPic
         }).catch(function(err){
           console.log("URL get error", err)
         })
@@ -83,16 +94,16 @@ export class SettingsPage {
     })
   }
   getPicture(upload) {
+    this.thisPage=false
     var cam=this.camera
     var vm = this.fbs
     var vm1=this.generateFileName
     if(!upload){
       var fp=this.processFile
       this.camera.takePicture(1).then(function(data){
-
         cam.getFile(data[0].fullpath).then(function(file){
           var pic = vm1(file)
-          var url=vm.currentUser().uid+"/images/"+pic
+          var url="/"+vm.currentUser().uid+"/images/"+pic
           fp(url,file)
         }).catch(function(err){
 
@@ -106,13 +117,23 @@ export class SettingsPage {
   }
   saveAndGoToProfile(){
     if(this.profile!==this.profilec){
-      this.fbs
+      this.fbs.setDatabase("users/"+this.fbs.currentUser().uid,this.profilec,false).then(function(res){
+        console.log("profile successfully updated")
+        this.navCtrl.pop()
+      }).catch(function(err){
+        console.log("Sadly, your profile has not been updated", err)
+      })
     }
   }
   exitToProfileWithoutSaving(){
-
+    console.log("Not Saved")
+    this.profilec=_.cloneDeep(this.profile)
+    this.navCtrl.pop()
   }
   keepUpdatingOrSomething(){
+
+  }
+  ionViewWillLeave(){
 
   }
   ngOnChanges() {

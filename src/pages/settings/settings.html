@@ -25,7 +25,7 @@
   <div style="background:#1a1a1a;color:white" padding>
     <ion-row>
       <ion-col>
-        <a (click)=showChoices($event)>
+        <a (click)=showChoices($event,true)>
           <ion-avatar *ngIf="profilec.currentPic!==''">
             <img style="border-radius:100%"[src]="profilec.currentPic"/>
           </ion-avatar>

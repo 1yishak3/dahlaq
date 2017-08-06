@@ -54,7 +54,15 @@ export class FirebaseService {
 
 
 
-
+  rmDatabase(url){
+    return new Promise(function(resolve,reject){
+      firebase.database().ref(url).remove().then(function(res){
+        resolve(res)
+      }).catch(function(err){
+        reject(err)
+      })
+    })
+  }
   getDatabase(url,once,uidn){
     if(uidn!==this.currentUser().uid){
       this.userCheck.emit(false)
@@ -92,7 +100,8 @@ export class FirebaseService {
         reject(err)
       })
     }else{
-      firebase.database().ref(url).update(value).then(function(res){
+      var val = {url:value}
+      firebase.database().ref().update(val).then(function(res){
         console.log(res)
         resolve(res)
       }).catch(function(err){

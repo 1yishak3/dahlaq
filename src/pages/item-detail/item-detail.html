@@ -44,45 +44,66 @@
       </ion-item>
     </ion-list>
 
-    <!--Definitely EDIT THIS-->
-    <ion-card  *ngFor="let item of cardItems">
-      <a (click)="detailPost(item)" style="background:black;" clear>
-      <ion-item>
-        <ion-avatar item-start>
-          <img [src]="item.user.avatar">
-        </ion-avatar>
-        <h2 style="color:white">{{item.user.name}}</h2>
-        <p item-end style="color:grey">{{item.date}}</p>
-      </ion-item>
-      <div padding style="color:grey;"><ion-icon item-start name='ios-eye'></ion-icon>1</div>
+    <!--Definitely Edited-->
+    <ion-list [virtualScroll]="userPosts">
+      <ion-card  *virtualItem="let post">
+        <a (click)="post.detailPost(post)" style="background:black;" clear>
+        <ion-item>
+          <ion-avatar item-start>
+            <ion-img [src]="post.userImage"></ion-img>
+          </ion-avatar>
+          <h2 style="color:white">{{post.poster.username}}</h2>
+          <p item-end style="color:grey">{{post.time}}</p>
+        </ion-item>
+        <div padding style="color:grey;"><ion-icon item-start name='ios-eye'></ion-icon>{{post.reach}}</div>
 
-      <img [src]="item.image">
+        <ion-img *ngIf="post.content.imageUrl!==''"[src]="post.content.imageUrl"></ion-img>
+        <div icon-center (click)="playVideo(post.content.videoUrl)" *ngIf="post.content.videoUrl!==''" style="height:50px" >
+          <ion-icon style="font-size:25px;position:relative"></ion-icon>
+        </div>
 
-      <ion-card-content>
-        <p style="color:white">{{item.content}}</p>
-      </ion-card-content>
-      </a>
-      <ion-row>
-        <ion-col>
-          <button ion-button color="light" clear small icon-start block>
-              <ion-icon name='thumbs-up'></ion-icon>
-              12| Like
+        <ion-card-content>
+          <p style="color:white">{{post.content.description}}</p>
+        </ion-card-content>
+        </a>
+        <ion-row>
+          <ion-col>
+            <button *ngIf="post.liked"(click)="post.like()" ion-button color="light" clear small icon-start block>
+                <ion-icon name='thumbs-up'></ion-icon>
+                {{post.likes}}| Like
+              </button>
+              <button *ngIf="!post.liked"(click)="post.unlike()" ion-button color="primary" clear small icon-start block>
+                  <ion-icon name='thumbs-up'></ion-icon>
+                  {{post.likes}}| Like
+                </button>
+          </ion-col>
+          <ion-col>
+            <button *ngIf="post.disliked"(click)="post.dislike()"ion-button color="light" clear small icon-start block>
+                <ion-icon name='thumbs-down'></ion-icon>
+                {{post.dislikes}}| Dislike
+              </button>
+              <button *ngIf="!post.disliked"(click)="post.undislike()"ion-button color="primary" clear small icon-start block>
+                  <ion-icon name='thumbs-down'></ion-icon>
+                  {{post.dislikes}}| Dislike
+                </button>
+          </ion-col>
+          <ion-col center text-center>
+            <button *ngIf="post.reported" (click)="post.report()" ion-button color="light" clear small icon-start block>
+                <ion-icon name='ios-redo'></ion-icon>
+                {{post.reports}}| Report
             </button>
-        </ion-col>
-        <ion-col>
-          <button ion-button color="light" clear small icon-start block>
-              <ion-icon name='thumbs-down'></ion-icon>
-              4| Dislike
+            <button *ngIf="!post.reported"(click)="post.unreport()" ion-button color="primary" clear small icon-start block>
+                <ion-icon name='ios-redo'></ion-icon>
+                {{post.reports}}| Report
             </button>
-        </ion-col>
-        <ion-col center text-center>
-          <button ion-button color="light" clear small icon-start block>
-              <ion-icon name='ios-redo'></ion-icon>
-              25| Boost
-          </button>
-        </ion-col>
-      </ion-row>
-    </ion-card>
-
+          </ion-col>
+        </ion-row>
+      </ion-card>
+      <ion-infinite-scroll (ionInfinite)="pullToAddMore($event)">
+        <ion-infinite-scroll-content
+        loadingSpinner="circles"
+        loadingText="Loading more of your posts..."></ion-infinite-scroll-content>
+      </ion-infinite-scroll>
+    </ion-list>
   </div>
 </ion-content>

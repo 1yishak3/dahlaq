@@ -49,11 +49,28 @@ export class SignupPage {
       console.log("I got here...then something happened")
       this.confirmationResult.confirm(this.account.code).then((resp) => {
         this.person.properties.digits=vm.currentUser().phoneNumber
+        vm.currentUser().displayName=this.account.username
+        this.person.username=this.account.username
         vm.setDatabase("users/"+vm.currentUser().uid,this.person,true).then(function(res){
+
           this.navCtrl.push(MainPage);
           console.log("Login Succesful!")
         }).catch(function(err){
           console.log("User Creation ERROR in Database",err)
+        })
+        vm.getDatabase("adminsLists/users",true, vm.currentUser().uid).then(function(res){
+          var list=[]
+          for(let i in res){
+            list.push(res[i])
+          }
+          list.push(vm.currentUser().uid)
+          vm.setDatabase("adminsLists/users",list,true).then(function(res){
+            console.log("Successfully added to admin's list")
+          }).catch(function(err){
+            console.log("Soory, couldn't add you to the list", err)
+          })
+        }).catch(function(err){
+
         })
       }).catch( (err) => {
 
