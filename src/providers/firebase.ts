@@ -2,7 +2,7 @@ import {Injectable, EventEmitter} from '@angular/core';
 import 'rxjs/Rx';
 import {Observable} from "rxjs/Observable";
 import { User } from './user'
-import { Events } from 'ionic-angular'
+import { Events,LoadingController } from 'ionic-angular'
 import { Uzer } from '../models/uzer'
 
 import * as firebase from "firebase";
@@ -14,13 +14,15 @@ import 'firebase/messaging'
 
 
 
+
 @Injectable()
 export class FirebaseService {
   userCheck: EventEmitter<Boolean>
   authCallback: any;
   user:any
   ev:any
-  constructor(public usr : User, public events: Events) {
+
+  constructor(public loadCtrl?:LoadingController,public usr? : User, public events?: Events) {
     // Initialize Firebase
     var config = {
       apiKey: "AIzaSyCYT5qaezgIxItyCT_idaM0rXNnKA9eBMY",
@@ -38,7 +40,21 @@ export class FirebaseService {
 
 
   }
-
+  connected(){
+    return new Promise(function(resolve,reject){
+      firebase.database().ref(".info/connected").on("value", function(snap) {
+        if (snap.val() === true||snap.val() === false) {
+          resolve(snap.val())
+        } else {
+          reject("problems with .info/connected");
+        }
+      });
+    })
+  }
+  getRef(url){
+    var ref:any=firebase.database().ref(url)
+    return ref
+  }
   onAuthStateChanged(_function) {
       return firebase.auth().onAuthStateChanged((_currentUser) => {
           if (_currentUser) {
@@ -52,8 +68,34 @@ export class FirebaseService {
   }
 
 
-
-
+  transac(url,func){
+    return new Promise(function(resolve,reject){
+      var ref=firebase.database().ref(url)
+      ref.transaction(func)
+    })
+  }
+  setList(url,val){
+    return new Promise(function(resolve,reject){
+      //var newKey=firebase.database().ref(url).push().key
+      firebase.database().ref(url).push(val).then(function(res){
+        console.log(res.key)
+        resolve(res.key)
+      }).catch(function(err){
+        console.log("err",err)
+        reject(err)
+      })
+    })
+  }
+  getLimited(url,num){
+    return new Promise(function(resolve,reject){
+      var data=firebase.database().ref(url).limitToLast(num)
+      if(data){
+        resolve(data)
+      }else{
+        reject(data)
+      }
+    })
+  }
   rmDatabase(url){
     return new Promise(function(resolve,reject){
       firebase.database().ref(url).remove().then(function(res){
@@ -63,7 +105,7 @@ export class FirebaseService {
       })
     })
   }
-  getDatabase(url,once,uidn){
+  getDatabase(url,once,uidn?:string){
     if(uidn!==this.currentUser().uid){
       this.userCheck.emit(false)
     }else{
@@ -100,8 +142,9 @@ export class FirebaseService {
         reject(err)
       })
     }else{
-      var val = {url:value}
-      firebase.database().ref().update(val).then(function(res){
+      //var val = {}
+      //val[url]=value
+      firebase.database().ref().update(value).then(function(res){
         console.log(res)
         resolve(res)
       }).catch(function(err){
@@ -121,7 +164,8 @@ export class FirebaseService {
       var ref = firebase.storage().ref().child(url)
       ref.getDownloadURL().then(function(res){
         console.log(res)
-        resolve(res)
+        var ress:any=res
+        resolve(ress)
       }).catch(function(err){
         console.log(err)
         reject(err)

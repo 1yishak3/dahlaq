@@ -7,7 +7,7 @@ import { File } from '@ionic-native/file'
 @Injectable()
 export class Camera{
 
-  constructor(public plt:Platform,public fl: File,public mc:MediaCapture,public mf:MediaFile,public ce:CaptureError,public cio:CaptureImageOptions,public cvo:CaptureVideoOptions){
+  constructor(public plt:Platform,public fl: File,public mc:MediaCapture){
 
   }
   takePicture(limit){

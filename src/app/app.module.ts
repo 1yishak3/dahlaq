@@ -18,8 +18,9 @@ import { Storage, IonicStorageModule } from '@ionic/storage';
 import { ElasticModule } from 'angular2-elastic'
 import { AutosizeModule } from 'ionic2-autosize'
 import { environment } from '../environments/environment'
-
+import { EmojiPickerModule } from '@ionic-tools/emoji-picker';
 import { MyApp } from './app.component';
+import { StreamingMedia } from '@ionic-native/streaming-media'
 
 import { CardsPage } from '../pages/cards/cards';
 import { ChatPage } from '../pages/chat-detail/chat-detail';
@@ -36,20 +37,22 @@ import { TabsPage } from '../pages/tabs/tabs';
 import { TutorialPage } from '../pages/tutorial/tutorial';
 import { WelcomePage } from '../pages/welcome/welcome';
 import { PostPage } from '../pages/post/post'
-
+import { PopoverPage } from '../pages/popovers/propop'
 import { Api } from '../providers/api';
 import { Items } from '../mocks/providers/items';
 import { Settings } from '../providers/settings';
 import { User } from '../providers/user';
 import { FirebaseService } from '../providers/firebase'
 
-import { Camera } from '@ionic-native/camera';
+import { Camera } from '../providers/camera';
 import { GoogleMaps } from '@ionic-native/google-maps';
 import { SplashScreen } from '@ionic-native/splash-screen';
 import { StatusBar } from '@ionic-native/status-bar';
 
 import { TranslateModule, TranslateLoader } from '@ngx-translate/core';
 import { TranslateHttpLoader } from '@ngx-translate/http-loader';
+import { MediaCapture } from '@ionic-native/media-capture'
+import { File } from '@ionic-native/file'
 //import { LueggModule } from 'angularjs-scroll-glue'
 
 // The translate loader needs to know where to load i18n files
@@ -90,7 +93,8 @@ export function provideSettings(storage: Storage) {
     TabsPage,
     TutorialPage,
     WelcomePage,
-    PostPage
+    PostPage,
+    PopoverPage
   ],
   imports: [
     //ionicMaterial,
@@ -107,6 +111,7 @@ export function provideSettings(storage: Storage) {
     IonicStorageModule.forRoot(),
     ElasticModule,
     AutosizeModule,
+    EmojiPickerModule.forRoot(),
   //  LueggModule
   ],
   bootstrap: [IonicApp],
@@ -126,14 +131,20 @@ export function provideSettings(storage: Storage) {
     TabsPage,
     TutorialPage,
     WelcomePage,
-    PostPage
+    PostPage,
+    PopoverPage
   ],
   providers: [
+    ItemCreatePage,
+    PopoverPage,
+    File,
+    MediaCapture,
+    StreamingMedia,
+    Camera,
     FirebaseService,
     Api,
     Items,
     User,
-    Camera,
     GoogleMaps,
     SplashScreen,
     StatusBar,

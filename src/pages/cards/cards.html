@@ -18,7 +18,7 @@
     refreshingSpinner="circles"
     refreshingText="Getting More..."></ion-refresher-content>
  </ion-refresher>
-  <ion-list [virstualScroll]="viewables">
+  <ion-list [virtualScroll]="viewables">
     <ion-card  *virtualItem="let post">
       <a (click)="post.detailPost(post)" style="background:black;" clear>
       <ion-item>
@@ -78,4 +78,19 @@
       loadingText="Loading more of your posts..."></ion-infinite-scroll-content>
     </ion-infinite-scroll>
   </ion-list>
+  <ion-footer>
+    <<div>
+      <button ion-item no-lines text-center
+      clear icon-only
+  (click)="toggled = !toggled"
+  [(emojiPickerIf)]="toggled"
+  [emojiPickerDirection]="'top'"
+  (emojiPickerSelect)="handleEmoji($event)">
+        <ion-icon color="light" style="position:relative;top:0px;font-size:20px;" name="happy"></ion-icon>
+      </button>
+
+
+    </div>
+
+  </ion-footer>
 </ion-content>

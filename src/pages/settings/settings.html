@@ -13,7 +13,7 @@
   <input type="file" #fileInput style="height: 0px;width:0px" accept="image/*"name="files[]" (change)="onChangeInput($event)" />
 
   <ion-fab bottom left>
-    <button *ngIf="isUser "ion-button (tap)="saveExit($event)" color="light" clear><ion-icon style="font-size:40px" color="light" name="save"></ion-icon></button>
+    <button *ngIf="isUser " ion-button color="light" clear><ion-icon style="font-size:40px" color="light" name="save"></ion-icon></button>
     <ion-fab-list side="right">
       <button ion-fab color="light" (click)="saveAndGoToProfile()"><ion-icon color="dark"name="upload"></ion-icon></button>
       <button ion-fab color="light" (click)="exitToProfileWithoutSaving($event)"><ion-icon color="dark" name="close"></ion-icon></button>
@@ -26,10 +26,10 @@
     <ion-row>
       <ion-col>
         <a (click)=showChoices($event,true)>
-          <ion-avatar *ngIf="profilec.currentPic!==''">
-            <img style="border-radius:100%"[src]="profilec.currentPic"/>
+          <ion-avatar *ngIf="profilec.basic.currentPic!==''">
+            <img style="border-radius:100%"[src]="profilec.basic.currentPic"/>
           </ion-avatar>
-          <div class="profile-image-placeholder" *ngIf="profilec.currentPic===''">
+          <div class="profile-image-placeholder" *ngIf="profilec.basic.currentPic===''">
             <ion-icon name="add"></ion-icon>
             <div>
               Add A Profile Pic
@@ -41,12 +41,12 @@
         <ion-row><ion-col></ion-col></ion-row>
         <ion-row>
           <ion-col>
-            <h2>{{ profile.username }}</h2>
+            <h2>{{ profilec.basic.username }}</h2>
           </ion-col>
         </ion-row>
         <ion-row>
           <ion-col>
-            <ion-textarea ([ngModel])="profilec.bio" item-content #textt id="textarea" block ([ngModel])="post.content.desciption" autosize style="background:#121212;color:white;overflow:auto;max-height:200px;min-height:100px">
+            <ion-textarea [(ngModel)]="profilec.basic.bio" item-content #textt id="textarea" block ([ngModel])="post.content.desciption" autosize style="background:#121212;color:white;overflow:auto;max-height:200px;min-height:100px">
             </ion-textarea>
           </ion-col>
         </ion-row>
@@ -56,14 +56,14 @@
   <div>
     <ion-list style="color:white">
       <!--there will be an *ngFor here once you finish building the whole user. You will list the title and then the info provided.-->
-      <ion-item *ngFor="let property in Object.keys(profilec.properties)" *ngIf="property!=='profilePics'">
+      <ion-item *ngFor="let property of props">
         <ion-label fixed>{{property}}</ion-label>
-        <ion-input type="text" ([ngModel])="profilec.properties[property]"><ion-input>
+        <ion-input type="text" [(ngModel)]="profilec.properties[property]"></ion-input>
       </ion-item>
     </ion-list>
 
 
-    <ion-card  *ngFor="let item of cardItems">
+    <!--ion-card  *ngFor="let item of cardItems">
       <a (click)="detailPost(item)" style="background:black;" clear>
       <ion-item>
         <ion-avatar item-start>
@@ -100,7 +100,7 @@
           </button>
         </ion-col>
       </ion-row>
-    </ion-card>
+    </ion-card-->
 
   </div>
 </ion-content>

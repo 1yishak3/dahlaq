@@ -74,8 +74,33 @@ export class MyApp {
     }
     else{
       this.rootPage=TabsPage
+      this.samp()
     }
     console.log(this.rootPage)
+    this.platform.ready().then(() => {
+      // Okay, so the platform is ready and our plugins are available.
+      // Here you can do any higher level native things you might need.
+      this.statusBar.styleDefault();
+      this.splashScreen.hide();
+    });
+
+  }
+  samp(){
+    var vm=this
+    var consRef=this.fbs.getRef("/users/"+this.fbs.currentUser().uid+"/connections")
+    var onRef=this.fbs.getRef("/users/"+this.fbs.currentUser().uid+"/basic/online")
+    var conRef=this.fbs.getRef("/.info/connected")
+    conRef.on('value',function(snap){
+      if(snap.val()){
+        vm.fbs.setDatabase("/users/"+vm.user.uid+"/basic/online",true,true).then(function(res){
+
+        })
+      }
+      var con=consRef.push()
+      con.set(true)
+      con.onDisconnect().remove()
+      onRef.onDisconnect().set({"on":false,"time":firebase.database.ServerValue.TIMESTAMP})
+    })
   }
   ionViewDidLoad() {
     this.platform.ready().then(() => {

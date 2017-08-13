@@ -7,42 +7,46 @@
 </ion-header>
 
 
-<ion-content style="background:black;">
-
-    <ion-list>
-
-      <ion-item>
-        <ion-label fixed>Username</ion-label>
-        <ion-input type="text" [(ngModel)]="account.username" name="name"></ion-input>
-      </ion-item>
+<ion-content style="background:black;color:white">
 
 
-      <!--
-      Want to add a Username? Here you go:
-
-      <ion-item>
-        <ion-label floating>Username</ion-label>
-        <ion-input type="text" [(ngModel)]="account.username" name="username"></ion-input>
-      </ion-item>
-      -->
-
-      <!--ion-item>
-        <ion-label fixed>{{ 'PASSWORD' | translate }}</ion-label>
-        <ion-input type="password" [(ngModel)]="account.password" name="password" placeholder="Enter a Password"></ion-input>
-      </ion-item>
-      <ion-item>
-        <ion-label fixed>{{ 'PASSWORD' | translate }}</ion-label>
-        <ion-input type="password" [(ngModel)]="check" name="passwordCheck" placeholder="Enter Your Password Again"></ion-input>
-      </ion-item-->
-      <ion-item>
-        <ion-label fixed>Signup Code</ion-label>
-        <ion-input [(ngModel)]="account.code" name="code" placeholder="Enter Your Code"></ion-input>
-      </ion-item>
-
-    </ion-list>
     <ion-footer>
+      <ion-list style="color:white;text-color:white">
+
+        <ion-item>
+          <ion-label fixed>Username</ion-label>
+          <ion-input type="text" [(ngModel)]="account.username" name="name"></ion-input>
+        </ion-item>
+
+
+        <ion-item>
+          <ion-label fixed>Signup Code</ion-label>
+          <ion-input [(ngModel)]="account.code" name="code" placeholder="Enter Your Code"></ion-input>
+        </ion-item>
+        <ion-item>
+          <ion-label fixed>Referrer</ion-label>
+          <ion-input type="text" name="referrer"></ion-input>
+        </ion-item>
+      </ion-list>
       <div padding>
         <button ion-button (click)="doSignup()" color="light" block>{{ 'SIGNUP_BUTTON' | translate }}</button>
       </div>
     </ion-footer>
 </ion-content>
+<!--
+Want to add a Username? Here you go:
+
+<ion-item>
+  <ion-label floating>Username</ion-label>
+  <ion-input type="text" [(ngModel)]="account.username" name="username"></ion-input>
+</ion-item>
+-->
+
+<!--ion-item>
+  <ion-label fixed>{{ 'PASSWORD' | translate }}</ion-label>
+  <ion-input type="password" [(ngModel)]="account.password" name="password" placeholder="Enter a Password"></ion-input>
+</ion-item>
+<ion-item>
+  <ion-label fixed>{{ 'PASSWORD' | translate }}</ion-label>
+  <ion-input type="password" [(ngModel)]="check" name="passwordCheck" placeholder="Enter Your Password Again"></ion-input>
+</ion-item-->

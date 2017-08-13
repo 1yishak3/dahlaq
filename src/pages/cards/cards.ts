@@ -15,12 +15,13 @@ export class CardsPage {
   @ViewChild(Nav) nav: Nav;
   viewables=[]
   profile:Uzer
-  uid:String
+  uid:string
   arrayStopped=1
-  j:Number
+  j:number
   newList:Array<Post>
+  toggled:boolean=false
   constructor(public sm:StreamingMedia,public navCtrl: NavController, public events : Events ,public fbs:FirebaseService) {
-    this.uid=this.fbs.currentUser().uid
+  //  this.uid=this.fbs.currentUser().uid
   }
   ionViewWillEnter(){
     if (this.viewables.length===50){
@@ -34,21 +35,24 @@ export class CardsPage {
       console.log("An error has come up", err)
     })
   }
+  handleEmoji(event){
+
+  }
   getNewstuff(){
+    var vm=this
     return new Promise(function(resolve,reject){
-      this.uid=this.fbs.currentUser().uid
-      var vm=this
+      vm.uid=vm.fbs.currentUser().uid
       //if disconnected take most recent cached posts and show them
       //if connected-
-      this.array=1 //and then go with the below procedure
+      vm.arrayStopped=1 //and then go with the below procedure
       vm.newList=[]
-      this.fbs.getDatabase("/users/"+this.uid,true,null).then(function(snap){
+      vm.fbs.getDatabase("/users/"+vm.uid,true,null).then(function(snap){
         for(let i in snap){
           vm.profile[i]=snap[i]
         }
         console.log(snap)
         for (let k in vm.profile.viewables){
-          var item=vm.profile.viewables[vm.profile.viewables.length-Number(k)-1]
+          var item=vm.profile.viewables[Object.keys(vm.profile.viewables).length-Number(k)-1]
           if(item!==vm.viewables[vm.viewables.length-1].postId){
             vm.newList.push(item)
           }else{
@@ -56,21 +60,23 @@ export class CardsPage {
           }
         }
         //var j = vm.profile.viewables.length-this.array
-        for(let i in vm.newList){
-          var index=vm.newList.length-1-Number(i)
-          vm.fbs.getDatabase("/posts/"+vm.newList[index],false,vm.uid).then(function(res){
-            var post=new Post
-            for(let i in res){
-              post[i]=res[i]
+        if(vm.newList.length!==0){
+          for(let i in vm.newList){
+            var index=vm.newList.length-1-Number(i)
+            vm.fbs.getDatabase("/posts/"+vm.newList[index],false,vm.uid).then(function(res){
+              var post=new Post(vm.fbs)
+              for(let i in res){
+                post[i]=res[i]
+              }
+              vm.viewables.unshift(post)
+              console.log(post)
+            }).catch(function(err){
+              console.log("couldn't get post,",err)
+            })
+            if(Number(i)===14||Number(i)===vm.newList.length-1){
+              vm.arrayStopped=index-1
+              break
             }
-            vm.viewables.unshift(post)
-            console.log(post)
-          }).catch(function(err){
-            console.log("couldn't get post,",err)
-          })
-          if(Number(i)===14||Number(i)===vm.newList.length-1){
-            vm.arrayStopped=index-1
-            break
           }
         }
         resolve(null)
@@ -101,7 +107,7 @@ export class CardsPage {
       for(let i in vm.newList){
         var k =j-Number(i)
         vm.fbs.getDatabase("/posts/"+vm.newList[k],false,vm.uid).then(function(res){
-          var post = new Post
+          var post = new Post(vm.fbs)
           for(let i in res){
             post[i]=res[i]
           }
@@ -147,6 +153,6 @@ export class CardsPage {
 
   }
   ionViewWillLeave(){
-    this.array=1
+    this.arrayStopped=1
   }
 }

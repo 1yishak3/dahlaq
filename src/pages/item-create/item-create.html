@@ -32,7 +32,7 @@
         <ion-col>
           <ion-row>
             <ion-col>
-              <ion-textarea (change)="generateId()" item-content #textt id="textarea" block ([ngModel])="post.content.desciption" autosize style="background:#121212;color:white;overflow:auto;max-height:200px;min-height:100px" placeholder="What's up?">
+              <ion-textarea (change)="generatePostId()" item-content #textt id="textarea" block [(ngModel)]="text" autosize style="background:#121212;color:white;overflow:auto;max-height:200px;min-height:100px" placeholder="What's up?">
               </ion-textarea>
             </ion-col>
           </ion-row>
@@ -67,20 +67,20 @@
         </div>
         <div class="profile-image" [style.backgroundImage]="getProfileImageStyle()" *ngIf="this.form.controls.profilePic.value"></div>
       </div-->
-      <ion-row>
+      <ion-item no-lines>
           <ion-label >Maximum Reach</ion-label>
-          <ion-select ([ngModel])="post.desiredReach" multiple>
+          <ion-select [(ngModel)]="reach">
             <!--ion-option *ngFor="#name of namesList" [value]="name.shortName" [checked]="false">{{name.shortName}}</ion-option-->
-            <ion-option [value]=1 checked="true">1</ion-option>
-            <ion-option [value]=2>2</ion-option>
+            <ion-option [value]=10>10</ion-option>
+            <ion-option [value]=15>15</ion-option>
           </ion-select>
         <!--ion-item>
           <ion-input type="text" placeholder="{{ 'ITEM_ABOUT_PLACEHOLDER' | translate }}" formControlName="about"></ion-input>
         </ion-item-->
-      </ion-row>
+      </ion-item>
     </ion-grid>
   </div>
 </ion-content>
 <ion-footer>
-  <button ion-button color="light" block (click)="submitPost()">POST<button>
+  <button ion-button color="light" block (click)="submitPost()">POST</button>
 </ion-footer>

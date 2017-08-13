@@ -26,6 +26,7 @@ export class SettingsPage {
   saved:boolean=false
   bool:any
   thisPage:boolean=false
+  props:any
   constructor(public popCtrl:PopoverController,
     public camera:Camera,
     public navCtrl: NavController,
@@ -35,13 +36,14 @@ export class SettingsPage {
   {
     this.profile= navParams.get('user')
     this.profilec= _.cloneDeep(this.profile)
+    this.props=Object.keys(this.profilec.properties)
   }
   ionViewWillEnter(){
     this.profile= this.navParams.get('user')
     this.profilec = _.cloneDeep(this.profile)
   }
   removePhoto(){
-    this.profilec.currentPic=""
+    this.profilec.basic.currentPic=""
   }
   showChoices(e,bool){
     this.thisPage=true
@@ -67,8 +69,10 @@ export class SettingsPage {
     this.fbs.setStorage(url,file).then(function(res){
       saved.getStorage(url).then(function(res){
         console.log(res)
-        pst.properties.profilePics.push(res)
-        pst.currentPic=res
+        var len=Object.keys(pst.properties.profilePics).length
+        pst.properties.profilePics[len]=res
+        pst.basic.currentPic=pst.properties.profilePics[Object.keys(pst.properties.profilePics).length-1]
+        saved.currentUser().photoURL=pst.basic.currentPic
       }).catch(function(err){
         console.log("URL get error", err)
       })
@@ -82,9 +86,10 @@ export class SettingsPage {
       vm.setStorage(url,file).then(function(res){
         vm.getStorage(url).then(function(res){
           console.log(res)
-          pst.properties.profilePics.push(res)
-          pst.currentPic=pst.properties.profilePics[pst.properties.profilePics.length-1]
-          vm.currentUser().photoURL=pst.currentPic
+          var len=Object.keys(pst.properties.profilePics).length
+          pst.properties.profilePics[len]=res
+          pst.basic.currentPic=pst.properties.profilePics[Object.keys(pst.properties.profilePics).length-1]
+          vm.currentUser().photoURL=pst.basic.currentPic
         }).catch(function(err){
           console.log("URL get error", err)
         })

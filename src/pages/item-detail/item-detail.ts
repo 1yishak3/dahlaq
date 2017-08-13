@@ -20,31 +20,36 @@ export class ItemDetailPage {
   arrayStopped=1
   j:Number
   newList:Array<Post>
+  props:any
   constructor(public sm:StreamingMedia,public fbs:FirebaseService,public navCtrl: NavController, navParams: NavParams, items: Items) {
     this.uid = navParams.get('item') || fbs.currentUser().uid;
     this.fbs.userCheck.subscribe((boolean)=>{
       this.isUser==boolean
     })
+    this.profile=new Uzer()
+    this.props=Object.keys(this.profile.properties)
 
   }
   ionViewWillEnter(){
-
+    this.getNewstuff()
   }
   getNewstuff(){
+    var vm=this
     return new Promise(function(resolve,reject){
-      this.uid=this.fbs.currentUser().uid
-      var vm=this
+      vm.uid=vm.fbs.currentUser().uid
+      //var vm=this
       //if disconnected take most recent cached posts and show them
       //if connected-
-      this.array=1 //and then go with the below procedure
+      vm.arrayStopped=1 //and then go with the below procedure
       vm.newList=[]
-      this.fbs.getDatabase("/users/"+this.uid,true,null).then(function(snap){
+      vm.fbs.getDatabase("/users/"+vm.uid,true,null).then(function(snap){
         for(let i in snap){
           vm.profile[i]=snap[i]
         }
         console.log(snap)
+        vm.props=Object.keys(vm.profile.properties)
         for (let k in vm.profile.userPosts){
-          var item=vm.profile.userPosts[vm.profile.userPosts.length-Number(k)-1]
+          var item=vm.profile.userPosts[Object.keys(vm.profile.userPosts).length-Number(k)-1]
           if(item!==vm.userPosts[vm.userPosts.length-1].postId){
             vm.newList.push(item)
           }else{
@@ -55,7 +60,7 @@ export class ItemDetailPage {
         for(let i in vm.newList){
           var index=vm.newList.length-1-Number(i)
           vm.fbs.getDatabase("/posts/"+vm.newList[index],false,vm.uid).then(function(res){
-            var post=new Post
+            var post=new Post(vm.fbs)
             for(let i in res){
               post[i]=res[i]
             }
@@ -114,8 +119,9 @@ export class ItemDetailPage {
     if(j>=0){
       for(let i in vm.newList){
         var k =j-Number(i)
+        console.log(i,k)
         vm.fbs.getDatabase("/posts/"+vm.newList[k],false,vm.uid).then(function(res){
-          var post = new Post
+          var post = new Post(vm.fbs)
           for(let i in res){
             post[i]=res[i]
           }

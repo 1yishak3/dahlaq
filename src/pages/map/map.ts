@@ -1,9 +1,10 @@
 import { Component, ViewChild } from '@angular/core';
 import { NavController, Platform , ModalController} from 'ionic-angular';
 import { ChatPage } from '../chat-detail/chat-detail'
-import { GoogleMaps, GoogleMap, GoogleMapsEvent, LatLng, CameraPosition } from '@ionic-native/google-maps';
+import { FirebaseService } from '../../providers/firebase'
+import { Uzer } from '../../models/uzer'
+import * as _ from "lodash"
 
-declare var google: any;
 
 @Component({
   selector: 'page-map',
@@ -12,53 +13,77 @@ declare var google: any;
 export class MapPage {
 
 //  @ViewChild('map') map;
+  uid:any
+  profile:Uzer
   search:boolean = false
-  items:any[]=[
-    {
-      "name": "Burt Bear",
-      "profilePic": "assets/img/speakers/bear.jpg",
-      "about": "Burt is a Bear."
-    },
-    {
-      "name": "Charlie Cheetah",
-      "profilePic": "assets/img/speakers/cheetah.jpg",
-      "about": "Charlie is a Cheetah."
-    },
-    {
-      "name": "Donald Duck",
-      "profilePic": "assets/img/speakers/duck.jpg",
-      "about": "Donald is a Duck."
-    },
-    {
-      "name": "Eva Eagle",
-      "profilePic": "assets/img/speakers/eagle.jpg",
-      "about": "Eva is an Eagle."
-    },
-    {
-      "name": "Ellie Elephant",
-      "profilePic": "assets/img/speakers/elephant.jpg",
-      "about": "Ellie is an Elephant."
-    },
-    {
-      "name": "Molly Mouse",
-      "profilePic": "assets/img/speakers/mouse.jpg",
-      "about": "Molly is a Mouse."
-    },
-    {
-      "name": "Paul Puppy",
-      "profilePic": "assets/img/speakers/puppy.jpg",
-      "about": "Paul is a Puppy."
-    }
-  ];
-  constructor(private googleMaps: GoogleMaps, public navCtrl: NavController, public platform: Platform, public modalCtrl: ModalController) { }
+  people:Array<any>
+  suggestedPeople:any
+  miniList:any
+  sorted:boolean
+  constructor(public navCtrl: NavController,
+    public platform: Platform,
+    public modalCtrl: ModalController,
+  public fbs:FirebaseService) {
+  this.uid=fbs.currentUser().uid
+  }
+
+  ionViewWillEnter() {
+    var vm=this
+    this.uid=this.fbs.currentUser().uid
+    this.fbs.getDatabase("/users/"+this.uid,false).then(function(res){
+      for(let i in res){
+        vm.profile[i]=res[i]
+      }
+      for(let i in vm.profile.people){
+        this.fbs.getDatabase("/chats/"+vm.profile.people[i]+"/summary", false).then(function(res){
+          var chat=res
+          var oUid=""
+          for(let i in chat.users){
+            if(i!==vm.uid){
+              chat["oUid"]=i
+            }
+          }
+          vm.people.push(chat)
+        }).catch(function(err){
+          console.log("Couldn't get chat, ",err)
+        })
+      }
+      vm.people.sort(function(a,b){
+        return Number(b.lastTime)-Number(a.lastTime)
+      })
+      vm.sorted=true
+      vm.suggestedPeople=vm.profile.suggestedPeople
+      vm.refreshList()
+    }).catch(function(err){
+      console.log("Error getting profile, ",err)
+    })
+  }
   /*openItem(number: string) {
     this.navCtrl.push(ChatPage, {
       chatWith: number
     });
   }*/
-  openItem(data) {
-    let addModal = this.modalCtrl.create(ChatPage);
+  refreshList(){
+    var prev=-1
+    var vm=this
+    for(let i=0;i<5;i++){
+      var lucky=Math.floor(Math.random()*this.suggestedPeople.length)
+      while(prev===lucky){
+        var lucky=Math.floor(Math.random()*this.suggestedPeople.length)
+      }
+      prev=_.cloneDeep(lucky)
+      vm.fbs.getDatabase("/users/"+this.suggestedPeople[i]+"/basic/", false).then(function(res){
+        vm.miniList.push(res)
+      }).catch(function(err){
+        console.log("unable to get the profile, sth's wong :P ", err)
+      })
+    }
+
+  }
+  openChat(data) {
+    let addModal = this.modalCtrl.create(ChatPage,{person:data});
     addModal.onDidDismiss(item => {
+      //maybe set it in storage  for safe keeping?
     })
     addModal.present();
   }

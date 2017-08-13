@@ -36,13 +36,14 @@ export class WelcomePage {
    }
   login() {
     var navCtrl=this.navCtrl
-    this.fbs.login(this.creds, this.recaptchaVerifier).then(function(res){
-      console.log("We have a response: ", res)
-      navCtrl.push(LoginPage,{"confirm":res})
-    }).catch(function(err){
-      console.log("Error loging in. Cause: ",err)
-      navCtrl.push(LoginPage)
-    })
+    navCtrl.push(LoginPage,{'confirm':"what?"})
+    // this.fbs.login(this.creds, this.recaptchaVerifier).then(function(res){
+    //   console.log("We have a response: ", res)
+    //   navCtrl.push(LoginPage,{"confirm":res})
+    // }).catch(function(err){
+    //   console.log("Error loging in. Cause: ",err)
+    //   //navCtrl.push(LoginPage)
+    // })
   }
 
   signup() {

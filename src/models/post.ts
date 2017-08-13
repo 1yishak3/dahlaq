@@ -1,46 +1,79 @@
-import { FirebaseService } from '../providers/firebase'
+
 import { PostPage } from '../pages/post/post'
 import { NavController } from 'ionic-angular'
+import { FirebaseService } from '../providers/firebase'
 export class Post {
   postId:String
   time:Number
-  poster:{
-    username:string,
-    digits:string,
-    uId:string,
-    profilePic:string,
+  likes:any
+  dislikes:any
+  reports:any
+  boosts:any
+  reach:any
+  poster={
+    username:"",
+    digits:"",
+    uId:"",
+    profilePic:"",
     desiredReach:1,
   }
-  content:{
-    desciption:string,
-    imageUrl:any,
-    videoUrl:any,
-    fileUrl:any,
+  content={
+    description:"",
+    imageUrl:"",
+    videoUrl:"",
+    fileUrl:"",
     likes:{},
     dislikes:{},
     reports:{},
     reach:{},
     boosts:{}
   }
-  likes= (Object.keys(this.content.likes)).length
-  dislikes=(Object.keys(this.content.dislikes)).length
-  reports=(Object.keys(this.content.reports)).length
-  boosts=(Object.keys(this.content.boosts)).length
-  reach=(Object.keys(this.content.reach)).length
 
-  deleted:""
+  deleted=""
   reported:boolean
   liked:boolean
   disliked:boolean
-  fbs:FirebaseService
   navCtrl: NavController
-  constructor(){
-    this.reported=(this.content.reports[this.fbs.currentUser().uid]!==undefined)
-    this.liked=(this.content.likes[this.fbs.currentUser().uid]!==undefined)
-    this.disliked=(this.content.dislikes[this.fbs.currentUser().uid]!==undefined)
+  uid:any
+
+  constructor(public fbs:FirebaseService){
+    console.log("this is this: ",fbs)
+    this.uid=fbs.currentUser().uid
+    console.log("this is the uid: ",this.uid)
+    this.likes= (Object.keys(this.content.likes)).length
+    this.dislikes=(Object.keys(this.content.dislikes)).length
+    this.reports=(Object.keys(this.content.reports)).length
+    this.boosts=(Object.keys(this.content.boosts)).length
+    this.reach=(Object.keys(this.content.reach)).length
+    this.reported=(this.content.reports[this.uid]!==undefined)
+    this.liked=(this.content.likes[this.uid]!==undefined)
+    this.disliked=(this.content.dislikes[this.uid]!==undefined)
+
+    // this.reported=(this.content.reports[this.fbs.currentUser().uid]!==undefined)
+    // this.liked=(this.content.likes[this.fbs.currentUser().uid]!==undefined)
+    // this.disliked=(this.content.dislikes[this.fbs.currentUser().uid]!==undefined)
   }
   //liking, unliking, reporting, unreporting should all trigger cloud functions to produce
   //preference schemas and, of course, our fame number
+
+
+  /*function toggleStar(postRef, uid) {
+  postRef.transaction(function(post) {
+    if (post) {
+      if (post.stars && post.stars[uid]) {
+        post.starCount--;
+        post.stars[uid] = null;
+      } else {
+        post.starCount++;
+        if (!post.stars) {
+          post.stars = {};
+        }
+        post.stars[uid] = true;
+      }
+    }
+    return post;
+  });
+}*/
   like(){
     if(this.content.dislikes[cU]===undefined){
       this.undislike()
@@ -57,6 +90,7 @@ export class Post {
     this.reported=(this.content.reports[this.fbs.currentUser().uid]!==undefined)
     this.liked=(this.content.likes[this.fbs.currentUser().uid]!==undefined)
     this.disliked=(this.content.dislikes[this.fbs.currentUser().uid]!==undefined)
+
   }
   unlike(){
     var cU= this.fbs.currentUser().uid
@@ -69,7 +103,7 @@ export class Post {
     this.reported=(this.content.reports[this.fbs.currentUser().uid]!==undefined)
     this.liked=(this.content.likes[this.fbs.currentUser().uid]!==undefined)
     this.disliked=(this.content.dislikes[this.fbs.currentUser().uid]!==undefined)
-  }
+    }
   dislike(){
     if(this.content.likes[cU]!==undefined){
       this.unlike()
@@ -88,6 +122,7 @@ export class Post {
     this.liked=(this.content.likes[this.fbs.currentUser().uid]!==undefined)
     this.disliked=(this.content.dislikes[this.fbs.currentUser().uid]!==undefined)
 
+
   }
   undislike(){
     var cU= this.fbs.currentUser().uid
@@ -100,6 +135,7 @@ export class Post {
     this.reported=(this.content.reports[this.fbs.currentUser().uid]!==undefined)
     this.liked=(this.content.likes[this.fbs.currentUser().uid]!==undefined)
     this.disliked=(this.content.dislikes[this.fbs.currentUser().uid]!==undefined)
+
   }
   report(){
     var cU= this.fbs.currentUser().uid
@@ -115,6 +151,7 @@ export class Post {
     this.reported=(this.content.reports[this.fbs.currentUser().uid]!==undefined)
     this.liked=(this.content.likes[this.fbs.currentUser().uid]!==undefined)
     this.disliked=(this.content.dislikes[this.fbs.currentUser().uid]!==undefined)
+
   }
   unreport(){
     var cU= this.fbs.currentUser().uid
@@ -127,6 +164,7 @@ export class Post {
     this.reported=(this.content.reports[this.fbs.currentUser().uid]!==undefined)
     this.liked=(this.content.likes[this.fbs.currentUser().uid]!==undefined)
     this.disliked=(this.content.dislikes[this.fbs.currentUser().uid]!==undefined)
+
   }
   detailPost(post:Post){
     this.navCtrl.push(PostPage,{

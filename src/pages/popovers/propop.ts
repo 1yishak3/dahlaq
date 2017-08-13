@@ -16,7 +16,8 @@ import { ItemCreatePage } from '../item-create/item-create'
   `
 })
 export class PopoverPage {
-  constructor(public icp:ItemCreatePage,public viewCtrl: ViewController, public stgs: SettingsPage){
+  stgs: SettingsPage
+  constructor(public icp:ItemCreatePage,public viewCtrl: ViewController){
 
   }
   removePhoto(){

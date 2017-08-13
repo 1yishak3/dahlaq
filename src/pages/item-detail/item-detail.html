@@ -17,19 +17,24 @@
     <ion-row>
       <ion-col>
         <ion-avatar>
-          <img style="border-radius:100%"[src]="item.profilePic"/>
+          <img style="border-radius:100%"[src]="profile.basic.currentPic"/>
         </ion-avatar>
       </ion-col>
       <ion-col>
         <ion-row><ion-col></ion-col></ion-row>
         <ion-row>
           <ion-col>
-            <h2>{{ profile.username }}</h2>
+            <h2>
+              {{ profile.basic.username }}
+              <ion-badge color="light">
+                #{{profile.basic.rank}}
+              </ion-badge>
+            </h2>
           </ion-col>
         </ion-row>
         <ion-row>
           <ion-col>
-            <h4>"{{profile.bio}}"</h4>
+            <h4>"{{profile.basic.bio}}"</h4>
           </ion-col>
         </ion-row>
       </ion-col>
@@ -38,7 +43,7 @@
   <div>
     <ion-list style="color:white">
       <!--there will be an *ngFor here once you finish building the whole user. You will list the title and then the info provided.-->
-      <ion-item *ngFor="let property in Object.keys(profile.properties)" *ngIf="property!=='profilePics'">
+      <ion-item *ngFor="let property of props ">
         <ion-label fixed>{{property}}</ion-label>
         {{profile.properties[property]}}
       </ion-item>

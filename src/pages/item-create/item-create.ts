@@ -1,6 +1,6 @@
 import { Component, ViewChild,ElementRef } from '@angular/core';
 import { Validators, FormBuilder, FormGroup } from '@angular/forms';
-import { NavController, ViewController,PopoverController } from 'ionic-angular';
+import { NavController, ViewController,PopoverController,App } from 'ionic-angular';
 import { Post } from '../../models/post'
 import { Camera } from '../../providers/camera';
 import { FirebaseService } from '../../providers/firebase'
@@ -15,14 +15,17 @@ export class ItemCreatePage {
   @ViewChild('fileInput') fileInput;
   @ViewChild('fileInput1') fileInput1;
   @ViewChild('fileInput2') fileInput2;
+  private app:App
   isReadyToPost: boolean;
   post:Post
   item: any;
   postId:any
   bool:any
   get:number
+  text:string
+  reach=0
   constructor(public popCtrl:PopoverController,public fbs: FirebaseService, public navCtrl: NavController, public viewCtrl: ViewController, formBuilder: FormBuilder, public camera: Camera) {
-
+    this.post=new Post(fbs)
   }
 
   showChoices(e,bool, num){
@@ -41,10 +44,11 @@ export class ItemCreatePage {
     var uid = this.fbs.currentUser().uid
     var time = Date.now();
     console.log(uid+time)
-    this.post.postId = uid+time
+    this.post.postId = uid+"_"+time
   }
   submitPost(){
     var vm=this.fbs
+    var vm1=this
     if(!this.post.postId){
       this.generatePostId()
     }
@@ -52,26 +56,48 @@ export class ItemCreatePage {
     this.post.poster.digits=this.fbs.currentUser().phoneNumber
     this.post.poster.uId=this.fbs.currentUser().uid
     this.post.poster.profilePic=this.fbs.currentUser().photoURL
-    this.fbs.setDatabase("posts/"+this.post.postId,this.post,true).then(function(res){
+    this.post.poster.desiredReach=this.reach
+    console.log(this.reach)
+    console.log(this.post.poster.desiredReach)
+    this.post.content.description=this.text
+    var poste={
+    }
+    poste["postId"]=this.post.postId
+    poste["time"]=Date.now()
+    poste["poster"]=this.post.poster
+    poste["content"]=this.post.content
+    poste["deleted"]=false
+    poste["likes"]=0
+    poste["dislikes"]=0
+    poste["boosts"]=0
+    poste["reach"]=0
+    poste["reports"]=0
+    this.fbs.setDatabase("/posts/"+this.post.postId,poste,true).then(function(res){
       console.log("Success with, ",res)
       //pop up notifying success
       //pop to posts tab
+
+      vm1.app.getRootNav().getActiveChildNav().select(1);
+      vm.setList("/users/"+vm.currentUser().uid+"/viewables",vm1.postId).then(function(res){
+        console.log("Added to own file.")
+      }).catch(function(err){
+        console.log("What is the error", err)
+      })
+      vm.setList("/users/"+vm.currentUser().uid+"/userPosts",vm1.postId).then(function(res){
+        console.log("Added to own file.")
+      }).catch(function(err){
+        console.log("What is the error", err)
+      })
+      vm.setList("/adminsLists/posts",vm1.postId).then(function(res){
+        console.log("Successfully added to admin's list")
+      }).catch(function(err){
+        console.log("Sorry, couldn't add you to the list", err)
+      })
     }).catch(function(err){
       console.log(err)
 
     })
-    vm.getDatabase("adminsLists/posts",true, vm.currentUser().uid).then(function(res){
-      var list=[]
-      for(let i in res){
-        list.push(res[i])
-      }
-      list.push(vm.currentUser().uid)
-      vm.setDatabase("adminsLists/posts",list,true).then(function(res){
-        console.log("Successfully added to admin's list")
-      }).catch(function(err){
-        console.log("Soory, couldn't add you to the list", err)
-      })
-    })
+
   }
   generateFileName(typ){
     var type=typ.name
@@ -89,7 +115,7 @@ export class ItemCreatePage {
 
         cam.getFile(data[0].fullpath).then(function(file){
           var pic = vm1(file)
-          var url=vm.currentUser().uid+"/images/"+pic
+          var url="/"+vm.currentUser().uid+"/images/"+pic
           fp(url,file)
         }).catch(function(err){
 
@@ -169,7 +195,7 @@ export class ItemCreatePage {
     var pst =  this.post
     fil.file(function(file){
       vm.setStorage(url,file).then(function(res){
-        vm.getStorage(url).then(function(res){
+        vm.getStorage(url).then(function(res:any){
           console.log(res)
           if(this.get===1){
             pst.content.imageUrl=res
@@ -195,10 +221,14 @@ export class ItemCreatePage {
    * The user cancelled, so we dismiss without sending data back.
    */
   cancel() {
-    this.post = new Post
-    this.navCtrl.popToRoot();
+    this.text=""
+    this.reach=0
+    this.post = new Post(this.fbs)
+    this.app.getRootNav().getActiveChildNav().select(1);
   }
+  ionViewWillLeave(){
 
+  }
 
 
   getNews() {
