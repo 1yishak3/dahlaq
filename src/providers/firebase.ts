@@ -36,9 +36,27 @@ export class FirebaseService {
     this.user=usr
     this.ev=events
     this.userCheck=new EventEmitter
+  //  this.snap()
     // check for changes in auth status
 
 
+  }
+  snap(){
+    var vm=this
+    var consRef=this.getRef("/users/"+this.currentUser().uid+"/connections")
+    var onRef=this.getRef("/users/"+this.currentUser().uid+"/basic/online")
+    var conRef=this.getRef("/.info/connected")
+    conRef.on('value',function(snap){
+      if(snap.val()){
+        vm.setDatabase("/users/"+vm.user.uid+"/basic/online",true,true).then(function(res){
+
+        })
+      }
+      var con=consRef.push()
+      con.set(true)
+      con.onDisconnect().remove()
+      onRef.onDisconnect().set({"on":false,"time":firebase.database.ServerValue.TIMESTAMP})
+    })
   }
   connected(){
     return new Promise(function(resolve,reject){
@@ -75,13 +93,12 @@ export class FirebaseService {
     })
   }
   setList(url,val){
+    var vm=this
     return new Promise(function(resolve,reject){
       //var newKey=firebase.database().ref(url).push().key
       firebase.database().ref(url).push(val).then(function(res){
-        console.log(res.key)
-        resolve(res.key)
+        resolve(res)
       }).catch(function(err){
-        console.log("err",err)
         reject(err)
       })
     })
@@ -114,16 +131,16 @@ export class FirebaseService {
     return new Promise(function(resolve,reject){
       if(!once){
       firebase.database().ref(url).on('value',function(snapshot){
-        console.log(snapshot)
-        resolve(snapshot)
+        //console.log(snapshot)
+        resolve(snapshot.val())
       },function(err){
         console.log(err)
         reject(err)
       })
     }else{
       firebase.database().ref(url).once('value').then(function(res){
-        console.log(res)
-        resolve(res)
+        //console.log(res)
+        resolve(res.val())
       }).catch(function(err){
         console.log(err)
         reject(err)
@@ -173,15 +190,8 @@ export class FirebaseService {
     })
   }
   setStorage(url,value){
-    return new Promise(function(resolve,reject){
-      firebase.storage().ref().child(url).put(value).then(function(res){
-        console.log(res)
-        resolve(res)
-      }).catch(function(err){
-        console.log(err)
-        reject(err)
-      })
-    })
+    var uploadTask=firebase.storage().ref().child(url).put(value)
+    return uploadTask
   }
   currentUser() {
       return firebase.auth().currentUser
@@ -263,7 +273,7 @@ export class FirebaseService {
     })
   }
 
-  uploadPhotoFromFile(_imageData, _progress) {
+  /*uploadPhotoFromFile(_imageData, _progress) {
 
 
     return new Observable(observer => {
@@ -302,7 +312,7 @@ export class FirebaseService {
 
       });
     });
-  }
+  }*/
 
   /*getDataObs() {
       var ref = firebase.database().ref('images')

@@ -3,6 +3,7 @@ import { BrowserModule } from '@angular/platform-browser';
 import { HttpModule, Http } from '@angular/http';
 import { IonicApp, IonicModule, IonicErrorHandler } from 'ionic-angular';
 import * as firebase from 'firebase'
+import { MdProgressSpinnerModule } from '@angular/material';
 //var dFire = firebase.initializeApp(environment.firebase)
 import 'firebase/auth'
 import 'firebase/messaging'
@@ -15,7 +16,7 @@ import 'firebase/storage'
 //import { AngularFireStorageModule } from 'angularfire2/auth';
 //import ionicMaterial from '../../bower_components/ionic-material/dist/ionic.material'
 import { Storage, IonicStorageModule } from '@ionic/storage';
-import { ElasticModule } from 'angular2-elastic'
+import { Elastic } from 'angular2-elastic'
 import { AutosizeModule } from 'ionic2-autosize'
 import { environment } from '../environments/environment'
 import { EmojiPickerModule } from '@ionic-tools/emoji-picker';
@@ -37,7 +38,7 @@ import { TabsPage } from '../pages/tabs/tabs';
 import { TutorialPage } from '../pages/tutorial/tutorial';
 import { WelcomePage } from '../pages/welcome/welcome';
 import { PostPage } from '../pages/post/post'
-import { PopoverPage } from '../pages/popovers/propop'
+//import { PopoverPage } from '../pages/popovers/propop'
 import { Api } from '../providers/api';
 import { Items } from '../mocks/providers/items';
 import { Settings } from '../providers/settings';
@@ -53,6 +54,10 @@ import { TranslateModule, TranslateLoader } from '@ngx-translate/core';
 import { TranslateHttpLoader } from '@ngx-translate/http-loader';
 import { MediaCapture } from '@ionic-native/media-capture'
 import { File } from '@ionic-native/file'
+import { MomentjsPipe } from '../pipes/moment'
+import { TruncatePipe } from '../pipes/truncate'
+//import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
+import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 //import { LueggModule } from 'angularjs-scroll-glue'
 
 // The translate loader needs to know where to load i18n files
@@ -94,10 +99,13 @@ export function provideSettings(storage: Storage) {
     TutorialPage,
     WelcomePage,
     PostPage,
-    PopoverPage
+    MomentjsPipe,
+    TruncatePipe
+  //  PopoverPage
   ],
   imports: [
     //ionicMaterial,
+    MdProgressSpinnerModule,
     BrowserModule,
     HttpModule,
     TranslateModule.forRoot({
@@ -109,9 +117,10 @@ export function provideSettings(storage: Storage) {
     }),
     IonicModule.forRoot(MyApp),
     IonicStorageModule.forRoot(),
-    ElasticModule,
+    Elastic,
     AutosizeModule,
     EmojiPickerModule.forRoot(),
+    NoopAnimationsModule
   //  LueggModule
   ],
   bootstrap: [IonicApp],
@@ -132,11 +141,11 @@ export function provideSettings(storage: Storage) {
     TutorialPage,
     WelcomePage,
     PostPage,
-    PopoverPage
+  //  PopoverPage
   ],
   providers: [
-    ItemCreatePage,
-    PopoverPage,
+    //ItemCreatePage,
+    //PopoverPage,
     File,
     MediaCapture,
     StreamingMedia,

@@ -1,9 +1,9 @@
 export class Uzer {
-  preferences={}
-  likes={}//list with keys that are like "o","1","2","3"..
-  dislikes={}//list with keys that are like "o","1","2","3"..
-  reports={}//list with keys that are like "o","1","2","3"..
-  userPosts={}
+  preferences=0
+  likes=0//list with keys that are like "o","1","2","3"..
+  dislikes=0//list with keys that are like "o","1","2","3"..
+  reports=0//list with keys that are like "o","1","2","3"..
+  userPosts=0
   basic={
     uid:"",
     username:"",
@@ -13,19 +13,19 @@ export class Uzer {
     online:""
   }//list with keys that are like "o","1","2","3"..
   fame=0
-  connections={}
+  connections=0
   properties={
-    profilePics:{},
+    profilePics:0,
     digits:"",
     city:"",
     food:"",
     relationshipStatus:"",
     education:"",
-    refers:{}
+    refers:0
   }
-  people={}//list with keys that are like "o","1","2","3"..
-  viewables={}//list with keys that are like "o","1","2","3"..
-  suggestedPeople={}//list with keys that are like "o","1","2","3"..
+  people=0//list with keys that are like "o","1","2","3"..
+  viewables=0//list with keys that are like "o","1","2","3"..
+  suggestedPeople=0//list with keys that are like "o","1","2","3"..
   constructor() {
     // Quick and dirty extend/assign fields to this model
   }

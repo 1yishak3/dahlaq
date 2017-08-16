@@ -7,6 +7,7 @@ import { FirebaseService } from '../../providers/firebase'
 import { Post } from '../../models/post'
 import { Uzer } from '../../models/uzer'
 import { StreamingMedia } from '@ionic-native/streaming-media'
+import * as _ from 'lodash'
 
 @Component({
   selector: 'page-item-detail',
@@ -21,8 +22,13 @@ export class ItemDetailPage {
   j:Number
   newList:Array<Post>
   props:any
+  postz:any={}
+  ready:boolean
+  check:any
+  dud:any
   constructor(public sm:StreamingMedia,public fbs:FirebaseService,public navCtrl: NavController, navParams: NavParams, items: Items) {
     this.uid = navParams.get('item') || fbs.currentUser().uid;
+    this.check=fbs.currentUser().uid;
     this.fbs.userCheck.subscribe((boolean)=>{
       this.isUser==boolean
     })
@@ -34,47 +40,69 @@ export class ItemDetailPage {
     this.getNewstuff()
   }
   getNewstuff(){
+    //this.ready=false
     var vm=this
     return new Promise(function(resolve,reject){
       vm.uid=vm.fbs.currentUser().uid
-      //var vm=this
       //if disconnected take most recent cached posts and show them
       //if connected-
       vm.arrayStopped=1 //and then go with the below procedure
       vm.newList=[]
-      vm.fbs.getDatabase("/users/"+vm.uid,true,null).then(function(snap){
-        for(let i in snap){
-          vm.profile[i]=snap[i]
-        }
-        console.log(snap)
-        vm.props=Object.keys(vm.profile.properties)
-        for (let k in vm.profile.userPosts){
-          var item=vm.profile.userPosts[Object.keys(vm.profile.userPosts).length-Number(k)-1]
-          if(item!==vm.userPosts[vm.userPosts.length-1].postId){
-            vm.newList.push(item)
-          }else{
-            break
-          }
-        }
-        //var j = vm.profile.userPosts.length-this.array
-        for(let i in vm.newList){
-          var index=vm.newList.length-1-Number(i)
-          vm.fbs.getDatabase("/posts/"+vm.newList[index],false,vm.uid).then(function(res){
-            var post=new Post(vm.fbs)
-            for(let i in res){
-              post[i]=res[i]
+      console.log(vm.uid)
+      vm.fbs.getDatabase("/users/"+vm.uid+"/userPosts",true,null).then(function(snap){
+        //console.log(snap)
+
+        console.log("this is the snap from userPosts: ",snap)
+        //console.log(vm.profile.userPosts)
+      //  var gool=false
+        for (let k in snap){
+          var item=snap[k]
+          if(vm.userPosts.length!==0&&snap[k]!=undefined&&snap[k]!=null){
+            if(vm.postz[item]===undefined){
+              vm.newList.unshift(item)
+              vm.postz[item]=true
             }
-            vm.userPosts.unshift(post)
-            console.log(post)
-          }).catch(function(err){
-            console.log("couldn't get post,",err)
-          })
-          if(Number(i)===14||Number(i)===vm.newList.length-1){
-            vm.arrayStopped=index-1
-            break
+            // if(item===vm.userPosts[0].postId){
+            //   gool=true
+            // }
+          }else if(vm.userPosts.length===0&&snap[k]!=undefined&&snap[k]!=null){
+            vm.newList.unshift(item)
+            vm.postz[item]=true
           }
         }
-        resolve(null)
+        console.log("this is the new list:",vm.newList)
+        //var j = vm.profile.userPosts.length-this.array
+        //vm.newList.reverse()
+
+        if(vm.newList.length!==0){
+
+          for(let i in vm.newList){
+
+            vm.fbs.getDatabase("/posts/"+vm.newList[i],true,vm.uid).then(function(res){
+              var post=new Post(vm.fbs,vm.navCtrl)
+              for(let i in res){
+                post[i]=res[i]
+              }
+              vm.dud.push(post)
+              if(Number(i)===14||Number(i)===vm.newList.length-1){
+                vm.arrayStopped=Number(i)+1
+                vm.dud.sort(function(a,b){
+                  return b.time-a.time
+                })
+              }
+              console.log(post)
+            }).catch(function(err){
+              console.log("couldn't get post,",err)
+            })
+            if(Number(i)===14||Number(i)===vm.newList.length-1){
+              vm.userPosts=vm.dud
+              break
+            }
+          }
+        }
+        vm.ready=true
+        console.log(vm.userPosts)
+        resolve("Got all posts")
       }).catch(function(err){
         console.log("Error getting profile ",err)
         reject(err)
@@ -121,7 +149,7 @@ export class ItemDetailPage {
         var k =j-Number(i)
         console.log(i,k)
         vm.fbs.getDatabase("/posts/"+vm.newList[k],false,vm.uid).then(function(res){
-          var post = new Post(vm.fbs)
+          var post = new Post(vm.fbs,vm.navCtrl)
           for(let i in res){
             post[i]=res[i]
           }

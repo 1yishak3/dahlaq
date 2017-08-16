@@ -39,9 +39,10 @@ export class SignupPage {
       this.signupErrorString = value;
     })
     this.confirmationResult = this.nvp.get("confirm")
+    this.person=new Uzer()
   }
   doSignup() {
-    this.person=new Uzer()
+    //this.person=new Uzer()
     this.once=this.once+1
     var vm=this.fbs
     var vm1=this
@@ -74,14 +75,34 @@ export class SignupPage {
         console.log(vm.currentUser().displayName)
         this.person.basic.username=this.account.username
         console.log("I'm in")
+
         vm.setDatabase("/users/"+vm.currentUser().uid,this.person,true).then(function(res){
-          say="creating correspondence"
+          // var update={}
+          // update["/users/"+vm.currentUser().uid+"/viewables"]=null
+          // update["/users/"+vm.currentUser().uid+"/suggestedPeople"]=null
+          // update["/users/"+vm.currentUser().uid+"/properties/profilePics"]=null
+          // update["/users/"+vm.currentUser().uid+"/properties/refers"]=null
+          // update["/users/"+vm.currentUser().uid+"/connections"]=null
+          // update["/users/"+vm.currentUser().uid+"/userPosts"]=null
+          // update["/users/"+vm.currentUser().uid+"/people"]=null
+          // update["/users/"+vm.currentUser().uid+"/preferences"]=null
+          // update["/users/"+vm.currentUser().uid+"/dislikes"]=null
+          // update["/users/"+vm.currentUser().uid+"/likes"]=null
+          // update["/users/"+vm.currentUser().uid+"/reports"]=null
+          // vm.setDatabase("/dummbase",update,false).then(function(res){
+          //   console.log("successfully set nulls", res)
+          // }).catch(function(err){
+          //   console.log("tell me the error", err)
+          // })
+
+
           vm.setDatabase("/ref/"+vm.currentUser().displayName,vm.currentUser().uid,true)
           vm1.navCtrl.push(MainPage);
           load1.dismiss()
           console.log("Login Succesful!")
         }).catch(function(err){
           console.log("User Creation ERROR in Database",err)
+            vm.currentUser().delete()
         })
         vm.setList("/adminsLists/users",vm.currentUser().uid).then(function(res){
           console.log("Successfully added to admin's list")
@@ -92,7 +113,7 @@ export class SignupPage {
       }).catch( (err) => {
 
         //this.navCtrl.push(MainPage); // TODO: Remove this when you add your signup endpoint
-
+        vm.currentUser().delete()
         // Unable to sign up
         console.log("I'm not in: ",err)
         let toast = this.toastCtrl.create({

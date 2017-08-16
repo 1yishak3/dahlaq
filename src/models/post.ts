@@ -1,4 +1,4 @@
-
+import { OnInit } from '@angular/core'
 import { PostPage } from '../pages/post/post'
 import { NavController } from 'ionic-angular'
 import { FirebaseService } from '../providers/firebase'
@@ -22,41 +22,54 @@ export class Post {
     imageUrl:"",
     videoUrl:"",
     fileUrl:"",
-    likes:{},
-    dislikes:{},
-    reports:{},
-    reach:{},
-    boosts:{}
+    likes:0,
+    dislikes:0,
+    reports:0,
+    reach:0,
+    boosts:0
   }
 
   deleted=""
   reported:boolean
   liked:boolean
   disliked:boolean
-  navCtrl: NavController
   uid:any
 
-  constructor(public fbs:FirebaseService){
-    console.log("this is this: ",fbs)
+  constructor(public fbs:FirebaseService,public navCtrl:NavController){
+  //  console.log("this is this: ",fbs)
     this.uid=fbs.currentUser().uid
-    console.log("this is the uid: ",this.uid)
+  //  console.log("this is the uid: ",this.uid)
+
     this.likes= (Object.keys(this.content.likes)).length
     this.dislikes=(Object.keys(this.content.dislikes)).length
     this.reports=(Object.keys(this.content.reports)).length
     this.boosts=(Object.keys(this.content.boosts)).length
     this.reach=(Object.keys(this.content.reach)).length
+
     this.reported=(this.content.reports[this.uid]!==undefined)
     this.liked=(this.content.likes[this.uid]!==undefined)
     this.disliked=(this.content.dislikes[this.uid]!==undefined)
-
-    // this.reported=(this.content.reports[this.fbs.currentUser().uid]!==undefined)
-    // this.liked=(this.content.likes[this.fbs.currentUser().uid]!==undefined)
-    // this.disliked=(this.content.dislikes[this.fbs.currentUser().uid]!==undefined)
+    //this.bootstrap()
   }
   //liking, unliking, reporting, unreporting should all trigger cloud functions to produce
   //preference schemas and, of course, our fame number
-
-
+ ngOnInit(){
+   this.bootstrap()
+ }
+  bootstrap(){
+    var vm=this
+    this.fbs.getDatabase("/posts/"+this.postId,false).then(function(res){
+      var pst:any= res
+      vm.poster=pst.poster
+      vm.content=pst.content
+      vm.likes=Object.keys(pst.content.likes).length
+      vm.dislikes=Object.keys(pst.content.dislikes).length
+      vm.reports=Object.keys(pst.content.reports).length
+      vm.reported=(vm.content.reports[vm.uid]!==undefined)
+      vm.liked=(vm.content.likes[vm.uid]!==undefined)
+      vm.disliked=(vm.content.dislikes[vm.uid]!==undefined)
+    })
+  }
   /*function toggleStar(postRef, uid) {
   postRef.transaction(function(post) {
     if (post) {
@@ -75,7 +88,7 @@ export class Post {
   });
 }*/
   like(){
-    if(this.content.dislikes[cU]===undefined){
+    if(this.content.dislikes[cU]!==undefined){
       this.undislike()
     }
     var cU= this.fbs.currentUser().uid
@@ -90,6 +103,7 @@ export class Post {
     this.reported=(this.content.reports[this.fbs.currentUser().uid]!==undefined)
     this.liked=(this.content.likes[this.fbs.currentUser().uid]!==undefined)
     this.disliked=(this.content.dislikes[this.fbs.currentUser().uid]!==undefined)
+    console.log(this.liked,this.reported,this.disliked)
 
   }
   unlike(){
@@ -97,6 +111,7 @@ export class Post {
     var vm=this
     vm.likes=vm.likes-1
     this.fbs.rmDatabase("/posts/"+this.postId+"/content/likes/"+cU).then(function(res){
+      delete this.content.likes[cU]
     }).catch(function(err){
 
     })
@@ -129,6 +144,7 @@ export class Post {
     var vm=this
     vm.dislikes=vm.dislikes-1
     this.fbs.rmDatabase("/posts/"+this.postId+"/content/dislikes/"+cU).then(function(res){
+      delete this.content.dislikes[cU]
     }).catch(function(err){
 
     })
@@ -158,6 +174,7 @@ export class Post {
     var vm=this
     vm.reports=vm.reports-1
     this.fbs.rmDatabase("/posts/"+this.postId+"/content/reports/"+cU).then(function(res){
+      delete this.content.likes[cU]
     }).catch(function(err){
 
     })

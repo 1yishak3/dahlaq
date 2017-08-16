@@ -43,23 +43,23 @@ export class LoginPage {
   // Attempt to login in through our User service
   doLogin() {
   //  var cCode=this.nvp.get("confirm")
-    this.navCtrl.push(MainPage);
-    // this.once=this.once+1
-    // if (this.once<2){
-    //   //this.navCtrl.push(MainPage);
-    //   this.cCode.confirm(this.account.code).then((res)=>{
-    //     console.log("Login Successful")
-    //     this.navCtrl.push(MainPage);
-    //   }).catch((err)=>{
-    //     //this.navCtrl.push(MainPage);
-    //     console.log("Error with the confirmation code", err)
-    //     let toast = this.toastCtrl.create({
-    //       message: this.loginErrorString,
-    //       duration: 3000,
-    //       position: 'top'
-    //     });
-    //     toast.present();
-    //   })
-    // }
+    //this.navCtrl.push(MainPage);
+    this.once=this.once+1
+    if (this.once<2){
+      //this.navCtrl.push(MainPage);
+      this.cCode.confirm(this.account.code).then((res)=>{
+        console.log("Login Successful")
+        this.navCtrl.push(MainPage);
+      }).catch((err)=>{
+        //this.navCtrl.push(MainPage);
+        console.log("Error with the confirmation code", err)
+        let toast = this.toastCtrl.create({
+          message: this.loginErrorString,
+          duration: 3000,
+          position: 'top'
+        });
+        toast.present();
+      })
+    }
   }
 }

@@ -14,7 +14,7 @@ export class MapPage {
 
 //  @ViewChild('map') map;
   uid:any
-  profile:Uzer
+  profile:any
   search:boolean = false
   people:Array<any>
   suggestedPeople:any
@@ -30,12 +30,13 @@ export class MapPage {
   ionViewWillEnter() {
     var vm=this
     this.uid=this.fbs.currentUser().uid
-    this.fbs.getDatabase("/users/"+this.uid,false).then(function(res){
-      for(let i in res){
-        vm.profile[i]=res[i]
-      }
-      for(let i in vm.profile.people){
-        this.fbs.getDatabase("/chats/"+vm.profile.people[i]+"/summary", false).then(function(res){
+    this.fbs.getDatabase("/users/"+this.uid,false).then(function(res:any){
+      // for(let i in res){
+      //   vm.profile[i]=res[i]
+      // }
+      vm.profile=res
+      for(let i in res.people){
+        this.fbs.getDatabase("/chats/"+res.people[i]+"/summary", false).then(function(res){
           var chat=res
           var oUid=""
           for(let i in chat.users){

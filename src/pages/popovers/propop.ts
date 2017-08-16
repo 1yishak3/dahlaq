@@ -18,7 +18,7 @@ import { ItemCreatePage } from '../item-create/item-create'
 export class PopoverPage {
   stgs: SettingsPage
   constructor(public icp:ItemCreatePage,public viewCtrl: ViewController){
-
+    console.log("Am I here? Questions...")
   }
   removePhoto(){
     this.close()
