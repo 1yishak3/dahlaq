@@ -1,8 +1,9 @@
-import {Injectable} from '@angular/core';
+import {Injectable, EventEmitter} from '@angular/core';
 import 'rxjs/Rx';
 import {Observable} from "rxjs/Observable";
 import { User } from './user'
-import { Events } from 'ionic-angular'
+import { Events,LoadingController } from 'ionic-angular'
+import { Uzer } from '../models/uzer'
 
 import * as firebase from "firebase";
 import 'firebase/auth'
@@ -13,13 +14,15 @@ import 'firebase/messaging'
 
 
 
+
 @Injectable()
 export class FirebaseService {
-
+  userCheck: EventEmitter<Boolean>
   authCallback: any;
   user:any
   ev:any
-  constructor(public usr : User, public events: Events) {
+
+  constructor(public loadCtrl?:LoadingController,public usr? : User, public events?: Events) {
     // Initialize Firebase
     var config = {
       apiKey: "AIzaSyCYT5qaezgIxItyCT_idaM0rXNnKA9eBMY",
@@ -32,20 +35,48 @@ export class FirebaseService {
     firebase.initializeApp(config);
     this.user=usr
     this.ev=events
+    this.userCheck=new EventEmitter
+  //  this.snap()
     // check for changes in auth status
 
 
   }
-  doStuff(data) {
-    var db = firebase.database();
-    db.ref('users/dude').set(data)
+  snap(){
+    var vm=this
+    var consRef=this.getRef("/users/"+this.currentUser().uid+"/connections")
+    var onRef=this.getRef("/users/"+this.currentUser().uid+"/basic/online")
+    var conRef=this.getRef("/.info/connected")
+    conRef.on('value',function(snap){
+      if(snap.val()){
+        vm.setDatabase("/users/"+vm.user.uid+"/basic/online",true,true).then(function(res){
 
+        })
+      }
+      var con=consRef.push()
+      con.set(true)
+      con.onDisconnect().remove()
+      onRef.onDisconnect().set({"on":false,"time":firebase.database.ServerValue.TIMESTAMP})
+    })
   }
-
-  /*onAuthStateChanged(_function) {
+  connected(){
+    return new Promise(function(resolve,reject){
+      firebase.database().ref(".info/connected").on("value", function(snap) {
+        if (snap.val() === true||snap.val() === false) {
+          resolve(snap.val())
+        } else {
+          reject("problems with .info/connected");
+        }
+      });
+    })
+  }
+  getRef(url){
+    var ref:any=firebase.database().ref(url)
+    return ref
+  }
+  onAuthStateChanged(_function) {
       return firebase.auth().onAuthStateChanged((_currentUser) => {
           if (_currentUser) {
-              console.log("User " + _currentUser.uid + " is logged in with " + _currentUser.provider);
+              console.log("User " + _currentUser.uid + " is logged in with " + _currentUser.providerData);
               _function(_currentUser);
           } else {
               console.log("User is logged out");
@@ -55,24 +86,113 @@ export class FirebaseService {
   }
 
 
-
-
-
-  createEmailUser(credentials) {
-
-      return new Observable(observer => {
-          return firebase.auth().createUserWithEmailAndPassword(credentials.email, credentials.password)
-              .then((authData) => {
-                  console.log("User created successfully with payload-", authData);
-                  observer.next(authData)
-              }).catch((_error) => {
-                  console.log("Login Failed!", _error);
-                  observer.error(_error)
-              })
-      });
-  }*/
-  //dataGetter()
-  //dataWriter()
+  transac(url,func){
+    return new Promise(function(resolve,reject){
+      var ref=firebase.database().ref(url)
+      ref.transaction(func)
+    })
+  }
+  setList(url,val){
+    var vm=this
+    return new Promise(function(resolve,reject){
+      //var newKey=firebase.database().ref(url).push().key
+      firebase.database().ref(url).push(val).then(function(res){
+        resolve(res)
+      }).catch(function(err){
+        reject(err)
+      })
+    })
+  }
+  getLimited(url,num){
+    return new Promise(function(resolve,reject){
+      var data=firebase.database().ref(url).limitToLast(num)
+      if(data){
+        resolve(data)
+      }else{
+        reject(data)
+      }
+    })
+  }
+  rmDatabase(url){
+    return new Promise(function(resolve,reject){
+      firebase.database().ref(url).remove().then(function(res){
+        resolve(res)
+      }).catch(function(err){
+        reject(err)
+      })
+    })
+  }
+  getDatabase(url,once,uidn?:string){
+    if(uidn!==this.currentUser().uid){
+      this.userCheck.emit(false)
+    }else{
+      this.userCheck.emit(true)
+    }
+    return new Promise(function(resolve,reject){
+      if(!once){
+      firebase.database().ref(url).on('value',function(snapshot){
+        //console.log(snapshot)
+        resolve(snapshot.val())
+      },function(err){
+        console.log(err)
+        reject(err)
+      })
+    }else{
+      firebase.database().ref(url).once('value').then(function(res){
+        //console.log(res)
+        resolve(res.val())
+      }).catch(function(err){
+        console.log(err)
+        reject(err)
+      })
+    }
+    })
+  }
+  setDatabase(url,value,set){
+    return new Promise(function(resolve,reject){
+      if(set){
+      firebase.database().ref(url).set(value).then(function(res){
+        console.log(res)
+        resolve(res)
+      }).catch(function(err){
+        console.log(err)
+        reject(err)
+      })
+    }else{
+      //var val = {}
+      //val[url]=value
+      firebase.database().ref().update(value).then(function(res){
+        console.log(res)
+        resolve(res)
+      }).catch(function(err){
+        console.log(err)
+        reject(err)
+      })
+    }
+    })
+  }
+  // getStorageUrl(url,){
+  //   return new Promise(function(resolve,reject){
+  //
+  //   })
+  // }
+  getStorage(url){
+    return new Promise(function(resolve,reject){
+      var ref = firebase.storage().ref().child(url)
+      ref.getDownloadURL().then(function(res){
+        console.log(res)
+        var ress:any=res
+        resolve(ress)
+      }).catch(function(err){
+        console.log(err)
+        reject(err)
+      })
+    })
+  }
+  setStorage(url,value){
+    var uploadTask=firebase.storage().ref().child(url).put(value)
+    return uploadTask
+  }
   currentUser() {
       return firebase.auth().currentUser
   }
@@ -84,7 +204,8 @@ export class FirebaseService {
     var vm = this.linkToNumber
     var cr;
     console.log(email+"---"+password)
-    return new Promise(function(resolve, reject){firebase.auth().createUserWithEmailAndPassword(email,password).then(function(d){
+    return new Promise(function(resolve, reject){
+      firebase.auth().createUserWithEmailAndPassword(email,password).then(function(d){
       console.log("Account creation successful, proceeding with phone number verification,",d)
       var user = firebase.auth().currentUser
       vm(num,veri).then(function(res){
@@ -109,7 +230,11 @@ export class FirebaseService {
       console.log("Linked", result)
       resolve(cr)
     }).catch(function(err){
-
+      user.delete().then(function(res){
+        console.log("Account Deleted", res)
+      }).catch(function(err){
+        console.log("Error Deleteing account. Check Connection",err)
+      })
       console.log("Link error",err)
       reject(null)
     })})
@@ -148,7 +273,7 @@ export class FirebaseService {
     })
   }
 
-  uploadPhotoFromFile(_imageData, _progress) {
+  /*uploadPhotoFromFile(_imageData, _progress) {
 
 
     return new Observable(observer => {
@@ -187,7 +312,7 @@ export class FirebaseService {
 
       });
     });
-  }
+  }*/
 
   /*getDataObs() {
       var ref = firebase.database().ref('images')

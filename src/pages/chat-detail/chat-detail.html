@@ -6,12 +6,33 @@
       </button>
     </ion-buttons>
     <ion-title>
-      Chat Name
+      <ion-buttons>
+        <button ion-button icon-only clear (click)="openPerson()">
+          {{oUser}}
+          <ion-icon name="egg" color="secondary" *ngIf="online"></ion-icon>
+          <ion-note *ngIf="!online" >Last seen at {{lastSeen}}</ion-note>
+        </button>
+      </ion-buttons>
     </ion-title>
   </ion-navbar>
 </ion-header>
 
 <ion-content style="background:black">
+  <ion-fab top left>
+    <button (click)="presentConfirm()" *ngIf="chatId"ion-fab mini><ion-icon name="trash-a"></ion-icon></button>
+  </ion-fab>
+  <div *ngIf="ready">
+    <span *ngFor="let message of messages;let i =index">
+      <div class="talk-bubble round" *ngIf="message.sender===oUser&&(message.time>messages[i-1].time-60000&&message.time<messages[i-1].time+60000)">
+      </div>
+      <div class="talk-bubble tri-right round left-top" *ngIf="message.sender===oUser&&(message.time<messages[i-1].time-60000||message.time>messages[i-1].time+60000)">
+      </div>
+      <div class="talk-bubble round" *ngIf="message.sender===user&&(message.time>messages[i-1].time-60000&&message.time<messages[i-1].time+60000)">
+      </div>
+      <div class="talk-bubble tri-right round right-top" *ngIf="message.sender===user&&(message.time<messages[i-1].time-60000||message.time>messages[i-1].time+60000)">
+      </div>
+    </span>
+  </div>
   <ion-footer style="background:transparent">
     <!--ion-row style="background:#1a1a1a;">
       <ion-col>
@@ -27,16 +48,28 @@
       <ion-row wrap>
         <ion-col col-1>
           <div>
-            <ion-icon color="light" style="position:relative;top:0px;font-size:20px;" name="happy"></ion-icon>
+            <button ion-button
+            clear icon-only
+    (click)="toggled = !toggled"
+    [(emojiPickerIf)]="toggled"
+    [emojiPickerDirection]="'bottom' || 'top' || 'left' || 'right'"
+    (emojiPickerSelect)="handleEmoji($event)">
+              <ion-icon color="light" style="position:relative;top:0px;font-size:20px;" name="happy"></ion-icon>
+            </button>
+
+
           </div>
         </ion-col>
         <ion-col col-10>
-          <ion-textarea item-content #textt id="textarea" block [(ngModel)]="message" autosize
-          style="background:#121212;color:white;overflow:auto;max-height:100px;" placeholder="Message">
+          <ion-textarea item-content #textt id="textarea" block (change)="subscribe()" [(formControl)]="messageCtrl" [(ngModel)]="message" autosize
+          style="background:#1a1a1a;color:white;overflow:auto;max-height:100px;" placeholder="Message">
           </ion-textarea>
         </ion-col>
+        <!--get an attache icon here that is clickable-->
         <ion-col col-1>
-          <ion-icon color="light" style="font-size:25px;" name="send"></ion-icon>
+          <button (click)="sendMessage()"  ion-button clear icon-only>
+            <ion-icon color="light" style="font-size:25px;" name="send"></ion-icon>
+          </button>
         </ion-col>
       </ion-row>
     </ion-grid>

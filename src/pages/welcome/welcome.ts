@@ -36,12 +36,15 @@ export class WelcomePage {
    }
   login() {
     var navCtrl=this.navCtrl
+    var vm=this
+    //navCtrl.push(LoginPage,{'confirm':"what?"})
     this.fbs.login(this.creds, this.recaptchaVerifier).then(function(res){
       console.log("We have a response: ", res)
       navCtrl.push(LoginPage,{"confirm":res})
     }).catch(function(err){
+    //  vm.fbs.currentUser().delete()
       console.log("Error loging in. Cause: ",err)
-      navCtrl.push(LoginPage)
+      //navCtrl.push(LoginPage)
     })
   }
 
@@ -49,9 +52,10 @@ export class WelcomePage {
     console.log(this.creds)
     /*var happy = this.fbs.linkToNumber
     var creds= this.creds
-
+    var vm=this
 
     var recaptchaVerifier1 = this.recaptchaVerifier1*/
+    var vm=this
     var confirmationResult;
     var navCtrl=this.navCtrl
     this.fbs.createUser(this.creds, this.recaptchaVerifier1).then(function(res){
@@ -59,8 +63,10 @@ export class WelcomePage {
       confirmationResult = res
       navCtrl.push(SignupPage,{"confirm":confirmationResult})
     }).catch(function(err){
+      vm.fbs.currentUser().delete()
       console.log("You have an error",err)
-      navCtrl.push(SignupPage,{"confirm":confirmationResult})
+      //toast saying An error with the network occured, click back and try again.
+      //navCtrl.push(SignupPage,{"confirm":confirmationResult})
     })
 
 

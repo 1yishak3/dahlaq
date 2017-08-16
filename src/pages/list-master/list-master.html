@@ -12,15 +12,18 @@
         <ion-icon name="close"></ion-icon>
       </button>
     </ion-buttons>
-    <ion-searchbar *ngIf="search"  (ionInput)="getItems($event)" placeholder="Search the ranks"></ion-searchbar>
+    <ion-searchbar *ngIf="search"  ([ngModel])="searchTerm" [formControl]="searchCtrl" (ionInput)="getItems()" placeholder="Username..."></ion-searchbar>
   </ion-navbar>
 
 </ion-header>
 
 <ion-content style="background-color:black;">
+  <div *ngIf="searching" class="spinner-container">
+        <ion-spinner></ion-spinner>
+    </div>
   <ion-item>
     <ion-label>Rank on</ion-label>
-    <ion-select>
+    <ion-select ([ngModel])= "basis">
       <ion-option value="1">Fame</ion-option>
       <ion-option value="2">Notoreity</ion-option>
     </ion-select>
@@ -38,11 +41,16 @@
         <div item-end icon-right><ion-icon color="light" name="star" >{{3*1/i}}</ion-icon></div>
       </button>
 
-      <ion-item-options>
+      <!--ion-item-options>
         <button ion-button color="danger" (click)="deleteItem(item)">
           {{ 'DELETE_BUTTON' | translate }}
         </button>
-      </ion-item-options>
+      </ion-item-options-->
     </ion-item-sliding>
+    <ion-infinite-scroll (ionInfinite)="pullToAddMore($event)">
+      <ion-infinite-scroll-content
+      loadingSpinner="circles"
+      loadingText="Loading more ranks..."></ion-infinite-scroll-content>
+    </ion-infinite-scroll>
   </ion-list>
 </ion-content>
