@@ -18,8 +18,8 @@
     refreshingSpinner="circles"
     refreshingText="Getting More..."></ion-refresher-content>
  </ion-refresher>
- <ion-spinner *ngIf="ready!==true" name="bubbles"></ion-spinner>
-  <ion-list [virtualScroll]="viewables" approxItemHeight="60px">
+ <ion-spinner color="light" *ngIf="ready!==true" name="bubbles"></ion-spinner>
+  <ion-list [virtualScroll]="viewables" approxItemHeight="500px">
     <ion-card  *virtualItem="let post">
       <a (click)="post.detailPost(post)" style="background:black;" clear>
       <ion-item>
@@ -33,15 +33,17 @@
           </ion-note>
         <p item-end style="color:grey">{{post.time|momentjs}}</p>
       </ion-item>
+    </a>
 
-      </a>
-      <ion-img *ngIf="post.content.imageUrl!==''"[src]="post.content.imageUrl"></ion-img>
-      <div icon-center (click)="playVideo(post.content.videoUrl)" *ngIf="post.content.videoUrl!==''" style="height:50px" >
-        <ion-icon style="font-size:25px;position:relative"></ion-icon>
+      <div text-center *ngIf="post.content.imageUrl!==''||post.content.videoUrl!==''"style="width:inherit;height:250px" padding>
+        <ion-img style="width:inherit;" *ngIf="post.content.imageUrl!==''"[src]="post.content.imageUrl"></ion-img>
+        <div style="width:inherit;height:inherit;background:black" icon-center (click)="playVideo(post.content.videoUrl)" *ngIf="post.content.videoUrl!==''">
+          <ion-icon color="light" style="font-size:50px;position:relative"></ion-icon>
+        </div>
       </div>
       <a (click)="post.detailPost(post)" style="background:black;" clear>
       <ion-card-content>
-        <p style="color:white">{{post.content.description|truncate:150:'...Click to read more.'}}</p>
+        <p style="color:white">{{post.content.description|truncate:150:"...click to read more."}}</p>
       </ion-card-content>
       </a>
       <ion-row>

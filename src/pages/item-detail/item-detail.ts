@@ -20,7 +20,7 @@ export class ItemDetailPage {
   userPosts=[]
   arrayStopped=1
   j:Number
-  newList:Array<Post>
+  newList:Array<any>
   props:any
   postz:any={}
   ready:boolean
@@ -79,7 +79,7 @@ export class ItemDetailPage {
           for(let i in vm.newList){
 
             vm.fbs.getDatabase("/posts/"+vm.newList[i],true,vm.uid).then(function(res){
-              var post=new Post(vm.fbs,vm.navCtrl)
+              var post=new Post(vm.fbs,vm.navCtrl,vm.newList[i],true)
               for(let i in res){
                 post[i]=res[i]
               }
@@ -149,7 +149,7 @@ export class ItemDetailPage {
         var k =j-Number(i)
         console.log(i,k)
         vm.fbs.getDatabase("/posts/"+vm.newList[k],false,vm.uid).then(function(res){
-          var post = new Post(vm.fbs,vm.navCtrl)
+          var post = new Post(vm.fbs,vm.navCtrl,vm.newList[k],true)
           for(let i in res){
             post[i]=res[i]
           }

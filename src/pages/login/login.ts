@@ -44,21 +44,35 @@ export class LoginPage {
   doLogin() {
   //  var cCode=this.nvp.get("confirm")
     //this.navCtrl.push(MainPage);
+    var vm=this
     this.once=this.once+1
     if (this.once<2){
       //this.navCtrl.push(MainPage);
       this.cCode.confirm(this.account.code).then((res)=>{
-        console.log("Login Successful")
-        this.navCtrl.push(MainPage);
+        if(vm.fbss.currentUser().displayName===""){
+            vm.fbss.currentUser().delete()
+            let toast = this.toastCtrl.create({
+              message: "It looks like don't have an account with us yet, please signup on this page to enjoy Dahlaq",
+              duration: 3333,
+              position: 'top'
+            });
+            toast.present();
+            this.navCtrl.pop()
+
+        }else{
+          console.log("Login Successful")
+          this.navCtrl.push(MainPage);
+        }
       }).catch((err)=>{
         //this.navCtrl.push(MainPage);
         console.log("Error with the confirmation code", err)
         let toast = this.toastCtrl.create({
-          message: this.loginErrorString,
-          duration: 3000,
+          message: "You tried signing in with the wrong code, please try again.",
+          duration: 3333,
           position: 'top'
         });
         toast.present();
+        this.navCtrl.pop()
       })
     }
   }

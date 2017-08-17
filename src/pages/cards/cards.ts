@@ -20,7 +20,7 @@ export class CardsPage {
   uid:string
   arrayStopped=1
   j:number
-  newList:Array<Post>
+  newList:Array<any>
   toggled:boolean=false
   ready:boolean
   postz:any={}
@@ -84,7 +84,7 @@ export class CardsPage {
           for(let i in vm.newList){
 
             vm.fbs.getDatabase("/posts/"+vm.newList[i],true,vm.uid).then(function(res){
-              var post=new Post(vm.fbs,vm.navCtrl)
+              var post=new Post(vm.fbs,vm.navCtrl,vm.newList[i],true)
               for(let i in res){
                 post[i]=res[i]
               }
@@ -137,7 +137,7 @@ export class CardsPage {
         var k =Number(i)+j
         if(vm.newList[k]!==undefined){
           vm.fbs.getDatabase("/posts/"+vm.newList[k],false,vm.uid).then(function(res){
-            var post = new Post(vm.fbs,vm.navCtrl)
+            var post = new Post(vm.fbs,vm.navCtrl,vm.newList[k],true)
             for(let i in res){
               post[i]=res[i]
             }
