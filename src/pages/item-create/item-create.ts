@@ -309,15 +309,20 @@ export class ItemCreatePage {
     var pst = this.post
     console.log("this is file",file)
     var task= this.fbs.setStorage(url,file)
-    var sub=task.on('state_changed')
-    sub({
-      'next':function(snap:any){
+    var sub=task.on('state_changed',function(snap:any){
       console.log(snap.bytesTransferred)
       console.log(snap.totalBytes)
 
       vm.progress=(Number(snap.bytesTransferred)/Number(snap.totalBytes))*100
       console.log(vm.progress)
-      if(vm.progress===100){
+      console.log("this is your snapshot, ",snap)
+
+    },
+    function(err){
+        console.log("This is your error",err)
+    })
+    task.then(function(snap){
+      console.log(snap)
         vm.fbs.getStorage(url).then(function(res:any){
           if(vm.get===1){
             pst.content.imageUrl=res
@@ -329,18 +334,8 @@ export class ItemCreatePage {
           vm.complete=true
           vm.uploading=false
         })
-      }
-
-      console.log("this is your snapshot, ",snap)
-
-    },
-    'error':function(err){
-        console.log("This is your error",err)
-    }
-
-
-
     })
+
 
     // this.fbs.setStorage(url,file).then(function(res:any){
     //   vm.progress=(res.bytesTransfered/res.totalBytes)
@@ -374,7 +369,9 @@ export class ItemCreatePage {
   //   })
   // }
   }
-
+  dU(t){
+    var URL=t.snapshot.downloadUrl
+  }
   processFile(url,fil) {
     this.uploading=true
     var vm = this.fbs

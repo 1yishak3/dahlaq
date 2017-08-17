@@ -131,7 +131,7 @@ export class FirebaseService {
     return new Promise(function(resolve,reject){
       if(!once){
       firebase.database().ref(url).on('value',function(snapshot){
-        //console.log(snapshot)
+        console.log(snapshot)
         resolve(snapshot.val())
       },function(err){
         console.log(err)
@@ -139,7 +139,7 @@ export class FirebaseService {
       })
     }else{
       firebase.database().ref(url).once('value').then(function(res){
-        //console.log(res)
+        console.log(res)
         resolve(res.val())
       }).catch(function(err){
         console.log(err)

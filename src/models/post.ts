@@ -3,8 +3,8 @@ import { PostPage } from '../pages/post/post'
 import { NavController } from 'ionic-angular'
 import { FirebaseService } from '../providers/firebase'
 export class Post {
-  postId:String
-  time:Number
+  postId:string
+  time:number
   likes:any
   dislikes:any
   reports:any
@@ -35,39 +35,58 @@ export class Post {
   disliked:boolean
   uid:any
 
-  constructor(public fbs:FirebaseService,public navCtrl:NavController){
+  constructor(public fbs:FirebaseService,public navCtrl:NavController,public pId?:string, public tr?:boolean){
   //  console.log("this is this: ",fbs)
     this.uid=fbs.currentUser().uid
+    this.postId=pId
   //  console.log("this is the uid: ",this.uid)
 
-    this.likes= (Object.keys(this.content.likes)).length
-    this.dislikes=(Object.keys(this.content.dislikes)).length
-    this.reports=(Object.keys(this.content.reports)).length
-    this.boosts=(Object.keys(this.content.boosts)).length
-    this.reach=(Object.keys(this.content.reach)).length
-
-    this.reported=(this.content.reports[this.uid]!==undefined)
-    this.liked=(this.content.likes[this.uid]!==undefined)
-    this.disliked=(this.content.dislikes[this.uid]!==undefined)
-    //this.bootstrap()
+    // this.likes= (Object.keys(this.content.likes)).length
+    // this.dislikes=(Object.keys(this.content.dislikes)).length
+    // this.reports=(Object.keys(this.content.reports)).length
+    // this.boosts=(Object.keys(this.content.boosts)).length
+    // this.reach=(Object.keys(this.content.reach)).length
+    //
+    // this.reported=(this.content.reports[this.uid]!==undefined)
+    // this.liked=(this.content.likes[this.uid]!==undefined)
+    // this.disliked=(this.content.dislikes[this.uid]!==undefined)
+    if(tr){
+      this.bootstrap()
+    }
   }
   //liking, unliking, reporting, unreporting should all trigger cloud functions to produce
   //preference schemas and, of course, our fame number
- ngOnInit(){
-   this.bootstrap()
- }
+ // ngOnInit(){
+ //   this.bootstrap()
+ //   console.log("ngOnInit")
+ // }
+ // ionViewWillEnter(){
+ //   this.bootstrap()
+ //   console.log("I have started")
+ // }
   bootstrap(){
     var vm=this
-    this.fbs.getDatabase("/posts/"+this.postId,false).then(function(res){
-      var pst:any= res
-      vm.poster=pst.poster
-      vm.content=pst.content
-      vm.likes=Object.keys(pst.content.likes).length
-      vm.dislikes=Object.keys(pst.content.dislikes).length
-      vm.reports=Object.keys(pst.content.reports).length
-      vm.reported=(vm.content.reports[vm.uid]!==undefined)
-      vm.liked=(vm.content.likes[vm.uid]!==undefined)
-      vm.disliked=(vm.content.dislikes[vm.uid]!==undefined)
+    console.log("THIS IS YOUR PostID PLEASE DON'T BE NULL",this.postId)
+    this.fbs.getDatabase("/posts/"+this.postId,false).then(function(res:any){
+      console.log("how many times am I actually being called?",res)
+      //var pst:any= res
+      vm.poster=res.poster
+      vm.content=res.content
+      if(res.content.likes!==undefined&&res.content.likes!==null){
+        vm.likes=Object.keys(res.content.likes).length
+        vm.liked=(vm.content.likes[vm.uid]!==undefined)
+      }
+      if(res.content.dislikes!==undefined&&res.content.dislikes!==null){
+        vm.dislikes=Object.keys(res.content.dislikes).length
+        vm.disliked=(vm.content.dislikes[vm.uid]!==undefined)
+      }
+      if(res.content.reports!==undefined&&res.content.reports!==null){
+        vm.reports=Object.keys(res.content.reports).length
+        vm.reported=(vm.content.reports[vm.uid]!==undefined)
+      }
+      console.log("stats", vm.liked,vm.disliked,vm.reported)
+    }).catch(function(err){
+      console.log("an error has occured, ",err)
     })
   }
   /*function toggleStar(postRef, uid) {
@@ -88,99 +107,253 @@ export class Post {
   });
 }*/
   like(){
-    if(this.content.dislikes[cU]!==undefined){
-      this.undislike()
-    }
-    var cU= this.fbs.currentUser().uid
-    var vm=this.likes
     var y=this
-    vm=vm+1
-    this.fbs.setDatabase("/posts/"+this.postId+"/content/likes/"+cU,Date.now(),true).then(function(res){
-      console.log("You liked this!")
-    }).catch(function(err){
-      console.log("Couldn't like, sorry", err)
-    })
-    this.reported=(this.content.reports[this.fbs.currentUser().uid]!==undefined)
-    this.liked=(this.content.likes[this.fbs.currentUser().uid]!==undefined)
-    this.disliked=(this.content.dislikes[this.fbs.currentUser().uid]!==undefined)
-    console.log(this.liked,this.reported,this.disliked)
+
+    if(this.disliked){
+      y.likes=y.likes+1
+      y.liked=true
+      this.undislike().then(function(res){
+        var cU= y.fbs.currentUser().uid
+        var vm=y.likes
+        if(y.reported){
+          y.unreport().then(function(res){
+            y.fbs.setDatabase("/posts/"+y.postId+"/content/likes/"+cU,Date.now(),true).then(function(res){
+              console.log("You liked this!")
+              // y.reported=(y.content.reports[y.fbs.currentUser().uid]!==undefined)
+              // y.liked=(y.content.likes[y.fbs.currentUser().uid]!==undefined)
+              // y.disliked=(y.content.dislikes[y.fbs.currentUser().uid]!==undefined)
+              // console.log(y.liked,y.reported,y.disliked)
+            }).catch(function(err){
+              console.log("Couldn't like, sorry", err)
+              y.liked=false
+              y.likes=y.likes-1
+            })
+          }).catch(function(err){
+
+          })
+
+        }else{
+          y.fbs.setDatabase("/posts/"+y.postId+"/content/likes/"+cU,Date.now(),true).then(function(res){
+            console.log("You liked this!")
+            // y.reported=(y.content.reports[y.fbs.currentUser().uid]!==undefined)
+            // y.liked=(y.content.likes[y.fbs.currentUser().uid]!==undefined)
+            // y.disliked=(y.content.dislikes[y.fbs.currentUser().uid]!==undefined)
+            // console.log(y.liked,y.reported,y.disliked)
+          }).catch(function(err){
+            console.log("Couldn't like, sorry", err)
+            y.liked=false
+            y.likes=y.likes-1
+          })
+        }
+      }).catch(function(err){
+        console.log(err)
+      })
+
+    }else if(this.reported){
+      y.likes=y.likes+1
+      y.liked=true
+      this.unreport().then(function(res){
+        var cU= y.fbs.currentUser().uid
+        //var vm=y.likes
+        if(y.disliked){
+          y.undislike().then(function(res){
+            y.fbs.setDatabase("/posts/"+y.postId+"/content/likes/"+cU,Date.now(),true).then(function(res){
+              console.log("You liked this!")
+              // y.reported=(y.content.reports[y.fbs.currentUser().uid]!==undefined)
+              // y.liked=(y.content.likes[y.fbs.currentUser().uid]!==undefined)
+              // y.disliked=(y.content.dislikes[y.fbs.currentUser().uid]!==undefined)
+              // console.log(y.liked,y.reported,y.disliked)
+            }).catch(function(err){
+              console.log("Couldn't like, sorry", err)
+              y.liked=false
+              y.likes=y.likes-1
+            })
+          }).catch(function(err){
+
+          })
+
+        }else{
+          y.fbs.setDatabase("/posts/"+y.postId+"/content/likes/"+cU,Date.now(),true).then(function(res){
+            console.log("You liked this!")
+            // y.reported=(y.content.reports[y.fbs.currentUser().uid]!==undefined)
+            // y.liked=(y.content.likes[y.fbs.currentUser().uid]!==undefined)
+            // y.disliked=(y.content.dislikes[y.fbs.currentUser().uid]!==undefined)
+            // console.log(y.liked,y.reported,y.disliked)
+          }).catch(function(err){
+            console.log("Couldn't like, sorry", err)
+            y.liked=false
+            y.likes=y.likes-1
+          })
+        }
+      }).catch(function(err){
+        console.log(err)
+      })
+
+
+    }else{
+
+      var cU= this.fbs.currentUser().uid
+      var vm=this.likes
+      var y=this
+      y.likes=y.likes+1
+      y.liked=true
+      this.fbs.setDatabase("/posts/"+this.postId+"/content/likes/"+cU,Date.now(),true).then(function(res){
+        console.log("You liked this!")
+        // y.reported=(y.content.reports[y.fbs.currentUser().uid]!==undefined)
+        // y.liked=(y.content.likes[y.fbs.currentUser().uid]!==undefined)
+        // y.disliked=(y.content.dislikes[y.fbs.currentUser().uid]!==undefined)
+        // console.log(y.liked,y.reported,y.disliked)
+      }).catch(function(err){
+        console.log("Couldn't like, sorry", err)
+        y.liked=false
+        y.likes=y.likes-1
+      })
+    }
 
   }
   unlike(){
-    var cU= this.fbs.currentUser().uid
     var vm=this
-    vm.likes=vm.likes-1
-    this.fbs.rmDatabase("/posts/"+this.postId+"/content/likes/"+cU).then(function(res){
-      delete this.content.likes[cU]
-    }).catch(function(err){
-
+    return new Promise(function(resolve,reject){
+      var cU= vm.fbs.currentUser().uid
+      vm.likes=vm.likes-1
+      vm.liked=false
+      vm.fbs.rmDatabase("/posts/"+vm.postId+"/content/likes/"+cU).then(function(res){
+        // if(this.content.likes[cU]){
+        //   delete this.content.likes[cU]
+        // }
+        // vm.reported=(vm.content.reports[vm.fbs.currentUser().uid]!==undefined)
+        // vm.liked=(vm.content.likes[vm.fbs.currentUser().uid]!==undefined)
+        // vm.disliked=(vm.content.dislikes[vm.fbs.currentUser().uid]!==undefined)
+        resolve("success")
+      }).catch(function(err){
+        vm.liked=true
+        vm.likes=vm.likes+1
+        reject("failure")
+      })
     })
-    this.reported=(this.content.reports[this.fbs.currentUser().uid]!==undefined)
-    this.liked=(this.content.likes[this.fbs.currentUser().uid]!==undefined)
-    this.disliked=(this.content.dislikes[this.fbs.currentUser().uid]!==undefined)
     }
   dislike(){
-    if(this.content.likes[cU]!==undefined){
-      this.unlike()
-    }
     var cU= this.fbs.currentUser().uid
-    var vm=this.dislikes
-    var y=this
-    vm=vm+1
-    this.fbs.setDatabase("/posts/"+this.postId+"/content/dislikes/"+cU,Date.now(),true).then(function(res){
-      //y.content.dislikes[cU]=Date.now()
-      console.log("You liked this!")
-    }).catch(function(err){
-      console.log("Couldn't like, sorry", err)
-    })
-    this.reported=(this.content.reports[this.fbs.currentUser().uid]!==undefined)
-    this.liked=(this.content.likes[this.fbs.currentUser().uid]!==undefined)
-    this.disliked=(this.content.dislikes[this.fbs.currentUser().uid]!==undefined)
+    var vm=this
+    if(this.liked){
+      vm.dislikes=vm.dislikes+1
+      vm.disliked=true
+      this.unlike().then(function(res){
+
+          vm.fbs.setDatabase("/posts/"+vm.postId+"/content/dislikes/"+cU,Date.now(),true).then(function(res){
+            //y.content.dislikes[cU]=Date.now()
+            // vm.reported=(vm.content.reports[vm.fbs.currentUser().uid]!==undefined)
+            // vm.liked=(vm.content.likes[vm.fbs.currentUser().uid]!==undefined)
+            // vm.disliked=(vm.content.dislikes[vm.fbs.currentUser().uid]!==undefined)
+            console.log("You disliked this!")
+          }).catch(function(err){
+            console.log("Couldn't dislike, sorry", err)
+            vm.disliked=false
+            vm.dislikes=vm.dislikes-1
+          })
+      }).catch(function(f){
+        console.log("unliking failed, sorry")
+      })
+    }else{
+      var vm=this
+      vm.dislikes=vm.dislikes+1
+      vm.disliked=true
+      this.fbs.setDatabase("/posts/"+this.postId+"/content/dislikes/"+cU,Date.now(),true).then(function(res){
+        //y.content.dislikes[cU]=Date.now()
+        // vm.reported=(vm.content.reports[vm.fbs.currentUser().uid]!==undefined)
+        // vm.liked=(vm.content.likes[vm.fbs.currentUser().uid]!==undefined)
+        // vm.disliked=(vm.content.dislikes[vm.fbs.currentUser().uid]!==undefined)
+        console.log("You disliked this!")
+      }).catch(function(err){
+        console.log("Couldn't dislike, sorry", err)
+        vm.disliked=false
+        vm.dislikes=vm.dislikes-1
+      })
+    }
 
 
   }
   undislike(){
-    var cU= this.fbs.currentUser().uid
     var vm=this
+    return new Promise(function(resolve, reject){
+
+    var cU= vm.fbs.currentUser().uid
     vm.dislikes=vm.dislikes-1
-    this.fbs.rmDatabase("/posts/"+this.postId+"/content/dislikes/"+cU).then(function(res){
-      delete this.content.dislikes[cU]
+    vm.disliked=false
+    vm.fbs.rmDatabase("/posts/"+vm.postId+"/content/dislikes/"+cU).then(function(res){
+      // if(this.content.dislikes[cU]){
+      //   delete this.content.dislikes[cU]
+      // }
+      // vm.reported=(vm.content.reports[vm.fbs.currentUser().uid]!==undefined)
+      // vm.liked=(vm.content.likes[vm.fbs.currentUser().uid]!==undefined)
+      // vm.disliked=(vm.content.dislikes[vm.fbs.currentUser().uid]!==undefined)
+      resolve("success")
     }).catch(function(err){
-
+      vm.dislikes=vm.dislikes+1
+      vm.disliked=true
+      reject("failure")
     })
-    this.reported=(this.content.reports[this.fbs.currentUser().uid]!==undefined)
-    this.liked=(this.content.likes[this.fbs.currentUser().uid]!==undefined)
-    this.disliked=(this.content.dislikes[this.fbs.currentUser().uid]!==undefined)
-
+  })
   }
   report(){
-    var cU= this.fbs.currentUser().uid
-    var vm=this.reports
-    var y=this
-    vm=vm+1
-    this.fbs.setDatabase("/posts/"+this.postId+"/content/reports/"+cU,Date.now(),true).then(function(res){
-      //y.content.dislikes[cU]=Date.now()
-      console.log("You liked this!")
-    }).catch(function(err){
-      console.log("Couldn't like, sorry", err)
-    })
-    this.reported=(this.content.reports[this.fbs.currentUser().uid]!==undefined)
-    this.liked=(this.content.likes[this.fbs.currentUser().uid]!==undefined)
-    this.disliked=(this.content.dislikes[this.fbs.currentUser().uid]!==undefined)
+    var vm=this
+    if(this.liked){
+      vm.reports=vm.reports+1
+      vm.reported=true
+      this.unlike().then(function(res){
+        var cU= vm.fbs.currentUser().uid
 
+
+        vm.fbs.setDatabase("/posts/"+vm.postId+"/content/reports/"+cU,Date.now(),true).then(function(res){
+          //y.content.dislikes[cU]=Date.now()
+          // vm.reported=(vm.content.reports[vm.fbs.currentUser().uid]!==undefined)
+          // vm.liked=(vm.content.likes[vm.fbs.currentUser().uid]!==undefined)
+          // vm.disliked=(vm.content.dislikes[vm.fbs.currentUser().uid]!==undefined)
+          // console.log("You liked this!")
+        }).catch(function(err){
+          vm.reports=vm.reports-1
+          vm.reported=false
+          console.log("Couldn't like, sorry", err)
+        })
+      })
+    }else{
+      var cU= this.fbs.currentUser().uid
+      var vm=this
+      vm.reports=vm.reports+1
+      vm.reported=true
+      this.fbs.setDatabase("/posts/"+this.postId+"/content/reports/"+cU,Date.now(),true).then(function(res){
+        //y.content.dislikes[cU]=Date.now()
+        // vm.reported=(vm.content.reports[vm.fbs.currentUser().uid]!==undefined)
+        // vm.liked=(vm.content.likes[vm.fbs.currentUser().uid]!==undefined)
+        // vm.disliked=(vm.content.dislikes[vm.fbs.currentUser().uid]!==undefined)
+        // console.log("You liked this!")
+      }).catch(function(err){
+        vm.reports=vm.reports-1
+        vm.reported=false
+        console.log("Couldn't like, sorry", err)
+      })
+    }
   }
   unreport(){
-    var cU= this.fbs.currentUser().uid
     var vm=this
-    vm.reports=vm.reports-1
-    this.fbs.rmDatabase("/posts/"+this.postId+"/content/reports/"+cU).then(function(res){
-      delete this.content.likes[cU]
-    }).catch(function(err){
-
+    return new Promise(function(resolve,reject){
+      var cU= vm.fbs.currentUser().uid
+      vm.reports=vm.reports-1
+      vm.reported=false
+      vm.fbs.rmDatabase("/posts/"+vm.postId+"/content/reports/"+cU).then(function(res){
+        // if(this.content.reports[cU]){
+        //   delete this.content.reports[cU]
+        // }
+        // vm.reported=(vm.content.reports[vm.fbs.currentUser().uid]!==undefined)
+        // vm.liked=(vm.content.likes[vm.fbs.currentUser().uid]!==undefined)
+        // vm.disliked=(vm.content.dislikes[vm.fbs.currentUser().uid]!==undefined)
+        resolve("Success")
+      }).catch(function(err){
+        vm.reports=vm.reports+1
+        vm.reported=true
+        reject("fail")
+      })
     })
-    this.reported=(this.content.reports[this.fbs.currentUser().uid]!==undefined)
-    this.liked=(this.content.likes[this.fbs.currentUser().uid]!==undefined)
-    this.disliked=(this.content.dislikes[this.fbs.currentUser().uid]!==undefined)
 
   }
   detailPost(post:Post){
