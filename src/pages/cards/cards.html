@@ -11,13 +11,13 @@
 
 
 <ion-content style="background:black;">
-  <ion-refresher style="color:white"(ionRefresh)="refresher($event)">
+  <!--ion-refresher style="color:white"(ionRefresh)="refresher($event)">
    <ion-refresher-content style="text-color:white;color:white"
     pullingIcon="arrow-dropdown"
     pullingText="#Refresh"
     refreshingSpinner="circles"
     refreshingText="Getting More..."></ion-refresher-content>
- </ion-refresher>
+ </ion-refresher-->
  <ion-spinner color="light" *ngIf="ready!==true" name="bubbles"></ion-spinner>
   <ion-list [virtualScroll]="viewables" approxItemHeight="500px">
     <ion-card  *virtualItem="let post">

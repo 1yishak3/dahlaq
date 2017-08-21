@@ -20,13 +20,13 @@ export class ListMasterPage {
   searching: any=false
   searchCtrl:FormControl
   searchTerm:string=""
-  ranks: Array<string>
-  viewList:Array<string>
-  people:Array<Uzer>
+  ranks: Array<any>
+  viewList:Array<any>
+  people:Array<any>
   startAt:number
   notor:Array<string>
   fam:Array<string>
-  basis:number
+  basis:any
   master={}
   constructor(public fbs:FirebaseService,public http:Http,public navCtrl: NavController, public items: Items, public modalCtrl: ModalController) {
     this.searchCtrl=new FormControl()
@@ -37,19 +37,24 @@ export class ListMasterPage {
    * The view loaded, let's query our items for the list
 
    */
-  ionWillEnter(){
+  ionViewWillEnter(){
     var vm=this
-    this.fbs.getDatabase("/namesList/1",false).then(function(res){
+    this.fbs.getDatabase("/fameList",false).then(function(res){
       for (let i=0;i<Object.keys(res).length;i++){
-        vm.fam.push(res[i])
+        var key=Object.keys(res)[i]
+        vm.fam.push(res[key])
       }
     }).catch(function(err){
       //to  be taken care of
       console.log("check internet connection")
     })
-    this.fbs.getDatabase("/namesList/2",false).then(function(res){
-      for (let i=0;i<Object.keys(res).length;i++){
-        vm.notor.push(res[i])
+    this.fbs.getDatabase("/notorList",false).then(function(res){
+      if(res){
+        for (let i=0;i<Object.keys(res).length;i++){
+          vm.notor.push(res[i])
+        }
+      }else{
+        vm.notor=null
       }
     }).catch(function(err){
       //to  be taken care of
@@ -57,6 +62,9 @@ export class ListMasterPage {
     })
     vm.master["1"]=vm.fam
     vm.master["2"]=vm.notor
+    if(vm.notor===null){
+      vm.basis="1"
+    }
     vm.ranks=vm.master[vm.basis]
   }
   ionViewDidLoad() {
@@ -71,10 +79,10 @@ export class ListMasterPage {
   searchOn(){
     this.search=!this.search
   }
-  openItem(person: Uzer) {
-    this.navCtrl.push(ItemDetailPage, {
-      person: person
-    });
+  openItem(person) {
+      this.navCtrl.push(ItemDetailPage, {
+        person: person.uid
+      });
   }
   getItems(){
     this.ranks=this.master[this.basis]
@@ -91,47 +99,45 @@ export class ListMasterPage {
     return new Promise(function(resolve,reject){
       if(searchTerm!=""){
         vm.viewList=vm.ranks.filter((person) => {
-            return person.toLowerCase().indexOf(searchTerm.toLowerCase()) > -1;
+            return person.username.toLowerCase().indexOf(searchTerm.toLowerCase()) > -1;
         });
         vm.loadIt(vm.viewList)
       }else{
         vm.viewList=vm.ranks
-        vm.loadIt(vm.ranks)
+        vm.loadIt(vm.viewList)
       }
     })
   }
   loadIt(data){
     var vm=this
     for(let i in data){
-      this.fbs.getDatabase("/uidList/"+i,false).then(function(res){
-        this.fbs.getDatabase("/users/"+res,false).then(function(res){
-          vm.people.push(res)
-        }).catch(function(err){
-
-        })
+      this.fbs.getDatabase("/users/"+data[i].uid+"/basic",false).then(function(res:any){
+        var dat=data[i]
+        dat["currentPic"]=res.currentPic
+        dat["bio"]=res
+        vm.people.push(dat)
       }).catch(function(err){
 
       })
-      if(Number(i)===14||Number(i)===this.ranks.length-1){
-        this.startAt=Number(i)
-        break
-      }
+      if(Number(i)===25||Number(i)===data.length-1){
+      this.startAt=Number(i)
+      break
+    }
     }
   }
   pullToAddMore(e){
     var vm=this
     for(let i in this.viewList){
       var j=Number(i)+this.startAt
-      this.fbs.getDatabase("/uidList/"+j,false).then(function(res){
-        this.fbs.getDatabase("/users/"+res,false).then(function(res){
-          vm.people.push(res)
-        }).catch(function(err){
-
-        })
+      this.fbs.getDatabase("/users/"+this.viewList[j].uid+"/basic",false).then(function(res:any){
+        var dat=this.viewList[j]
+        dat["currentPic"]=res.currentPic
+        dat["bio"]=res.bio
+        vm.people.push(dat)
       }).catch(function(err){
 
       })
-      if(Number(i)===14||Number(i)===this.ranks.length-1){
+      if(Number(i)===25||Number(i)===this.viewList.length-1){
         this.startAt=Number(i)+this.startAt
         e.complete()
         break

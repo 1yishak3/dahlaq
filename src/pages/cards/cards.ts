@@ -54,61 +54,76 @@ export class CardsPage {
       //if disconnected take most recent cached posts and show them
       //if connected-
       vm.arrayStopped=1 //and then go with the below procedure
-      vm.newList=[]
+
       console.log(vm.uid)
       vm.fbs.getDatabase("/users/"+vm.uid+"/viewables",true,null).then(function(snap){
         //console.log(snap)
-
-        console.log("this is the snap from VIEWABLESSS: ",snap)
-        //console.log(vm.profile.viewables)
-      //  var gool=false
-        for (let k in snap){
-          var item=snap[k]
-          if(vm.viewables.length!==0&&snap[k]!=undefined&&snap[k]!=null){
-            if(vm.postz[item]===undefined){
+        if(snap&&snap!==null){
+          console.log("this is the snap from VIEWABLESSS: ",snap)
+          //console.log(vm.profile.viewables)
+        // var gool=false
+          // if(Object.keys(snap).length>=30){
+          //   vm.newList=[]
+          // }
+          // var ref;
+          // vm.fbs.getRef("/users/"+vm.uid+"/viewables").then(function(res){
+          //   ref=res
+          //   ref.onDisconnect().set(null)
+          // })
+          vm.fbs.setDatabase("/users/"+vm.uid+"/viewables",null,true).then(function(res){
+            console.log("Yolo")
+          })
+          for (let k in snap){
+            var item=snap[k]
+            if(vm.viewables.length!==0&&snap[k]!=undefined&&snap[k]!=null){
+              if(vm.postz[item]===undefined){
+                vm.newList.unshift(item)
+                vm.postz[item]=true
+              }
+              // if(item===vm.viewables[0].postId){
+              //   gool=true
+              // }
+            }else if(vm.viewables.length===0&&snap[k]!=undefined&&snap[k]!=null){
               vm.newList.unshift(item)
               vm.postz[item]=true
             }
-            // if(item===vm.viewables[0].postId){
-            //   gool=true
-            // }
-          }else if(vm.viewables.length===0&&snap[k]!=undefined&&snap[k]!=null){
-            vm.newList.unshift(item)
-            vm.postz[item]=true
           }
-        }
-        console.log("this is the new list:",vm.newList)
-        //var j = vm.profile.viewables.length-this.array
-        //vm.newList.reverse()
-        if(vm.newList.length!==0){
-          for(let i in vm.newList){
+          console.log("this is the new list:",vm.newList)
+          //var j = vm.profile.viewables.length-this.array
+          //vm.newList.reverse()
+          if(vm.newList.length>=30){
+            vm.viewables=[]
+          }
+          if(vm.newList.length!==0){
+            for(let i in vm.newList){
 
-            vm.fbs.getDatabase("/posts/"+vm.newList[i],true,vm.uid).then(function(res){
-              var post=new Post(vm.fbs,vm.navCtrl,vm.newList[i],true)
-              for(let i in res){
-                post[i]=res[i]
-              }
-              vm.liste.push(post)
+              vm.fbs.getDatabase("/posts/"+vm.newList[i],true,vm.uid).then(function(res){
+                var post=new Post(vm.fbs,vm.navCtrl,vm.newList[i],true)
+                for(let i in res){
+                  post[i]=res[i]
+                }
+                vm.liste.push(post)
+                if(Number(i)===14||Number(i)===vm.newList.length-1){
+                  vm.arrayStopped=Number(i)+1
+                  vm.liste.sort(function(a,b){
+                    return b.time-a.time
+                  })
+                }
+                console.log(post)
+              }).catch(function(err){
+                console.log("couldn't get post,",err)
+              })
               if(Number(i)===14||Number(i)===vm.newList.length-1){
-                vm.arrayStopped=Number(i)+1
-                vm.liste.sort(function(a,b){
-                  return b.time-a.time
-                })
+                vm.viewables=vm.liste
+                break
               }
-              console.log(post)
-            }).catch(function(err){
-              console.log("couldn't get post,",err)
-            })
-            if(Number(i)===14||Number(i)===vm.newList.length-1){
-              vm.viewables=vm.liste
-              break
             }
           }
-        }
 
-        vm.ready=true
-        console.log(vm.viewables)
-        resolve("Got all posts")
+          vm.ready=true
+          console.log(vm.viewables)
+          resolve("Got all posts")
+        }
       }).catch(function(err){
         console.log("Error getting profile ",err)
         reject(err)

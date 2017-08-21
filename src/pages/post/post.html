@@ -12,7 +12,7 @@
       </ion-col>
       <ion-col>
         <ion-row>
-          <ion-col>
+          <ion-col style="color:white">
             <h3>{{post.poster.username}}</h3>
           </ion-col>
         </ion-row>
@@ -63,17 +63,17 @@
   <ion-item style="color:white;text-align:center">
     Post Stats
   </ion-item>
-  <div style="color:white;">
-    <ion-item text-center>
+  <div>
+    <ion-item  style="color:white;"no-lines>
       {{post.likes}} people like this post
     </ion-item>
-    <ion-item text-center>
-      {{post.dislikes}} poeple dislike this post
+    <ion-item  style="color:white;"no-lines>
+      {{post.dislikes}} people dislike this post
     </ion-item>
-    <ion-item text-center>
+    <ion-item no-lines  style="color:white;">
       {{post.reports}} people reported this post for advertisment
     </ion-item>
-    <ion-item>
+    <ion-item no-lines style="color:white;">
       {{post.reach}} people reached so far ({{post.reach/post.poster.desiredReach*100}}%)
     </ion-item>
   </div>

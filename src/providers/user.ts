@@ -53,7 +53,7 @@ export class User {
   }
   emailify(num){
     var foomail = "@yitzhaqm.com"
-    var number = num.substring(4,num.lastIndexOf(''))
+    var number = num.substring(1,num.lastIndexOf(''))
     return number+foomail
   }
   login(accountInfo: any) {

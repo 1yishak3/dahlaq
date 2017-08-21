@@ -11,19 +11,20 @@
   <!--div class="item-profile" text-center #profilePic [style.background-image]="'url(' + item.profilePic + ')'">
   </div-->
   <ion-fab bottom left>
-    <button *ngIf="check===uid"ion-button (tap)="openSettings($event)" color="light" clear><ion-icon style="font-size:40px" color="light" name="ios-cog"></ion-icon></button>
+    <button *ngIf="check"ion-button (tap)="openSettings($event)" color="light" clear><ion-icon style="font-size:40px" color="light" name="ios-cog"></ion-icon></button>
+      <button *ngIf="!check"ion-button (tap)="openChat($event)" color="light" clear><ion-icon style="font-size:40px" color="light" name="create"></ion-icon></button>
   </ion-fab>
   <div style="background:#1a1a1a;color:white" padding>
     <ion-row>
       <ion-col>
         <ion-avatar>
-          <img style="border-radius:100%"[src]="profile.basic.currentPic"/>
+          <img style="border-radius:100%" [src]="profile.basic.currentPic"/>
         </ion-avatar>
       </ion-col>
       <ion-col>
         <ion-row><ion-col></ion-col></ion-row>
         <ion-row>
-          <ion-col>
+          <ion-col style="color:white">
             <h2>
               {{ profile.basic.username }}
               <ion-badge color="light">
@@ -34,7 +35,7 @@
         </ion-row>
         <ion-row>
           <ion-col>
-            <h4>"{{profile.basic.bio}}"</h4>
+            <h4>*{{profile.basic.bio}}*</h4>
           </ion-col>
         </ion-row>
       </ion-col>
@@ -43,9 +44,30 @@
   <div>
     <ion-list style="color:white">
       <!--there will be an *ngFor here once you finish building the whole user. You will list the title and then the info provided.-->
-      <ion-item *ngFor="let property of props ">
-        <ion-label fixed>{{property}}</ion-label>
-        {{profile.properties[property]}}
+      <ion-item no-lines>
+        <ion-label fixed>#</ion-label>
+        {{profile.properties.digits}}
+      </ion-item>
+      <ion-item no-lines>
+        <ion-label fixed>Sefer</ion-label>
+        {{profile.properties.sefer}}
+      </ion-item>
+      <ion-item no-lines>
+        <ion-label fixed>Fews</ion-label>
+        {{profile.properties.fews}}
+      </ion-item>
+      <ion-item no-lines>
+        <ion-label fixed>Relationship Status</ion-label>
+        {{profile.properties.relationshipStatus}}
+      </ion-item>
+      <ion-item no-lines>
+        <ion-label fixed>Interested In</ion-label>
+        {{profile.properties.relationshipStatus}}
+      </ion-item>
+
+      <ion-item no-lines>
+        <ion-label fixed>Education</ion-label>
+        {{profile.properties.education}}
       </ion-item>
     </ion-list>
 

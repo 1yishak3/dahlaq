@@ -1,6 +1,7 @@
 import { Component, ViewChild } from '@angular/core';
 import { NavController, Platform , ModalController} from 'ionic-angular';
 import { ChatPage } from '../chat-detail/chat-detail'
+import { ItemDetailPage } from '../item-detail/item-detail'
 import { FirebaseService } from '../../providers/firebase'
 import { Uzer } from '../../models/uzer'
 import * as _ from "lodash"
@@ -67,19 +68,27 @@ export class MapPage {
   refreshList(){
     var prev=-1
     var vm=this
+    var key = Object.keys(this.suggestedPeople)
     for(let i=0;i<5;i++){
-      var lucky=Math.floor(Math.random()*this.suggestedPeople.length)
+      var lucky=Math.floor(Math.random()*key.length)
       while(prev===lucky){
-        var lucky=Math.floor(Math.random()*this.suggestedPeople.length)
+        var lucky=Math.floor(Math.random()*key.length)
       }
       prev=_.cloneDeep(lucky)
-      vm.fbs.getDatabase("/users/"+this.suggestedPeople[i]+"/basic/", false).then(function(res){
+      vm.fbs.getDatabase("/users/"+this.suggestedPeople[lucky].uid+"/basic", false).then(function(res){
         vm.miniList.push(res)
       }).catch(function(err){
         console.log("unable to get the profile, sth's wong :P ", err)
       })
     }
 
+  }
+  openPerson(data) {
+    let addModal = this.modalCtrl.create(ItemDetailPage,{person:data});
+    addModal.onDidDismiss(item => {
+      //maybe set it in storage  for safe keeping?
+    })
+    addModal.present();
   }
   openChat(data) {
     let addModal = this.modalCtrl.create(ChatPage,{person:data});

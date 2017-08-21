@@ -4,25 +4,34 @@ export class Uzer {
   dislikes=0//list with keys that are like "o","1","2","3"..
   reports=0//list with keys that are like "o","1","2","3"..
   userPosts=0
+  stats={
+    likes:0,
+    reports:0,
+    dislikes:0,
+    reaches:0
+  }
   basic={
     uid:"",
     username:"",
-    bio:"",
+    bio:"One Proud Ethiopian",
     rank:0,
-    currrentPic:"",
-    online:""
+    currentPic:"",
+    online:"",
+    referrer:""
   }//list with keys that are like "o","1","2","3"..
+  reachLimit=0
   fame=0
   connections=0
   properties={
     profilePics:0,
     digits:"",
-    city:"",
-    food:"",
-    relationshipStatus:"",
-    education:"",
-    refers:0
+    sefer:"None",
+    fews:"None",
+    relationshipStatus:"Single & Looking",
+    interestedIn:"-",
+    education:"None",
   }
+  refers:0
   people=0//list with keys that are like "o","1","2","3"..
   viewables=0//list with keys that are like "o","1","2","3"..
   suggestedPeople=0//list with keys that are like "o","1","2","3"..

@@ -8,7 +8,7 @@ import { Post } from '../../models/post'
 import { Uzer } from '../../models/uzer'
 import { StreamingMedia } from '@ionic-native/streaming-media'
 import * as _ from 'lodash'
-
+import {ChatPage} from '../chat-detail/chat-detail'
 @Component({
   selector: 'page-item-detail',
   templateUrl: 'item-detail.html'
@@ -16,7 +16,7 @@ import * as _ from 'lodash'
 export class ItemDetailPage {
   uid: any;
   profile: Uzer
-  isUser:boolean
+//  isUser:boolean
   userPosts=[]
   arrayStopped=1
   j:Number
@@ -27,11 +27,8 @@ export class ItemDetailPage {
   check:any
   dud:any
   constructor(public sm:StreamingMedia,public fbs:FirebaseService,public navCtrl: NavController, navParams: NavParams, items: Items) {
-    this.uid = navParams.get('item') || fbs.currentUser().uid;
-    this.check=fbs.currentUser().uid;
-    this.fbs.userCheck.subscribe((boolean)=>{
-      this.isUser==boolean
-    })
+    this.uid = navParams.get('person') || fbs.currentUser().uid;
+    this.check=fbs.currentUser().uid===this.uid;
     this.profile=new Uzer()
     this.props=Object.keys(this.profile.properties)
 
@@ -123,24 +120,7 @@ export class ItemDetailPage {
     };
     this.sm.playVideo(videoUrl, options);
   }
-  /*like(post){
-    post.like()
-  }
-  unlike(post){
-    post.unlike
-  }
-  dislike(){
 
-  }
-  undislike(){
-
-  }
-  report(){
-
-  }
-  unreport(){
-
-  }*/
   pullToAddMore(e){
     var vm=this
     var j=vm.arrayStopped
@@ -174,6 +154,25 @@ export class ItemDetailPage {
 
       })
     }
+  }
+  openChat(e){
+    var vm=this
+    this.fbs.getDatabase("/users/"+this.fbs.currentUser().uid+"/people/",true).then(function(res){
+      var chat=""
+      for(let i in res){
+        if(res[i].indexOf(vm.uid)!==-1){
+          chat=res[i]
+          break
+        }
+      }
+      if(chat!==""){
+        vm.fbs.getDatabase("/chats/"+chat+"/summary",true).then(function(res){
+          vm.navCtrl.push(ChatPage,{person:res})
+        })
+      }else if(chat===""){
+        vm.navCtrl.push(ChatPage,{person:vm.profile.basic})
+      }
+    })
   }
 
 }

@@ -88,6 +88,16 @@ export class Post {
     }).catch(function(err){
       console.log("an error has occured, ",err)
     })
+    this.fbs.getDatabase("/posts/"+this.postId+"/content/reach",true).then(function(res){
+      var reach = res
+      if(reach===0){
+        reach={}
+        reach[vm.uid]=Date.now()
+      }
+      vm.fbs.setDatabase("/posts/"+vm.postId+"/content/reach",reach,true).then(function(res){
+        console.log("reach updated")
+      })
+    })
   }
   /*function toggleStar(postRef, uid) {
   postRef.transaction(function(post) {

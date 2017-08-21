@@ -82,12 +82,11 @@
         <div class="profile-image" [style.backgroundImage]="getProfileImageStyle()" *ngIf="this.form.controls.profilePic.value"></div>
       </div-->
       <ion-item style="color:white;background:clear" no-lines>
-          <ion-label >Maximum Reach</ion-label>
-          <ion-select [(ngModel)]="reach">
-            <!--ion-option *ngFor="#name of namesList" [value]="name.shortName" [checked]="false">{{name.shortName}}</ion-option-->
-            <ion-option [value]=10>10</ion-option>
-            <ion-option [value]=15>15</ion-option>
-          </ion-select>
+          <ion-label>Maximum Reach</ion-label>
+          <ion-range [(ngModel)]="reach" [max]="max" pin="true" color="dark">
+            <ion-label range-left>0</ion-label>
+            <ion-label range-right>{{max}}</ion-label>
+          </ion-range>
         <!--ion-item>
           <ion-input type="text" placeholder="{{ 'ITEM_ABOUT_PLACEHOLDER' | translate }}" formControlName="about"></ion-input>
         </ion-item-->

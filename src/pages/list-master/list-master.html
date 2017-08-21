@@ -21,7 +21,7 @@
   <div *ngIf="searching" class="spinner-container">
         <ion-spinner></ion-spinner>
     </div>
-  <ion-item>
+  <ion-item *ngIf="vm.notor!==null" >
     <ion-label>Rank on</ion-label>
     <ion-select ([ngModel])= "basis">
       <ion-option value="1">Fame</ion-option>
@@ -36,9 +36,10 @@
           </ion-avatar>
         <div style="color:white;">
           <h2>{{item.name}}</h2>
-          <h3>#{{i + 1}}</h3>
+          <h3>{{item.bio}}</h3>
         </div>
-        <div item-end icon-right><ion-icon color="light" name="star" >{{3*1/i}}</ion-icon></div>
+        <!-- <div item-end icon-right><ion-icon color="light" name="star" >{{3*1/i}}</ion-icon></div> -->
+        <ion-badge item-end>#{{i+1}}({{item.fame}})</ion-badge>
       </button>
 
       <!--ion-item-options>

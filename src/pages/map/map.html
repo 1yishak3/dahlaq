@@ -22,7 +22,13 @@
       <ion-icon style="font-size:40px" color="light" name="ios-cog"></ion-icon>
     </button>
   </ion-fab>
-  <ion-list>
+  <!-- <ion-list>
+    <ion-item no-lines>
+    <div text-center>Suggested People</div>
+      <ion-scroll scrollX="true" scroll-avatar>
+          <ion-avatar><img (click)="openPerson(person)" *ngFor="let person of miniList" [src]="person.currentPic" class="scroll-item"/></ion-avatar>
+      </ion-scroll>
+    </ion-item>
     <button ion-item  (click)="openChat(person)" *ngFor="let person of miniList">
       <ion-avatar item-start>
         <img [src]="person.currentPic"/>
@@ -31,10 +37,16 @@
       <ion-note>{{person.bio}}</ion-note>
       <ion-badge color="light">#{{person.rank}}</ion-badge>
     </button>
-  </ion-list>
-  <hr/>
+  </ion-list>-->
+  <ion-row style="background:#1a1a1a">
+    <ion-col *ngFor="let person of miniList" style="color:white">
+      <img style="border-radius:100%" [src]="person.currentPic"/>
+      <ion-note color="light">{{person.username}}</ion-note>
+    </ion-col>
+  </ion-row>
+  <hr>
   <ion-list *ngIf="sorted">
-    <button ion-item (click)="openChat(summary)"  *ngFor="let summary of people">
+    <button ion-item no-lines (click)="openChat(summary)"  *ngFor="let summary of people">
       <ion-avatar item-start>
         <img [src]="summary.currentPic"/>
       </ion-avatar>

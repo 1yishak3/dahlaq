@@ -98,13 +98,13 @@ export class ChatPage implements AfterViewChecked{
         //  vm.chat[i]=res[i]
         //}
         vm.chat.content.messages=res
-        vm.messages=[]
+        var mess=[]
         for (let i in vm.chat.content.messages){
-          vm.messages.push(vm.chat.content.messages[i])
+          mess.push(vm.chat.content.messages[i])
           console.log(i)
         }
-        vm.messages.reverse()
-        vm.ready=true
+        mess.reverse()
+        vm.messages=mess
       }).catch(function(err){
           console.log("got this instead of beutifully ordered messages", err)
       })
@@ -312,10 +312,6 @@ export class ChatPage implements AfterViewChecked{
       }
       this.fbs.setDatabase("/chats/"+this.chatId,this.chat,true).then(function(res){
         vm.registered=true
-        this.fbs.setList("/users/"+this.uid+"/people",this.chatId).then(function(res){
-
-        })
-
       }).catch(function(err){
         //you need to learn to wait for connectivity. Or does Firebase do that for you? Questions..
       })

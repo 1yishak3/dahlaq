@@ -13,19 +13,19 @@
     <ion-footer>
       <ion-list style="color:white;text-color:white">
 
-        <ion-item>
+        <ion-item style="color:white">
           <ion-label fixed>Username</ion-label>
-          <ion-input type="text" [(ngModel)]="account.username" name="name"></ion-input>
+          <ion-input type="text" [(ngModel)]="account.username" name="name" placeholder="Pick a username"></ion-input>
         </ion-item>
 
 
-        <ion-item>
+        <ion-item style="color:white">
           <ion-label fixed>Signup Code</ion-label>
-          <ion-input [(ngModel)]="account.code" name="code" placeholder="Enter Your Code"></ion-input>
+          <ion-input [(ngModel)]="account.code" name="code" placeholder="Enter the code we just sent you"></ion-input>
         </ion-item>
-        <ion-item>
-          <ion-label fixed>Referrer</ion-label>
-          <ion-input type="text" name="referrer"></ion-input>
+        <ion-item style="color:white">
+          <ion-label fixed>Referred By</ion-label>
+          <ion-input type="text" name="referrer" [(ngModel)]="account.refer" placeholder="Only if you have one :)" ></ion-input>
         </ion-item>
       </ion-list>
       <div padding>

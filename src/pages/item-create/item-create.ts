@@ -190,12 +190,12 @@ export class ItemCreatePage {
           console.log(resu)
           if(res===0){
             console.log("in here")
-            vm.setDatabase(resu,{"0":vm1.postId},true).then(function(res){
+            vm.setDatabase(resu,{"0":{"pid":vm1.postId,"uid":vm1.uid}},true).then(function(res){
               console.log("success setting adminslist posts")
             }).catch()
           }else{
             console.log("Not in there")
-            vm.setList(resu,vm1.postId).then(function(res){
+            vm.setList(resu,{"pid":vm1.postId,"uid":vm1.uid}).then(function(res){
               console.log("Successfully added to admin's list with key: ",res)
             }).catch(function(err){
               console.log("Sorry, couldn't add you to the list", err)
