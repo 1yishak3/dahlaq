@@ -21,7 +21,7 @@ export class FirebaseService {
   authCallback: any;
   user:any
   ev:any
-
+  messaging:any
   constructor(public loadCtrl?:LoadingController,public usr? : User, public events?: Events) {
     // Initialize Firebase
     var config = {
@@ -36,19 +36,51 @@ export class FirebaseService {
     this.user=usr
     this.ev=events
     this.userCheck=new EventEmitter
+    this.messaging=firebase.messaging()
   //  this.snap()
     // check for changes in auth status
 
 
   }
-  snap(){
+
+  getPermissionAndToken(){
+    var vm=this
+    return new Promise(function(resolve,reject){
+      vm.messaging.requestPermission()
+      .then(function() {
+        console.log('Notification permission granted.');
+        vm.messaging.onTokenRefresh(function() {
+          vm.messaging.getToken()
+          .then(function(refreshedToken) {
+            console.log('Token refreshed.');
+            // Indicate that the new Instance ID token has not yet been sent to the
+            // app server.
+            // ...
+            resolve(refreshedToken)
+          })
+          .catch(function(err) {
+            console.log('Unable to retrieve refreshed token ', err);
+          });
+        });
+
+        // ...
+      })
+      .catch(function(err) {
+        console.log('Unable to get permission to notify.', err);
+        reject(err)
+      });
+
+    })
+  }
+  snap(uid){
     var vm=this
     var consRef=this.getRef("/users/"+this.currentUser().uid+"/connections")
-    var onRef=this.getRef("/users/"+this.currentUser().uid+"/basic/online")
+    var onRef=this.getRef("/users/"+uid+"/basic/online")
     var conRef=this.getRef("/.info/connected")
     conRef.on('value',function(snap){
       if(snap.val()){
-        vm.setDatabase("/users/"+vm.user.uid+"/basic/online",true,true).then(function(res){
+        console.log("Do you see me??", uid)
+        vm.setDatabase("/users/"+uid+"/basic/online",{"on":true,"time":firebase.database.ServerValue.TIMESTAMP},true).then(function(res){
 
         })
       }
@@ -84,6 +116,9 @@ export class FirebaseService {
           }
       })
   }
+  firebaseAuth(){
+    return firebase.auth()
+  }
 
 
   transac(url,func){
@@ -96,8 +131,10 @@ export class FirebaseService {
     var vm=this
     return new Promise(function(resolve,reject){
       //var newKey=firebase.database().ref(url).push().key
-      firebase.database().ref(url).push(val).then(function(res){
-        resolve(res)
+      var ref=firebase.database().ref(url).push()
+      var key=ref.key
+      vm.setDatabase(url+"/"+key,val,true).then(function(res){
+        resolve(key)
       }).catch(function(err){
         reject(err)
       })
@@ -131,7 +168,7 @@ export class FirebaseService {
     return new Promise(function(resolve,reject){
       if(!once){
       firebase.database().ref(url).on('value',function(snapshot){
-        console.log(snapshot)
+        console.log(snapshot.val())
         resolve(snapshot.val())
       },function(err){
         console.log(err)
@@ -139,7 +176,7 @@ export class FirebaseService {
       })
     }else{
       firebase.database().ref(url).once('value').then(function(res){
-        console.log(res)
+        console.log(res.val())
         resolve(res.val())
       }).catch(function(err){
         console.log(err)
@@ -152,7 +189,7 @@ export class FirebaseService {
     return new Promise(function(resolve,reject){
       if(set){
       firebase.database().ref(url).set(value).then(function(res){
-        console.log(res)
+        //console.log(res)
         resolve(res)
       }).catch(function(err){
         console.log(err)
@@ -205,6 +242,9 @@ export class FirebaseService {
     var cr;
     console.log(email+"---"+password)
     return new Promise(function(resolve, reject){
+      if(email===null){
+        reject("notEthiopian")
+      }
       firebase.auth().createUserWithEmailAndPassword(email,password).then(function(d){
       console.log("Account creation successful, proceeding with phone number verification,",d)
       var user = firebase.auth().currentUser
@@ -214,10 +254,10 @@ export class FirebaseService {
         resolve(cr)
       })
 
-    }).catch(function(err){
-      console.log("Account not created",err)
-      reject(null)
-    })})
+      }).catch(function(err){
+        console.log("Account not created",err)
+        reject(null)
+      })})
 
   }
   linkToNumber(number, verifier){
@@ -225,7 +265,8 @@ export class FirebaseService {
     var user = firebase.auth().currentUser;
     var cr;
 
-    return new Promise(function(resolve, reject){user.linkWithPhoneNumber(number,verifier).then(function(result){
+    return new Promise(function(resolve, reject){
+      user.linkWithPhoneNumber(number,verifier).then(function(result){
       cr=result
       console.log("Linked", result)
       resolve(cr)
@@ -233,7 +274,7 @@ export class FirebaseService {
       user.delete().then(function(res){
         console.log("Account Deleted", res)
       }).catch(function(err){
-        console.log("Error Deleteing account. Check Connection",err)
+        console.log("Error Deleting account. Check Connection",err)
       })
       console.log("Link error",err)
       reject(null)
@@ -241,12 +282,13 @@ export class FirebaseService {
   }
   recaptcha(id) {
     //var recaptchaVerifier
-    console.log(id)
-    return new firebase.auth.RecaptchaVerifier(id, {
+    return new Promise(function(resolve,reject){
+    resolve( new firebase.auth.RecaptchaVerifier(id, {
       "size": "invisible",
       "callback": function(response) {
       },
 
+    }))
     })
   }
   logout() {

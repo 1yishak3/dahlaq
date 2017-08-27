@@ -1,5 +1,5 @@
-import { Component, ViewChild } from '@angular/core';
-import { NavController, Nav, Events } from 'ionic-angular';
+import { Component, ViewChild, ElementRef} from '@angular/core';
+import { NavController, Nav, Events, LoadingController } from 'ionic-angular';
 import { PostPage } from '../post/post'
 import { FirebaseService } from '../../providers/firebase'
 import { WelcomePage } from '../welcome/welcome'
@@ -8,6 +8,7 @@ import { Post } from '../../models/post'
 import { StreamingMedia } from '@ionic-native/streaming-media'
 import moment from 'moment'
 import * as _ from 'lodash'
+import { Network } from '@ionic-native/network';
 @Component({
   selector: 'page-cards',
   templateUrl: 'cards.html'
@@ -20,16 +21,34 @@ export class CardsPage {
   uid:string
   arrayStopped=1
   j:number
-  newList:Array<any>
+  newList:Array<any>=[]
   toggled:boolean=false
   ready:boolean
   postz:any={}
   liste:any=[]
-  constructor(public sm:StreamingMedia,public navCtrl: NavController, public events : Events ,public fbs:FirebaseService) {
+  connected:boolean
+  firstTime:boolean=false
+  noPosts:boolean=false
+  show:any=true
+  constructor(public lc:LoadingController, public nw:Network,public sm:StreamingMedia,public navCtrl: NavController, public events : Events ,public fbs:FirebaseService) {
    this.uid=this.fbs.currentUser().uid
    this.profile=new Uzer()
    this.viewables=[]
-   fbs.snap()
+   console.log(this.uid)
+   console.log("this is uiddddd",this.uid)
+   fbs.snap(this.uid)
+   var vm=this
+   var disc=nw.onDisconnect().subscribe(()=>{
+     console.log("disconnected??")
+     vm.connected=false
+   })
+   var conc=nw.onConnect().subscribe(()=>{
+     vm.show=true
+     vm.connected=true
+     setTimeout(function(){
+       vm.show=false
+     },5000)
+   })
   }
   ionViewWillEnter(){
     if (this.viewables.length>=50){
@@ -37,7 +56,12 @@ export class CardsPage {
         this.viewables.pop()
       }
     }
+    if(this.viewables.length===0){
+      this.firstTime=true
+    }
+    var vm=this
     this.getNewstuff().then(function(res){
+
       console.log("Got the stuff ;)")
     }).catch(function(err){
       console.log("An error has come up", err)
@@ -48,17 +72,27 @@ export class CardsPage {
   }
   getNewstuff(){
     //this.ready=false
+    //decide when users should see the loading thing
+    //I also need to go to createUser in firebase and adjust so it throws an error when number is invalid.
     var vm=this
+    var lc=this.lc.create({
+      content:"Checking for new posts..."
+    })
+    lc.present()
     return new Promise(function(resolve,reject){
       vm.uid=vm.fbs.currentUser().uid
       //if disconnected take most recent cached posts and show them
       //if connected-
       vm.arrayStopped=1 //and then go with the below procedure
+      var ld:any
+      console.log("in the promise")
 
       console.log(vm.uid)
       vm.fbs.getDatabase("/users/"+vm.uid+"/viewables",true,null).then(function(snap){
         //console.log(snap)
+        console.log("I have the data...which means the prob is with your if")
         if(snap&&snap!==null){
+          vm.noPosts=false
           console.log("this is the snap from VIEWABLESSS: ",snap)
           //console.log(vm.profile.viewables)
         // var gool=false
@@ -70,6 +104,7 @@ export class CardsPage {
           //   ref=res
           //   ref.onDisconnect().set(null)
           // })
+
           vm.fbs.setDatabase("/users/"+vm.uid+"/viewables",null,true).then(function(res){
             console.log("Yolo")
           })
@@ -115,6 +150,8 @@ export class CardsPage {
               })
               if(Number(i)===14||Number(i)===vm.newList.length-1){
                 vm.viewables=vm.liste
+                lc.dismiss()
+
                 break
               }
             }
@@ -123,6 +160,10 @@ export class CardsPage {
           vm.ready=true
           console.log(vm.viewables)
           resolve("Got all posts")
+        }else{
+          vm.noPosts=true
+
+            lc.dismiss()
         }
       }).catch(function(err){
         console.log("Error getting profile ",err)

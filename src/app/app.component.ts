@@ -67,15 +67,20 @@ export class MyApp {
 
   constructor(private translate: TranslateService, private platform: Platform,public fbs: FirebaseService, settings: Settings, private config: Config, private statusBar: StatusBar, private splashScreen: SplashScreen) {
     this.initTranslate();
-    this.user = this.fbs.currentUser()
-    console.log("this is you", this.user)
-    if(this.user===null){
-      this.rootPage=WelcomePage
-    }
-    else{
-      this.rootPage=TabsPage
-      this.samp()
-    }
+  //  this.user = this.fbs.currentUser()
+    // console.log("this is you", this.user)
+    // fbs.firebaseAuth().onAuthStateChanged(user=>{
+    //   if(user){
+    //     this.rootPage=TabsPage
+    //   }else{
+    //     this.rootPage=WelcomePage
+    //   }
+    // })
+    if(this.user){
+        this.rootPage=TabsPage
+      }else{
+        this.rootPage=WelcomePage
+      }
     console.log(this.rootPage)
     this.platform.ready().then(() => {
       // Okay, so the platform is ready and our plugins are available.
@@ -85,23 +90,23 @@ export class MyApp {
     });
 
   }
-  samp(){
-    var vm=this
-    var consRef=this.fbs.getRef("/users/"+this.fbs.currentUser().uid+"/connections")
-    var onRef=this.fbs.getRef("/users/"+this.fbs.currentUser().uid+"/basic/online")
-    var conRef=this.fbs.getRef("/.info/connected")
-    conRef.on('value',function(snap){
-      if(snap.val()){
-        vm.fbs.setDatabase("/users/"+vm.user.uid+"/basic/online",true,true).then(function(res){
-
-        })
-      }
-      var con=consRef.push()
-      con.set(true)
-      con.onDisconnect().remove()
-      onRef.onDisconnect().set({"on":false,"time":firebase.database.ServerValue.TIMESTAMP})
-    })
-  }
+  // samp(){
+  //   var vm=this
+  //   var consRef=this.fbs.getRef("/users/"+this.fbs.currentUser().uid+"/connections")
+  //   var onRef=this.fbs.getRef("/users/"+this.fbs.currentUser().uid+"/basic/online")
+  //   var conRef=this.fbs.getRef("/.info/connected")
+  //   conRef.on('value',function(snap){
+  //     if(snap.val()){
+  //       vm.fbs.setDatabase("/users/"+vm.user.uid+"/basic/online",true,true).then(function(res){
+  //
+  //       })
+  //     }
+  //     var con=consRef.push()
+  //     con.set(true)
+  //     con.onDisconnect().remove()
+  //     onRef.onDisconnect().set({"on":false,"time":firebase.database.ServerValue.TIMESTAMP})
+  //   })
+  // }
   ionViewDidLoad() {
     this.platform.ready().then(() => {
       // Okay, so the platform is ready and our plugins are available.

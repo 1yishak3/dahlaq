@@ -1,223 +1,329 @@
 const functions = require('firebase-functions')
 const admin = require('firebase-admin')
 admin.initializeApp(functions.config().firebase)
-
+//these sensors don't work
 exports.senseLike = functions.database.ref("/posts/{pid}/content/likes/{lid}").onWrite(e => {
   var uid = e.params.lid
   var pid = e.params.pid
-  var posterLikes = e.data.ref.parent.parent.parent.parent.parent.child("users").child(uid).child("likes")
-  var likesRef = e.data.ref.parent
-  var likesCount = e.data.ref.parent.parent.parent.child("likes")
-  return likesCount.transaction(current => {
-    posterLikes.once('value', function(snap) {
-      if (snap.val() === 0) {
-        posterLikes.set({"0": pid}).then(function(res) {
-          if (e.data.exists() && !e.data.previous.exists()) {
-            return (current || 0) + 1
-          } else if (!e.data.exists() && e.data.previous.exists()) {
-            return (current || 0) - 1
-          }
-        }).catch(function(err) {
-          console.log("error, ", err)
-        })
-      } else {
-        posterLikes.push(pid).then(function(res) {
-          if (e.data.exists() && !e.data.previous.exists()) {
-            return (current || 0) + 1
-          } else if (!e.data.exists() && e.data.previous.exists()) {
-            return (current || 0) - 1
-          }
-        }).catch(function(err) {
-          console.log("error", err)
-        })
+  var likerRef = e.data.adminRef.parent.parent.parent.parent.parent.child("users").child(uid).child("likes")
+  var likesRef = e.data.adminRef.parent
+  var likesCount = e.data.adminRef.parent.parent.parent.child("likes")
+  return likerRef.once('value').then((snap)=>{
+    var personal=snap.val()
+    if(personal===0){
+      personal={
       }
+      personal[pid]=Date.now()
+
+    }else{
+      personal[pid]=Date.now()
+    }
+    likerRef.set(personal).then((res)=>{
+      return likesCount.transaction(data=>{
+        if(e.data.exists()&&!e.data.previous.exists()){
+          return (data||0)+1
+        }else if(!e.data.exists()&&e.data.previous.exists()){
+          return (data||0)-1
+        }else{
+          return data
+        }
+      })
     })
-  }).then(() => {
-    console.log("like added")
   })
 })
 exports.senseDislike = functions.database.ref("/posts/{pid}/content/dislikes/{did}").onWrite(e => {
   var uid = e.params.did
   var pid = e.params.pid
-  var posterDislikes = e.data.ref.parent.parent.parent.parent.parent.child("users").child(uid).child("dislikes")
-  var dislikesRef = e.data.ref.parent
-  var dislikesCount = e.data.ref.parent.parent.parent.child("dislikes")
-  return dislikesCount.transaction(current => {
-    posterDislikes.once('value', function(snap) {
-      if (snap.val() === 0) {
-        posterDislikes.set({"0": pid}).then(function(res) {
-          if (e.data.exists() && !e.data.previous.exists()) {
-            return (current || 0) + 1
-          } else if (!e.data.exists() && e.data.previous.exists()) {
-            return (current || 0) - 1
-          }
-        }).catch(function(err) {
-          console.log("error, ", err)
-        })
-      } else {
-        posterDislikes.push(pid).then(function(res) {
-          if (e.data.exists() && !e.data.previous.exists()) {
-            return (current || 0) + 1
-          } else if (!e.data.exists() && e.data.previous.exists()) {
-            return (current || 0) - 1
-          }
-        }).catch(function(err) {
-          console.log("error", err)
-        })
+  var dislikerRef = e.data.adminRef.parent.parent.parent.parent.parent.child("users").child(uid).child("dislikes")
+  var dislikesRef = e.data.adminRef.parent
+  var dislikesCount = e.data.adminRef.parent.parent.parent.child("dislikes")
+  return dislikerRef.once('value').then((snap)=>{
+    var personal=snap.val()
+    if(personal===0){
+      personal={
       }
+      personal[pid]=Date.now()
+
+    }else{
+      personal[pid]=Date.now()
+    }
+    dislikerRef.set(personal).then((res)=>{
+      return dislikesCount.transaction(data=>{
+        if(e.data.exists()&&!e.data.previous.exists()){
+          return (data||0)+1
+        }else if(!e.data.exists()&&e.data.previous.exists()){
+          return (data||0)-1
+        }else{
+          return data
+        }
+      })
     })
-  }).then(() => {
-    console.log("dislike added")
   })
 })
 exports.senseReport = functions.database.ref("/posts/{pid}/content/reports/{rid}").onWrite(e => {
   var uid = e.params.rid
   var pid = e.params.pid
-  var posterReps = e.data.ref.parent.parent.parent.parent.parent.child("users").child(uid).child("reports")
-  var reportsRef = e.data.ref.parent
-  var reportsCount = e.data.ref.parent.parent.parent.child("reports")
-  return reportsCount.transaction(current => {
-    posterReps.once('value', function(snap) {
-      if (snap.val() === 0) {
-        posterReps.set({"0": pid}).then(function(res) {
-          if (e.data.exists() && !e.data.previous.exists()) {
-            return (current || 0) + 1
-          } else if (!e.data.exists() && e.data.previous.exists()) {
-            return (current || 0) - 1
-          }
-        }).catch(function(err) {
-          console.log("error, ", err)
-        })
-      } else {
-        posterReps.push(pid).then(function(res) {
-          if (e.data.exists() && !e.data.previous.exists()) {
-            return (current || 0) + 1
-          } else if (!e.data.exists() && e.data.previous.exists()) {
-            return (current || 0) - 1
-          }
-        }).catch(function(err) {
-          console.log("error", err)
-        })
+  var reporterRef = e.data.adminRef.parent.parent.parent.parent.parent.child("users").child(uid).child("reports")
+  var reportsRef = e.data.adminRef.parent
+  var reportsCount = e.data.adminRef.parent.parent.parent.child("reports")
+  return reporterRef.once('value').then((snap)=>{
+    var personal=snap.val()
+    if(personal===0){
+      personal={
+      }
+      personal[pid]=Date.now()
+
+    }else{
+      personal[pid]=Date.now()
+    }
+    reporterRef.set(personal).then((res)=>{
+      return reportsCount.transaction(data=>{
+        if(e.data.exists()&&!e.data.previous.exists()){
+          return (data||0)+1
+        }else if(!e.data.exists()&&e.data.previous.exists()){
+          return (data||0)-1
+        }else{
+          return data
+        }
+      })
+    })
+  })
+})
+exports.onPostCreate=functions.database.ref("/posts/{pid}/poster/desiredReach").onCreate(e=>{
+  e.data.adminRef.parent.child("uid").once('value').then((snap)=>{
+    var uid=snap.val()
+    admin.database().ref("/users/"+uid+"/reachLimit").once('value').then((snap)=>{
+      if(e.data.exists()){
+        if(Number(e.data.val())>Number(snap.val())){
+          return e.data.adminRef.set(Number(snap.val()))
+        }else{
+          return e.data.adminRef.set(Number(e.data.val()))
+        }
       }
     })
-  }).then(() => {
-    console.log("report added/removed")
+
+  })
+})
+//Anopther addition????????????????????????
+exports.picSet=functions.database.ref("/posts/{pid}/poster/profilePic").onCreate(e =>{
+  return e.data.adminRef.parent.child("uid").once('value').then((snap)=>{
+    var uid=snap.val()
+    admin.database().ref("/users/"+uid+"/basic/currentPic").once('value').then((snap)=>{
+      return e.data.adminRef.set(snap.val())
+    })
   })
 })
 exports.like = functions.database.ref("/posts/{pid}/content/likes/{lid}").onWrite(e => {
   var pid = e.params.pid
   var uid = e.params.lid
-  var prefRef = e.data.ref.parent.parent.parent.parent.parent.child("users").child(uid).child("preferences")
-  e.data.ref.parent.parent.parent.child("poster").child("uid").once('value', function(snap) {
+  var prefRef = e.data.adminRef.parent.parent.parent.parent.parent.child("users").child(uid).child("preferences")
+  e.data.adminRef.parent.parent.parent.child("poster").child("uid").once('value', function(snap) {
     var poster = snap.val()
-    var postRef = prefRef.child(poster)
-    return postRef.transaction(current => {
-      var t = (current || 0.5) - 0.07
-      if (t < 0) {
-        return 0
-      } else if (t > 1) {
-        return 1
-      } else if (t >= 0 || t <= 1) {
-        return t
-      }
-    })
+    if(poster){
+      var postRef = prefRef.child(poster)
+      return postRef.transaction(current => {
+        var t = (current || 0.5) - 0.07
+        if (t < 0) {
+          return 0
+        } else if (t > 1) {
+          return 1
+        } else if (t >= 0 || t <= 1) {
+          return t
+        }
+      })
+    }
+
   })
 })
 exports.dislike = functions.database.ref("/posts/{pid}/content/dislikes/{did}").onWrite(e => {
   var pid = e.params.pid
   var uid = e.params.did
-  var prefRef = e.data.ref.parent.parent.parent.parent.parent.child("users").child(uid).child("preferences")
-  e.data.ref.parent.parent.parent.child("poster").child("uid").once('value', function(snap) {
+  var prefRef = e.data.adminRef.parent.parent.parent.parent.parent.child("users").child(uid).child("preferences")
+  e.data.adminRef.parent.parent.parent.child("poster").child("uid").once('value', function(snap) {
     var poster = snap.val()
-    var postRef = prefRef.child(poster)
-    return postRef.transaction(current => {
-      var t = (current || 0.5) + 0.07
-      if (t < 0) {
-        return 0
-      } else if (t > 1) {
-        return 1
-      } else if (t >= 0 || t <= 1) {
-        return t
-      }
-    })
+    if(poster){
+      var postRef = prefRef.child(poster)
+      return postRef.transaction(current => {
+        var t = (current || 0.5) + 0.07
+        if (t < 0) {
+          return 0
+        } else if (t > 1) {
+          return 1
+        } else if (t >= 0 || t <= 1) {
+          return t
+        }
+      })
+    }
+
   })
 })
 exports.report = functions.database.ref("/posts/{pid}/content/reports/{rid}").onWrite(e => {
   var pid = e.params.pid
   var uid = e.params.rid
-  var prefRef = e.data.ref.parent.parent.parent.parent.parent.child("users").child(uid).child("preferences")
-  e.data.ref.parent.parent.parent.child("poster").child("uid").once('value', function(snap) {
+  var prefRef = e.data.adminRef.parent.parent.parent.parent.parent.child("users").child(uid).child("preferences")
+  e.data.adminRef.parent.parent.parent.child("poster").child("uid").once('value', function(snap) {
     var poster = snap.val()
-    var postRef = prefRef.child(poster)
-    return postRef.transaction(current => {
-      var t = (current || 0.5) + 0.1
-      if (t < 0) {
-        return 0
-      } else if (t > 1) {
-        return 1
-      } else if (t >= 0 || t <= 1) {
-        return t
-      }
-    })
+    if(poster){
+      var postRef = prefRef.child(poster)
+      return postRef.transaction(current => {
+        var t = (current || 0.5) + 0.1
+        if (t < 0) {
+          return 0
+        } else if (t > 1) {
+          return 1
+        } else if (t >= 0 || t <= 1) {
+          return t
+        }
+      })
+    }
+
   })
 })
 exports.senseL = functions.database.ref("/posts/{pid}/likes").onWrite(e => {
-  e.data.ref.parent.child("poster").child("uid").once('value', function(uid) {
+  e.data.adminRef.parent.child("poster").child("uid").once('value', function(uid) {
     var uid1 = uid.val()
-    var personLikes = e.data.ref.parent.parent.parent.child("users").child(uid1).child("stats").child("likes")
-    return personLikes.transaction(current => {
-      if (e.data.val() > e.data.previous.val()) {
-        return (current || 0) + 1
-      } else if (e.data.val() < e.data.previous.val()) {
-        return (current || 0) - 1
-      } else {
-        return
-      }
-    })
+    if(uid1){
+      var personLikes = e.data.adminRef.parent.parent.parent.child("users").child(uid1).child("stats").child("likes")
+      return personLikes.transaction(current => {
+        if (e.data.val() > e.data.previous.val()) {
+          return (current || 0) + 1
+        } else if (e.data.val() < e.data.previous.val()) {
+          return (current || 0) - 1
+        } else {
+          return
+        }
+      })
+    }
+
   })
 })
 exports.senseD = functions.database.ref("/posts/{pid}/dislikes").onWrite(e => {
-  e.data.ref.parent.child("poster").child("uid").once('value', function(uid) {
+  e.data.adminRef.parent.child("poster").child("uid").once('value', function(uid) {
     var uid1 = uid.val()
-    var personDislikes = e.data.ref.parent.parent.parent.child("users").child(uid1).child("stats").child("dislikes")
-    return personDislikes.transaction(current => {
-      if (e.data.val() > e.data.previous.val()) {
-        return (current || 0) + 1
-      } else if (e.data.val() < e.data.previous.val()) {
-        return (current || 0) - 1
-      } else {
-        return
-      }
-    })
+    if(uid1){
+      var personDislikes = e.data.adminRef.parent.parent.parent.child("users").child(uid1).child("stats").child("dislikes")
+      return personDislikes.transaction(current => {
+        if (e.data.val() > e.data.previous.val()) {
+          return (current || 0) + 1
+        } else if (e.data.val() < e.data.previous.val()) {
+          return (current || 0) - 1
+        } else {
+          return
+        }
+      })
+    }
   })
 })
 exports.senseR = functions.database.ref("/posts/{pid}/reports").onWrite(e => {
-  e.data.ref.parent.child("poster").child("uid").once('value', function(uid) {
+  e.data.adminRef.parent.child("poster").child("uid").once('value', function(uid) {
     var uid1 = uid.val()
-    var personReps = e.data.ref.parent.parent.parent.child("users").child(uid1).child("stats").child("reports")
-    return personReps.transaction(current => {
-      if (e.data.val() > e.data.previous.val()) {
-        return (current || 0) + 1
-      } else if (e.data.val() < e.data.previous.val()) {
-        return (current || 0) - 1
-      } else {
-        return
-      }
-    })
+    if(uid1){
+      var personReps = e.data.adminRef.parent.parent.parent.child("users").child(uid1).child("stats").child("reports")
+      return personReps.transaction(current => {
+        if (e.data.val() > e.data.previous.val()) {
+          return (current || 0) + 1
+        } else if (e.data.val() < e.data.previous.val()) {
+          return (current || 0) - 1
+        } else {
+          return
+        }
+      })
+    }
+
   })
 })
 exports.senseStats = functions.database.ref("/users/{uid}/stats").onWrite(e => {
   var data = e.data.val()
+  const recalcFame = function(data) {
+    var unreacted = data.reaches - (data.likes + data.dislikes + data.reports)
+    var fame = (data.reaches * (data.likes - data.dislikes) - (unreacted * (1 + data.reports))) / (data.reaches * (1 + data.reports))
+    return fame
+  }
   var newFame = recalcFame(data)
 
-  return e.data.ref.parents.child("fame").set(newFame)
+  return e.data.adminRef.parent.child("fame").set(newFame)
 })
 
 //REORDER THE ADMINSLIST
 exports.senseFame = functions.database.ref("/users/{uid}/fame").onWrite(e => {
   //reorder the adminsList users list accordingly
+
+  const reachLimit = function(fame) {
+    var limit = Math.ceil(fame) * 100
+    if(limit<10){
+      return 10
+    }else{
+      return limit
+    }
+  }
+
+  const efficient = function(ls, uid, tell, fame, rf) {
+    if(ls){
+      var nums = Object.keys(ls)
+      var uids = []
+      var fames = []
+      var key = ""
+      for (var i = 0; i < uids.length; i++) {
+
+        if (ls[i].uid === uid) {
+          key = i
+          uids.push(ls[i].uid)
+          fames.push(fame)
+        } else {
+          uids.push(ls[i].uid)
+          fames.push(ls[i].fame)
+        }
+      }
+      var key = uids.indexOf(uid)
+
+      if (tell === -1) {
+        var i = key + 1
+        while (fames[i] > fames[key] && i < fames.length) {
+          i++
+        }
+        var newPos = i - 1
+        var j = key + 1
+        while (j <= newPos) {
+          uids[j - 1] = uids[j]
+          fames[j - 1] = fames[j]
+          j++
+        }
+        fames[newPos] = ls[key].fame
+        uids[newPos] = uid
+        rf.set(newPos)
+        var newSet = []
+        for (var l = 0; l < uids.length; l++) {
+          newSet.push({"uid": uids[l], "fame": fames[l]})
+        }
+        return newSet
+      } else if (tell === 1) {
+        var i = key - 1
+        while (fames[i] < fames[key] && i >= 0) {
+          i--
+        }
+        var newPos = i + 1
+        var j = key - 1
+        while (j >= newPos) {
+          uids[j + 1] = uids[j]
+          fames[j + 1] = fames[j]
+          j--
+        }
+        fames[newPos] = ls[uid] //?
+        uids[newPos] = uid
+        var newSet = []
+        for (var l = 0; l < uids.length; l++) {
+          newSet.push({"uid": uids[l], "fame": fames[l]})
+        }
+        return newSet
+      } else {
+        return
+      }
+    }
+
+
+  }
   var fame = e.data.val()
-  var rankRef=e.data.ref.parent.child("basic/rank")
+  var rankRef=e.data.adminRef.parent.child("basic/rank")
   var limit = reachLimit(fame)
   var tell;
   if (e.data.val() < e.data.previous.val()) {
@@ -228,28 +334,40 @@ exports.senseFame = functions.database.ref("/users/{uid}/fame").onWrite(e => {
     tell = 0
   }
   var uid = e.params.uid
-  var usersRef = e.data.ref.parent.parent.parent.child("adminsLists/users")
-  var fameRef = e.data.ref.parent.parent.parent.child("fameList")
-  return fameRef.transaction(current => {
-    var newList = efficient(current, uid, tell, fame,rankRef)
-    return newList
+
+  var usersRef = e.data.adminRef.parent.parent.parent.child("adminsLists/users")
+  var fameRef = e.data.adminRef.parent.parent.parent.child("fameList")
+  e.data.adminRef.parent.child("reachLimit").set(limit).then(function(res){
+    return fameRef.transaction(current => {
+      var newList = efficient(current, uid, tell, fame,rankRef)
+      console.log("this is the new list",newList)
+      if(newList){
+        return newList
+      }else{
+        return current
+      }
+    })
+  }).catch(function(w){
+    console.log("loglog",w)
   })
 })
-exports.senseNewPost = functions.database.ref("/posts/{pid}").onCreate(e => {
-  if (e.data.exists()) {
-    var reachRef = e.data.ref.parent.parent.child("users/stats/reaches")
-    e.data.ref.child("poster/desiredReach").once('value').then(function(snap) {
-      var reach = snap.val()
-      return reachRef.transaction(current => {
-        return (current || 0) + Number(reach)
-      })
-    })
-  }
-})
-exports.senseAuth = functions.database.ref("/users/{uid}").onCreate(e => {
+// exports.senseNewPost = functions.database.ref("/posts/{pid}/poster/desiredReach").onCreate(e => {
+//   if (e.data.exists()) {
+//     e.data.adminRef.parent.child("uid").once('value').then(function(snap){
+//       var reachRef = e.data.adminRef.parent.parent.parent.parent.child("users").child(snap.val()).child("/stats/reaches")
+//       var reach=e.data.val()
+//       return reachRef.transaction(current => {
+//         return (current || 0) + Number(reach)
+//       })
+//
+//     })
+//
+//   }
+// })
+exports.senseAuth = functions.database.ref("/users/{uid}/basic/username").onCreate(e => {
   var uid = e.params.uid
-  var name= e.data.val().basic.username
-  e.data.ref.parent.parent.child("fameList").once('value').then(function(snap) {
+  var name= e.data.val()
+  e.data.adminRef.parent.parent.parent.parent.child("fameList").once('value').then(function(snap) {
     var list = {}
     var index;
     if (snap.val()) {
@@ -261,6 +379,7 @@ exports.senseAuth = functions.database.ref("/users/{uid}").onCreate(e => {
         "username":name
 
       }
+      index=Object.keys(list).length
     } else {
       list = {
         0: {
@@ -270,11 +389,12 @@ exports.senseAuth = functions.database.ref("/users/{uid}").onCreate(e => {
 
         }
       }
+      index=Object.keys(list).length
     }
-    e.data.ref.child("basic/rank").set(index).then(function(res){
-      return e.data.ref.parent.parent.child("fameList").set(list)
+    e.data.adminRef.parent.parent.child("basic/rank").set(index).then(function(res){
+      return e.data.adminRef.parent.parent.parent.parent.child("fameList").set(list)
     }).catch(function(err){
-      return e.data.ref.parent.parent.child("fameList").set(list)
+      return e.data.adminRef.parent.parent.parent.parent.child("fameList").set(list)
     })
 
   })
@@ -282,11 +402,127 @@ exports.senseAuth = functions.database.ref("/users/{uid}").onCreate(e => {
 //exports.fillUp2 = functions.database.ref("/users/{uid}").onCreate(e => {})
 exports.fillUp = functions.database.ref("/users/{uid}/viewables").onWrite(e => {
   if (e.data.val()===undefined||e.data.val()===null) {
-    var prefRef = e.data.ref.parent.child("preferences")
-    var viewRef = e.data.ref
+    var prefRef = e.data.adminRef.parent.child("preferences")
+    var viewRef = e.data.adminRef
     var uid=e.params.uid
-    var actRef=e.data.ref.parent.parent.parent.child("posts")
-    var postsRef = e.data.ref.parent.parent.parent.child("adminsLists/posts")
+    var actRef=e.data.adminRef.parent.parent.parent.child("posts")
+    var postsRef = e.data.adminRef.parent.parent.parent.child("adminsLists/posts")
+    const check=function(event, pid){
+      var postRef= event.child(pid)
+      postRef.child("reach").once('value').then(function(snap){
+        var r=snap.val()
+        postRef.child("poster/desiredReach").once('value').then(function(snap){
+          var r2=snap.val()
+          if(r>=r2){
+            return true
+          }else {
+            return false
+          }
+        })
+      })
+    }
+    const populate = function(psts, prfs,ev) {
+      return new Promise(function(resolve, reject) {
+        var list = []
+        var posts = psts
+        var prefs = prfs
+        var key = Object.keys(posts)
+        for (var i = key.length - 1; i >= 0; i--) {
+          var rand = Math.random()
+          var k = key[i]
+          var uid = posts[k].uid
+          var pid=posts[k].pid
+          var newPrefs={}
+          var reached=check(ev,pid)
+          if(!reached){
+            if (prefs[uid]) {
+              if (prefs[uid] <= rand) {
+
+                list.push(posts[k].pid)
+                newPrefs[pid]=true
+              } else {
+                continue
+              }
+            } else {
+              prefs[uid] = 0.5
+
+              if (rand >= 0.5 &&!newPrefs[pid]) {
+                newPrefs[pid]=true
+                list.push(posts[k].pid)
+              } else {
+                continue
+              }
+
+            }
+          }
+          if(list.length>=30){
+            break
+          }
+        }
+        var j =0
+        while(j<5&&list.length<30){
+          for (var i = key.length - 1; i >= 0; i--) {
+            var rand = Math.random()
+            var k = key[i]
+            var uid = posts[k].uid
+            if (prefs[uid]) {
+              if (prefs[uid] <= rand&&!newPrefs[pid]) {
+                list.push(posts[k].pid)
+                newPrefs[pid]=true
+              } else {
+                continue
+              }
+            } else {
+              prefs[uid] = 0.5
+              if (rand >= 0.5&&!newPrefs[pid]) {
+                list.push(posts[k].pid)
+                newPrefs[pid]=true
+              } else {
+                continue
+              }
+
+            }
+            if(list.length>=50){
+              break
+            }
+          }
+          j++
+        }
+        if(list.length<20){
+          for (var i = key.length - 1; i >= 0; i--) {
+            //var rand = Math.random()
+            var k = key[i]
+            var uid = posts[k].uid
+            if (prefs[uid]) {
+              if (!newPrefs[pid]) {
+                list.push(posts[k].pid)
+                newPrefs[pid]=true
+              } else {
+                continue
+              }
+            } else {
+              prefs[uid] = 0.5
+              if (!newPrefs[pid]) {
+                list.push(posts[k].pid)
+                newPrefs[pid]=true
+              } else {
+                continue
+              }
+
+            }
+            if(list.length>=50){
+              break
+            }
+          }
+        }
+        if (list) {
+          resolve(list, prefs)
+        } else {
+          reject("error")
+        }
+      })
+    }
+
     if(!e.data.val()&&e.data.previous.val()){
       return postsRef.once('value').then(function(snap) {
         var posts = snap.val()
@@ -314,6 +550,8 @@ exports.fillUp = functions.database.ref("/users/{uid}/viewables").onWrite(e => {
               return viewRef.set(list)
             })
 
+          }).catch(function(res){
+            console.log("Error error error")
           })
         })
       })
@@ -321,12 +559,12 @@ exports.fillUp = functions.database.ref("/users/{uid}/viewables").onWrite(e => {
   }
 })
 exports.chooseUp = functions.database.ref("/users/{uid}/basic/online").onWrite(e => {
-  if (e.data.val() === true){
-    var pplRef = e.data.ref.parent.parent.child("people")
-    var sgRef = e.data.ref.parent.parent.child("suggestedPeople")
-    var adminRef = e.data.ref.parent.parent.parent.parent.child("adminsLists/users")
-    var propRef = e.data.ref.parent.parent.child("properties")
-    var fameRef= e.data.ref.parent.parent.parent.parent.child("fameList")
+  if (e.data.val()){
+    var pplRef = e.data.adminRef.parent.parent.child("people")
+    var sgRef = e.data.adminRef.parent.parent.child("suggestedPeople")
+    var adminRef = e.data.adminRef.parent.parent.parent.parent.child("adminsLists/users")
+    var propRef = e.data.adminRef.parent.parent.child("properties")
+    var fameRef= e.data.adminRef.parent.parent.parent.parent.child("fameList")
     // adminRef.once('value').then(function(snap){
     //   var uzs=snap.val()
     //   pplRef.once('value').then(function(snaps){
@@ -344,17 +582,46 @@ exports.chooseUp = functions.database.ref("/users/{uid}/basic/online").onWrite(e
     //
     //   })
     // })
+    const pick2=function(uid,list){
+      var k = Object.keys(list)
+      var scrd=0
+      var uids=[]
+      for(var i=0;i<k.length;i++){
+        var key=k[i]
+        if(list[key].uid===uid){
+          scrd=key
+          break
+        }
+      }
+      var num=Number(scrd)
+      if(num){
+        var l=num-10
+        var m=num+10
+        var n=num-1
+        var o =num+1
+        while(n>=l&&o<=m){
+          if(list[n]){
+            uids.unshift(list[n])
+          }
+          if(list[o]){
+            uids.push(list[o])
+          }
+        }
+      }
+      return uids
+
+    }
     var uid=e.params.uid
     return fameRef.once('value').then(function(snap){
       var list=snap.val()
       var suggestList=pick2(uid,list)
-      return fameRef.set(suggestList)
+      return sgRef.set(suggestList)
     })
   }
 })
 exports.chats= functions.database.ref("/chats/{chatId}").onCreate(e =>{
-  var pRef=e.data.ref.child("summary/users")
-  var usersRef=e.data.ref.parent.parent.child("users")\
+  var pRef=e.data.adminRef.child("summary/users")
+  var usersRef=e.data.adminRef.parent.parent.child("users")
   var chat=e.params.chatId
    return pRef.once('value').then(function(snap){
     var users= snap.val()
@@ -368,7 +635,7 @@ exports.chats= functions.database.ref("/chats/{chatId}").onCreate(e =>{
   })
 })
 exports.reachs= functions.database.ref("/posts/{pid}/content/reach").onWrite(e =>{
-  var reach = e.data.ref.parent.parent.child("reach")
+  var reach = e.data.adminRef.parent.parent.child("reach")
   var nowe=e.data.val()
   var then=e.data.previous.val()
   return reach.transaction(current=>{
@@ -380,23 +647,23 @@ exports.reachs= functions.database.ref("/posts/{pid}/content/reach").onWrite(e =
   })
 })
 exports.senseReach= functions.database.ref("/posts/{pid}/reach").onWrite(e =>{
-  return e.data.ref.parent.child("poster/uid").once('value').then(function(snap){
+  return e.data.adminRef.parent.child("poster/uid").once('value').then(function(snap){
     var uid=snap.val()
-    var uRef=e.data.ref.parent.parent.parent.child("users").child(uid).child("stats/reaches")
+    var uRef=e.data.adminRef.parent.parent.parent.child("users").child(uid).child("stats/reaches")
     return uRef.transaction(current=>{
       return (current||0)+1
     })
   })
 
 })
-exports.senseAuthForRefer= functions.database.ref("/users/{uid}").onCreate(e =>{
-  var reff=e.data.val().basic.referrer
+exports.senseAuthForRefer= functions.database.ref("/users/{uid}/basic/referrer").onCreate(e =>{
+  var reff=e.data.val()
   if(reff!==""){
-    var ref=e.data.ref.parent.parent.child("ref")
+    var ref=e.data.adminRef.parent.parent.parent.parent.child("ref")
     ref.child(reff).once('value').then(function(snap){
       var f=snap.val()
       if(f&&f!==null){
-        e.data.ref.parent.child(f).child("refers").once('value').then(function(snap){
+        e.data.adminRef.parent.child(f).child("refers").once('value').then(function(snap){
           var val=snap.val()
           if(val===0||val===null||!val){
             val={}
@@ -405,7 +672,7 @@ exports.senseAuthForRefer= functions.database.ref("/users/{uid}").onCreate(e =>{
           else{
             val[e.params.uid]=Date.now()
           }
-          return   e.data.ref.parent.child(f).child("refers").set(val)
+          return   e.data.adminRef.parent.parent.parent.child(f).child("refers").set(val)
         })
       }
     })
@@ -414,221 +681,212 @@ exports.senseAuthForRefer= functions.database.ref("/users/{uid}").onCreate(e =>{
 exports.senseRefer=functions.database.ref("/users/{uid}/refers").onWrite(e =>{
   if(e.data.previous.val()!==0){
     if(Object.keys(e.data.val()).length>Object.keys(e.data.previous.val()).length){
-      return e.data.ref.parent.child("fame").transaction(current =>{
+      return e.data.adminRef.parent.child("fame").transaction(current =>{
         return(current||0)+0.1
       })
     }
   }
 })
-exports.actualAuth=functions.auth.user().onCreate(e =>{
-  var email=e.data.email
-  var num= email.substring(0,lastIndexOf("@"))
-  if(!checkNum(num)){
-    return e.data.delete()
+// exports.actualAuth=functions.auth.user().onCreate(e =>{
+//   var email=e.data.email
+//   var num= email.substring(0,email.lastIndexOf("@"))
+//   const checkNum=function(num){
+//     var truth=false
+//     var sub1=num.substring(0,3)
+//     var sub2=num.substring(3, email.lastIndexOf(""))
+//     if(sub1==="251"&&sub2.length===9){
+//       truth=true
+//     }
+//     return truth
+//   }
+//
+//   if(!checkNum(num)){
+//     return e.data.delete()
+//   }
+// })
+exports.proPic=functions.database.ref("/users/{uid}/basic/currentPic").onWrite(e =>{
+  if(e.data.val()===""){
+    return e.data.adminRef.set("https://firebasestorage.googleapis.com/v0/b/dahlaq-c7e0f.appspot.com/o/defaults%2Fplaceholder.png?alt=media&token=9ccd76a4-b182-47db-9115-13ff2cd72137").then((res)=>{
+      return admin.auth().updateUser(e.params.uid,{
+        photoURL: "https://firebasestorage.googleapis.com/v0/b/dahlaq-c7e0f.appspot.com/o/defaults%2Fplaceholder.png?alt=media&token=9ccd76a4-b182-47db-9115-13ff2cd72137"
+      })
+    })
+
   }
 })
+exports.chatDelete=functions.database.ref("/chats/{cid}/deleted").onWrite(e =>{
+  if(e.data.val()===true){
+    return e.data.adminRef.parent.child("summary/users").once('value').then(function(snap){
+      var users=snap.val()
+      if(users){
+        var key=Object.keys(users)
+        ref1=e.data.adminRef.parent.parent.parent.child("users").child(key[0])
+        ref2=e.data.adminRef.parent.parent.parent.child("users").child(key[1])
+      }
+      ref1.child("people").child(e.params.cid).remove().then(function(res){
+        return ref2.child("people").child(e.params.cid).remove()
+      })
+    })
+  }
+})
+
+exports.sendPush1 = functions.database.ref('/chats/{cid}/content/messages/{message}').onCreate(event => {
+  var message=e.data.val()
+  var uid=message.resUid
+  return e.data.adminRef.parent.parent.parent.parent.parent.child("users").child(uid).child("token").once('value')
+  .then(function(res){
+    var token=res.val()
+    var payload = {
+      notification: {
+          title: 'New from '+message.sender,
+          body: message.content,
+          sound: 'default',
+          badge: '1'
+      }
+    };
+
+    return admin.messaging().sendToDevice(token,payload)
+
+  })
+});
+exports.sendPush = functions.database.ref('/chats/{cid}').onCreate(e => {
+    // let projectStateChanged = false;
+    // let projectCreated = false;
+    // let projectData = event.data.val();
+    // if (!event.data.previous.exists()) {
+    //     projectCreated = true;
+    // }
+    // if (!projectCreated && event.data.changed()) {
+    //     projectStateChanged = true;
+    // }
+    // let msg = 'You have a new chat request.';
+		// if (projectCreated) {
+		// 	msg = `The following new project was added to the projec`;
+		// }
+    // return loadUsers().then(users => {
+    //     let tokens = [];
+    //     for (let user of users) {
+    //         tokens.push(user.pushToken);
+    //     }
+    //     let payload = {
+    //         notification: {
+    //             title: 'Firebase Notification',
+    //             body: msg,
+    //             sound: 'default',
+    //             badge: '1'
+    //         }
+    //     };
+    //     return admin.messaging().sendToDevice(tokens, payload);
+    // });
+
+    var users=e.data.val().summary.users
+    var uid=""
+    var cra=""
+    if(users){
+      for(var i=0;i<Object.keys(users).length;i++){
+        var key=Object.keys(users)[i]
+        if(users[key].creator===false){
+          uid=users[key].uid
+          if(i===0){
+            cra=users[1].username
+          }else{
+            cra=users[0].username
+          }
+        }
+      }
+      return e.data.adminRef.parent.parent.child("users").child(uid).child("token").once('value')
+      .then(function(snap){
+        var token=snap.val()
+        var payload = {
+          notification: {
+              title: 'New Chat Request',
+              body: 'You got a #habeshaHi from '+ cra+"! Tap to reply.",
+              sound: 'default',
+              badge: '1'
+          }
+        };
+
+        return admin.messaging().sendToDevice(token,payload)
+      })
+    }
+});
+exports.sent=functions.database.ref("/chats/{cid}/content/messages/{mid}").onWrite(e =>{
+  if(!e.data.previous.exists()){
+    return e.data.adminRef.child("sent").set(true)
+  }
+
+})
+// exports.checkValidityOfUser=functions.auth.user().onCreate(ev=>{
+//   var uid = ev.data.uid
+//   var digit=ev.data.phoneNumber||ev.data.providerData.phoneNumber
+//   if(digit){
+//     functions.database.ref("/users/"+uid).onCreate(e =>{
+//       if(e.data.val().properties.digits!==digit){
+//         return admin.auth().deleteUser(uid)
+//       }
+//     })
+//   }
+// })
+exports.checkUserV=functions.database.ref("/users/{uid}/properties/digits").onCreate(e =>{
+  var uid=e.params.uid
+  var num=e.data.val()
+  return admin.auth().getUser(uid).then(function(res){
+    var number=res.phoneNumber
+    if(number){
+      if(num!==number){
+        console.log("number 1",num)
+        console.log("number 2",number)
+        return admin.auth().deleteUser(uid).then(function(res){
+          return e.data.adminRef.parent.parent.remove()
+        })
+      }
+    }
+  })
+})
+exports.proPic2=functions.database.ref("/users/{uid}/basic/currentPic").onWrite(e =>{
+  if(e.data.val()!==""){
+    var uid=e.params.uid
+    var url=e.data.val()
+    return admin.auth().updateUser(uid,{
+      photoURL:url
+    })
+  }
+})
+
+////Newly added SYNC IMMEDIATELY
+exports.digitVerify=functions.database.ref("/users/{uid}/properties/digits").onWrite(e=>{
+  admin.auth().getUser(e.params.uid).then((res)=>{
+    var num=res.phoneNumber
+    if(num){
+      if(e.data.val()!==num){
+        return e.data.adminRef.set(num)
+      }
+    }
+  })
+})
+
+
+// function loadUsers() {
+//     let dbRef = admin.database().ref('/users');
+//     let defer = new Promise((resolve, reject) => {
+//         dbRef.once('value', (snap) => {
+//             let data = snap.val();
+//             let users = [];
+//             for (var property in data) {
+//                 users.push(data[property]);
+//             }
+//             resolve(users);
+//         }, (err) => {
+//             reject(err);
+//         });
+//     });
+//     return defer;
+// }
 //exports.emptyViewables = functions.database.ref("/users/{uid}/viewables").on
 // const pick=function(user, users,frends,suggested){
 //
 // }
-const checkNum=function(num){
-  var truth=false
-  var sub1=num.substring(0,3)
-  var sub2=num.substring(3, lastIndexOf(""))
-  if(sub1==="251"&&sub2.length===9){
-    truth=true
-  }
-  return truth
-}
-const pick2=function(uid,list){
-  var k = Object.keys(list)
-  var scrd=0
-  var uids=[]
-  for(var i=0;i<k.length;i++){
-    var key=k[i]
-    if(list[key].uid===uid){
-      scrd=key
-      break
-    }
-  }
-  var num=Number(scrd)
-  if(num){
-    var l=num-10
-    var m=num+10
-    var n=num-1
-    var o =num+1
-    while(n>=l&&o<=m){
-      if(list[n]){
-        uids.unshift(list[n])
-      }
-      if(list[o]){
-        uids.push(list[o])
-      }
-    }
-  }
-  return uids
 
-}
-const check=function(event, pid){
-  var postRef= event.child(pid)
-  postRef.child("reach").once('value').then(function(snap){
-    var r=snap.val()
-    postRef.child("poster/desiredReach").once('value').then(function(snap){
-      var r2=snap.val()
-      if(r>=r2){
-        return true
-      }else {
-        return false
-      }
-    })
-  })
-}
-const populate = function(psts, prfs,ev) {
-  return new Promise(function(resolve, reject) {
-    var list = []
-    var posts = psts
-    var prefs = prfs
-    var key = Object.keys(posts)
-    for (var i = key.length - 1; i >= 0; i--) {
-      var rand = Math.random()
-      var k = key[i]
-      var uid = posts[k].uid
-      var pid=posts[k].pid
-      var newPrefs={}
-      var reached=check(ev,pid)
-      if(!reached){
-        if (prefs[uid]) {
-          if (prefs[uid] <= rand) {
-
-            list.push(posts[k].pid)
-            newPrefs[pid]=true
-          } else {
-            continue
-          }
-        } else {
-          prefs[uid] = 0.5
-
-          if (rand >= 0.5) {
-            newPrefs[pid]=true
-            list.push(posts[k].pid)
-          } else {
-            continue
-          }
-
-        }
-      }
-      if(list.length>=30){
-        break
-      }
-    }
-    var j =0
-    while(j<5&&list.length<30){
-      for (var i = key.length - 1; i >= 0; i--) {
-        var rand = Math.random()
-        var k = key[i]
-        var uid = posts[k].uid
-        if (prefs[uid]) {
-          if (prefs[uid] <= rand&&!newPrefs[pid]) {
-            list.push(posts[k].pid)
-            newPrefs[pid]=true
-          } else {
-            continue
-          }
-        } else {
-          prefs[uid] = 0.5
-          if (rand >= 0.5&&) {
-            list.push(posts[k].pid)
-            newPrefs[pid]=true
-          } else {
-            continue
-          }
-
-        }
-        if(list.length>=30){
-          break
-        }
-      }
-      j++
-    }
-    if (list) {
-      resolve(list, prefs)
-    } else {
-      reject("error")
-    }
-  })
-}
-
-const recalcFame = function(data) {
-  var unreacted = data.reach - (data.likes + data.dislikes + data.reports)
-  var fame = (data.reach * (data.likes - data.dislikes) - (unreacted * (1 + data.reports))) / (data.reach * (1 + data.reports))
-  return fame
-}
-const reachLimit = function(fame) {
-  var limit = Math.ceil(fame) * 1000
-  return limit
-}
-const efficient = function(ls, uid, tell, fame, rf) {
-  var nums = Object.keys(ls)
-  var uids = []
-  var fames = []
-  var key = ""
-  for (var i = 0; i < uids.length; i++) {
-
-    if (ls[i].uid === uid) {
-      key = i
-      uids.push(ls[i].uid)
-      fames.push(fame)
-    } else {
-      uids.push(ls[i].uid)
-      fames.push(ls[i].fame)
-    }
-  }
-  var key = uids.indexOf(uid)
-
-  if (tell === -1) {
-    var i = key + 1
-    while (fames[i] > fames[key] && i < fames.length) {
-      i++
-    }
-    var newPos = i - 1
-    var j = key + 1
-    while (j <= newPos) {
-      uids[j - 1] = uids[j]
-      fames[j - 1] = fames[j]
-      j++
-    }
-    fames[newPos] = ls[key].fame
-    uids[newPos] = uid
-    rf.set(newPos)
-    var newSet = []
-    for (var l = 0; l < uids.length; l++) {
-      newSet.push({"uid": uids[l], "fame": fames[l]})
-    }
-    return newSet
-  } else if (tell === 1) {
-    var i = key - 1
-    while (fames[i] < fames[key] && i >= 0) {
-      i--
-    }
-    var newPos = i + 1
-    var j = key - 1
-    while (j >= newPos) {
-      uids[j + 1] = uids[j]
-      fames[j + 1] = fames[j]
-      j--
-    }
-    fames[newPos] = ls[uid] //?
-    uids[newPos] = uid
-    var newSet = []
-    for (var l = 0; l < uids.length; l++) {
-      newSet.push({"uid": uids[l], "fame": fames[l]})
-    }
-    return newSet
-  } else {
-    return
-  }
-
-}
 // // Create and Deploy Your First Cloud Functions
 // // https://firebase.google.com/docs/functions/write-firebase-functions
 //

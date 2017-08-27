@@ -94,4 +94,8 @@
     <plugin name="cordova-base64-to-gallery" spec="^4.1.2" />
     <plugin name="cordova-plugin-file" spec="^4.3.3" />
     <plugin name="com.hutchind.cordova.plugins.streamingmedia" spec="~0.1.4" />
+    <plugin name="phonegap-plugin-push" spec="^2.0.0">
+        <variable name="SENDER_ID" value="500593695235" />
+    </plugin>
+    <plugin name="cordova-plugin-network-information" spec="^1.3.3" />
 </widget>

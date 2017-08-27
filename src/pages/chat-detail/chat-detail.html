@@ -9,27 +9,85 @@
       <ion-buttons>
         <button ion-button icon-only clear (click)="openPerson()">
           {{oUser}}
-          <ion-icon name="egg" color="secondary" *ngIf="online"></ion-icon>
-          <ion-note *ngIf="!online" >Last seen at {{lastSeen}}</ion-note>
+          <ion-icon name="egg" color="secondary" *ngIf="online.on"></ion-icon>
+          <ion-note *ngIf="!online.on" >Last seen {{online.time | momentjs}}</ion-note>
         </button>
       </ion-buttons>
+      <!-- <ion-buttons end>
+        <button ion-button icon-only><ion-icon *ngIf="connected" name=""></ion-icon><ion-icon *ngIf="!connected"name=""></ion-icon></button>
+      </ion-buttons> -->
     </ion-title>
   </ion-navbar>
+
+    <div *ngIf="connected&&show" style="background:green;color:white;text-align:center">You are connected!</div>
+    <div *ngIf="!connected" style="background:red;color:white;text-align:center">No internet connection</div>
 </ion-header>
 
+
 <ion-content style="background:black">
+  <input type="file" #fileInput style="height: 0px;width:0px" accept="image/*"name="files[]" (change)="onChangeInput($event)" />
+
   <ion-fab top left>
-    <button (click)="presentConfirm()" *ngIf="chatId"ion-fab mini><ion-icon name="trash-a"></ion-icon></button>
+    <button (click)="presentConfirm()" *ngIf="spoken" ion-fab mini><ion-icon name="trash-a"></ion-icon></button>
   </ion-fab>
+
   <div *ngIf="ready">
+    <div class="talk-bubble tri-right round left-top" *ngIf="typing">
+      ...
+    </div>
     <span *ngFor="let message of messages;let i =index">
       <div class="talk-bubble round" *ngIf="message.sender===oUser&&(message.time>messages[i-1].time-60000&&message.time<messages[i-1].time+60000)">
+        <ion-row>
+          <img *ngIf="message.picture!==''" [src]="message.picture"/>
+
+          <div [innerHtml]="message.content|linky"></div>
+        </ion-row>
+        <ion-row>
+          <ion-col col-3>
+            {{message.time|momentjs}}
+          </ion-col>
+        </ion-row>
       </div>
       <div class="talk-bubble tri-right round left-top" *ngIf="message.sender===oUser&&(message.time<messages[i-1].time-60000||message.time>messages[i-1].time+60000)">
+        <ion-row>
+            <img *ngIf="message.picture!==''" [src]="message.picture"/>
+          <div [innerHtml]="message.content|linky"></div>
+        </ion-row>
+        <ion-row>
+          <ion-col col-3>
+            {{message.time|momentjs}}
+          </ion-col>
+        </ion-row>
       </div>
       <div class="talk-bubble round" *ngIf="message.sender===user&&(message.time>messages[i-1].time-60000&&message.time<messages[i-1].time+60000)">
+        <ion-row>
+            <img *ngIf="message.picture!==''" [src]="message.picture"/>
+          <div [innerHtml]="message.content|linky"></div>
+        </ion-row>
+        <ion-row>
+          <ion-col col-11>
+            {{message.time|momentjs}}
+          </ion-col>
+          <ion-col col-1>
+            <ion-icon color="light" name="checkmark" *ngIf="message.sent&&!message.read"></ion-icon>
+            <ion-icon color="primary" name="checkmark" *ngIf="message.read"></ion-icon>
+          </ion-col>
+        </ion-row>
       </div>
       <div class="talk-bubble tri-right round right-top" *ngIf="message.sender===user&&(message.time<messages[i-1].time-60000||message.time>messages[i-1].time+60000)">
+        <ion-row>
+            <img *ngIf="message.picture!==''" [src]="message.picture"/>
+          <div [innerHtml]="message.content|linky"></div>
+        </ion-row>
+        <ion-row>
+          <ion-col col-11>
+            {{message.time|momentjs}}
+          </ion-col>
+          <ion-col col-1>
+            <ion-icon color="light" name="checkmark" *ngIf="message.sent&&!message.read"></ion-icon>
+            <ion-icon color="primary" name="checkmark" *ngIf="message.read"></ion-icon>
+          </ion-col>
+        </ion-row>
       </div>
     </span>
   </div>
@@ -44,9 +102,18 @@
         </ion-buttons>
       </ion-col>
     </ion-row-->
+    <ion-row>
+    <ion-col text-center col-2>
+      <ion-spinner *ngIf="uploading"color="light"></ion-spinner>
+      <ion-icon *ngIf="complete" color="primary" name="checkmark"></ion-icon>
+    </ion-col>
+    <ion-col text-center col-10>
+      <div>{{currentFile}}</div>
+    </ion-col>
+  </ion-row>
     <ion-grid style="background:#1a1a1a">
-      <ion-row wrap>
-        <ion-col col-1>
+      <ion-row *ngIf="spoken" wrap>
+        <ion-col col-2>
           <div>
             <button ion-button
             clear icon-only
@@ -56,11 +123,14 @@
     (emojiPickerSelect)="handleEmoji($event)">
               <ion-icon color="light" style="position:relative;top:0px;font-size:20px;" name="happy"></ion-icon>
             </button>
+            <button ion-button clear icon-only (click)="showChoices()">
+              <ion-icon color="light" style="position:relative;top:0px;font-size:20px;" name="camera"></ion-icon>
+            </button>
 
 
           </div>
         </ion-col>
-        <ion-col col-10>
+        <ion-col col-9>
           <ion-textarea item-content #textt id="textarea" block (change)="subscribe()" [(formControl)]="messageCtrl" [(ngModel)]="message" autosize
           style="background:#1a1a1a;color:white;overflow:auto;max-height:100px;" placeholder="Message">
           </ion-textarea>
@@ -72,6 +142,9 @@
           </button>
         </ion-col>
       </ion-row>
+      <div *ngIf="!spoken" padding>
+      <button ion-button color="secondary" (click)="habeshaHi()" block>Send a #habeshaHI!</button>
+      </div>
     </ion-grid>
 
   </ion-footer>

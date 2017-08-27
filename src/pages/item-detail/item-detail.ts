@@ -1,5 +1,5 @@
-import { Component } from '@angular/core';
-import { NavController, NavParams } from 'ionic-angular';
+import { Component,NgZone,OnInit } from '@angular/core';
+import { NavController, NavParams,LoadingController } from 'ionic-angular';
 
 import { Items } from '../../providers/providers';
 import { SettingsPage } from '../settings/settings'
@@ -9,31 +9,113 @@ import { Uzer } from '../../models/uzer'
 import { StreamingMedia } from '@ionic-native/streaming-media'
 import * as _ from 'lodash'
 import {ChatPage} from '../chat-detail/chat-detail'
+import { Network } from '@ionic-native/network'
 @Component({
   selector: 'page-item-detail',
   templateUrl: 'item-detail.html'
 })
 export class ItemDetailPage {
+  zone:NgZone
   uid: any;
-  profile: Uzer
+  profile: any
 //  isUser:boolean
-  userPosts=[]
+  userPosts:Array<any>=[]
   arrayStopped=1
   j:Number
-  newList:Array<any>
+  newList:Array<any>=[]
   props:any
   postz:any={}
   ready:boolean
   check:any
-  dud:any
-  constructor(public sm:StreamingMedia,public fbs:FirebaseService,public navCtrl: NavController, navParams: NavParams, items: Items) {
+  dud:any=[]
+  connected:boolean
+  show:any=true
+  showEverything:boolean=false
+  constructor(public lc:LoadingController,public nw:Network,public sm:StreamingMedia,public fbs:FirebaseService,public navCtrl: NavController, navParams: NavParams, items: Items) {
     this.uid = navParams.get('person') || fbs.currentUser().uid;
     this.check=fbs.currentUser().uid===this.uid;
-    this.profile=new Uzer()
-    this.props=Object.keys(this.profile.properties)
+    var vm=this
+    var disc=nw.onDisconnect().subscribe(()=>{
+      vm.connected=false
+    })
+    var conc=nw.onConnect().subscribe(()=>{
+      vm.show=true
+      vm.connected=true
+      setTimeout(function(){
+        vm.show=false
+      },5000)
+    })
+
+    this.getProfile().then(e=>{
+      this.profile=e
+    })
+
+    //this.props=Object.keys(this.profile.properties)
 
   }
+  getProfile(){
+    return new Promise((resolve,reject)=>{
+      this.fbs.getDatabase("/users/"+this.uid,false).then((res)=>{
+          var f=new Uzer()
+          for(let i in res){
+            f[i]=res[i]
+          }
+          resolve(f)
+        //console.log(this.profile)
+      }).catch((err)=>{
+        reject("ugh")
+        console.log("Error is, ",err)
+      })
+    })
+
+  }
+  ngOnInit(){
+    // var vm=this
+    // var cr=this.lc.create({
+    //   content:"Loading profile..."
+    // })
+    // cr.present()
+    // vm.fbs.getDatabase("/users/"+this.uid,false).then((res:any)=>{
+    //   console.log("this is profile ",res)
+    //   vm.zone.run(()=>{
+    //     for(let i in res){
+    //       vm.profile[i]=res[i]
+    //     }
+    //     vm.props=res.properties
+    //     console.log("Does this even succeed? Cause I can use ngZone if it does",vm.props)
+    //     console.log(res.basic)
+    //     vm.showEverything=true
+    //     cr.dismiss()
+    //   })
+    // }).catch(function(err){
+    //   console.log("Err at profile getting, ",err)
+    //   cr.dismiss()
+    // })
+  }
   ionViewWillEnter(){
+    // var vm=this
+    // var cr=this.lc.create({
+    //   content:"Loading profile..."
+    // })
+    // cr.present()
+    // vm.fbs.getDatabase("/users/"+this.uid,false).then(function(res:any){
+    //   for(let i in res){
+    //     vm.profile[i]=res[i]
+    //   }
+    //   vm.props=res.properties
+    //   console.log("Does this even succeed? Cause I can use ngZone if it does",vm.props)
+    //   console.log(res.basic)
+    //   vm.showEverything=true
+    //   cr.dismiss()
+    // }).catch(function(err){
+    //   console.log("Err at profile getting, ",err)
+    //   cr.dismiss()
+    // })
+    this.getProfile().then((res)=>{
+      if(!_.isEqual(this.profile,res)){
+        this.profile=res
+      }
+    })
     this.getNewstuff()
   }
   getNewstuff(){
@@ -47,14 +129,14 @@ export class ItemDetailPage {
       vm.newList=[]
       console.log(vm.uid)
       vm.fbs.getDatabase("/users/"+vm.uid+"/userPosts",true,null).then(function(snap){
-        //console.log(snap)
+        console.log(snap)
 
         console.log("this is the snap from userPosts: ",snap)
         //console.log(vm.profile.userPosts)
       //  var gool=false
         for (let k in snap){
           var item=snap[k]
-          if(vm.userPosts.length!==0&&snap[k]!=undefined&&snap[k]!=null){
+          if(vm.userPosts.length!==0&&snap[k]!==undefined&&snap[k]!==null){
             if(vm.postz[item]===undefined){
               vm.newList.unshift(item)
               vm.postz[item]=true
@@ -72,14 +154,15 @@ export class ItemDetailPage {
         //vm.newList.reverse()
 
         if(vm.newList.length!==0){
-
+          console.log("in the if loop of userposts")
           for(let i in vm.newList){
-
+            console.log("are you in the for loop?", vm.dud)
             vm.fbs.getDatabase("/posts/"+vm.newList[i],true,vm.uid).then(function(res){
               var post=new Post(vm.fbs,vm.navCtrl,vm.newList[i],true)
               for(let i in res){
                 post[i]=res[i]
               }
+              console.log("vm.dud")
               vm.dud.push(post)
               if(Number(i)===14||Number(i)===vm.newList.length-1){
                 vm.arrayStopped=Number(i)+1
@@ -92,6 +175,8 @@ export class ItemDetailPage {
               console.log("couldn't get post,",err)
             })
             if(Number(i)===14||Number(i)===vm.newList.length-1){
+              console.log("here perhaps??")
+              console.log("dud",vm.dud)
               vm.userPosts=vm.dud
               break
             }
@@ -124,9 +209,9 @@ export class ItemDetailPage {
   pullToAddMore(e){
     var vm=this
     var j=vm.arrayStopped
-    if(j>=0){
+    if(j<vm.newList.length){
       for(let i in vm.newList){
-        var k =j-Number(i)
+        var k =j+Number(i)
         console.log(i,k)
         vm.fbs.getDatabase("/posts/"+vm.newList[k],false,vm.uid).then(function(res){
           var post = new Post(vm.fbs,vm.navCtrl,vm.newList[k],true)
@@ -146,6 +231,7 @@ export class ItemDetailPage {
         }
       }
     }
+    e.complete()
   }
   openSettings(e){
     if(this.uid===this.fbs.currentUser().uid){
@@ -170,7 +256,8 @@ export class ItemDetailPage {
           vm.navCtrl.push(ChatPage,{person:res})
         })
       }else if(chat===""){
-        vm.navCtrl.push(ChatPage,{person:vm.profile.basic})
+        var be:any=vm.profile
+        vm.navCtrl.push(ChatPage,{person:be.basic})
       }
     })
   }

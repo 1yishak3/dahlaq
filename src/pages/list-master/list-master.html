@@ -7,47 +7,48 @@
         <ion-icon name="search"></ion-icon>
       </button>
     </ion-buttons>
+    <!-- <ion-buttons *ngIf="!search" end>
+      <button  ion-button icon-only><ion-icon *ngIf="connected" name=""></ion-icon><ion-icon *ngIf="!connected"name=""></ion-icon></button>
+    </ion-buttons> -->
     <ion-buttons *ngIf="search" end>
       <button ion-button icon-only (click)="searchOn()">
         <ion-icon name="close"></ion-icon>
       </button>
     </ion-buttons>
+    <!-- Please Put proper position  -->
     <ion-searchbar *ngIf="search"  ([ngModel])="searchTerm" [formControl]="searchCtrl" (ionInput)="getItems()" placeholder="Username..."></ion-searchbar>
   </ion-navbar>
 
+    <div *ngIf="connected&&show" style="background:green;color:white;text-align:center">You are connected!</div>
+    <div *ngIf="!connected" style="background:red;color:white;text-align:center">No internet connection</div>
 </ion-header>
 
 <ion-content style="background-color:black;">
+    <div text-center style="color:rgb(50, 50, 50);text-align:center" *ngIf="people.length===0">Refer more people to join Dahlaq to see more ranks AND rank higher! #goEthiopia</div>
+    <div text-center style="color:rgb(50, 50, 50);text-align:center" *ngIf="people.length<10 &&people.length!==0">Not many people around. Refer more people to join Dahlaq to see more ranks AND rank higher! P.S. Don't forget to give them your exact username. #goEthiopia</div>
   <div *ngIf="searching" class="spinner-container">
         <ion-spinner></ion-spinner>
     </div>
-  <ion-item *ngIf="vm.notor!==null" >
+  <ion-item *ngIf="1===0" >
     <ion-label>Rank on</ion-label>
     <ion-select ([ngModel])= "basis">
       <ion-option value="1">Fame</ion-option>
       <ion-option value="2">Notoreity</ion-option>
     </ion-select>
   </ion-item>
+  <hr>
   <ion-list>
-    <ion-item-sliding *ngFor="let item of currentItems;let i = index">
-      <button ion-item (click)="openItem(item)">
+      <a ion-item no-lines *ngFor="let item of people;let i=index" (click)="openItem(item)">
           <ion-avatar item-start>
-            <img [src]="item.profilePic"/>
+            <img [src]="item.currentPic"/>
           </ion-avatar>
         <div style="color:white;">
-          <h2>{{item.name}}</h2>
-          <h3>{{item.bio}}</h3>
+          <h2>{{item.username}}</h2>
+          <ion-note style="color:rgb(69, 69, 69)">{{item.bio}}</ion-note>
         </div>
         <!-- <div item-end icon-right><ion-icon color="light" name="star" >{{3*1/i}}</ion-icon></div> -->
-        <ion-badge item-end>#{{i+1}}({{item.fame}})</ion-badge>
-      </button>
-
-      <!--ion-item-options>
-        <button ion-button color="danger" (click)="deleteItem(item)">
-          {{ 'DELETE_BUTTON' | translate }}
-        </button>
-      </ion-item-options-->
-    </ion-item-sliding>
+        <ion-badge color="light"item-end>#{{i+1}}</ion-badge>
+      </a>
     <ion-infinite-scroll (ionInfinite)="pullToAddMore($event)">
       <ion-infinite-scroll-content
       loadingSpinner="circles"

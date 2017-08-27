@@ -1,11 +1,12 @@
-import { Component, ViewChild,ElementRef } from '@angular/core';
+import { Component, ViewChild,ElementRef,OnInit } from '@angular/core';
 import { Validators, FormBuilder, FormGroup } from '@angular/forms';
-import { NavController, ViewController,AlertController,LoadingController } from 'ionic-angular';
+import { Nav,Tabs,NavController, ViewController,AlertController,LoadingController,ToastController } from 'ionic-angular';
 import { Post } from '../../models/post'
 import { Camera } from '../../providers/camera';
 import { FirebaseService } from '../../providers/firebase'
+import { Network } from '@ionic-native/network'
 //import { PopoverPage } from '../popovers/propop'
-
+import {Ng2ImgToolsService} from 'ng2-img-tools'
 
 @Component({
   selector: 'page-item-create',
@@ -31,15 +32,67 @@ export class ItemCreatePage {
   currentFile:any
   true:boolean
   complete:boolean
-  constructor(public loadCtrl: LoadingController,public alertCtrl:AlertController,public fbs: FirebaseService, public navCtrl: NavController, public viewCtrl: ViewController, formBuilder: FormBuilder, public camera: Camera) {
+  tabs:Tabs
+  connected:boolean
+  show:any=true
+  max:any
+  basic:any
+  constructor(public ir: Ng2ImgToolsService ,
+    public nw:Network,
+    public toastCtrl:ToastController,
+    public loadCtrl: LoadingController,
+    public alertCtrl:AlertController,
+    public fbs: FirebaseService,
+    public navCtrl: NavController,
+    public viewCtrl: ViewController,
+    public formBuilder: FormBuilder,
+    public camera: Camera,
+    private nav:Nav) {
     this.post=new Post(fbs,navCtrl)
     //console.log("app: ",this.app)
+    this.tabs=navCtrl.parent
     this.user=fbs.currentUser()
     this.uid =fbs.currentUser().uid
     this.uploading=false
     this.true=false
-  }
+    var vm=this
 
+    var disc=nw.onDisconnect().subscribe(()=>{
+      vm.connected=false
+    })
+    var conc=nw.onConnect().subscribe(()=>{
+      vm.show=true
+      vm.connected=true
+      setTimeout(function(){
+        vm.show=false
+      },5000)
+    })
+  }
+  ngOnInit(){
+
+  }
+  ionViewWillEnter(){
+    var c=this.loadCtrl.create({
+      content:"Getting your limit..."
+    })
+    c.present()
+    var vm=this
+    this.fbs.getDatabase("/users/"+this.uid+"/reachLimit",true).then((max)=>{
+
+      this.fbs.getDatabase("/users/"+this.uid+"/basic",true).then((res)=>{
+        vm.max=max
+        this.basic=res
+        c.dismiss()
+      })
+    }).catch((err)=>{
+      console.log(err)
+      c.dismiss()
+    })
+
+  }
+  // ionViewWillEnter(){
+  //
+  // }
   showChoices(e,bool,num){
     this.bool=bool
     this.get=num
@@ -72,7 +125,6 @@ export class ItemCreatePage {
     else if(bool===false){
       let pop = this.alertCtrl.create({
         title:"Choose Method",
-        cssClass:"black",
         buttons:[{
           text:"Open Camera",
           handler:dat=>{
@@ -109,6 +161,10 @@ export class ItemCreatePage {
   }
   submitPost(){
     this.true=false
+    var load1=this.loadCtrl.create({
+      content:"Posting..."
+    })
+    load1.present()
     if(!this.uploading){
       if(this.user!==null){
       var vm=this.fbs
@@ -118,8 +174,9 @@ export class ItemCreatePage {
       }
       this.post.poster.username=this.user.displayName
       this.post.poster.digits=this.user.phoneNumber
-      this.post.poster.uId=this.user.uid
-      this.post.poster.profilePic=this.user.photoURL
+      this.post.poster.uid=this.user.uid
+      this.post.poster.profilePic=this.basic.currentPic
+
       this.post.poster.desiredReach=this.reach
       console.log(this.reach)
       console.log(this.post.poster.desiredReach)
@@ -141,7 +198,7 @@ export class ItemCreatePage {
         //pop up notifying success
         //pop to posts tab
 
-      //  vm1.app.getRootNav().getActiveChildNav().select(1);
+        // vm1.app.getRootNav().getActiveChildNav().select(1);
         //vm1.navCtrl.parent.select(0)
         //vm.setDatabase("/dummybase",{""})
         vm1.text=""
@@ -150,17 +207,27 @@ export class ItemCreatePage {
         vm1.true=true
         vm1.currentFile=null
         vm1.complete=false
+        load1.dismiss()
+        var toast=vm1.toastCtrl.create({
+          message: "Your post has been submitted!",
+          duration: 2500,
+          position: 'top'
+        })
+        toast.present()
+
         vm.getDatabase("/users/"+vm1.uid+"/viewables",true).then(function(res){
           var resu= "/users/"+vm1.uid+"/viewables"
           console.log(resu)
           if(res===0){
             console.log("in here")
             vm.setDatabase(resu,{"0":vm1.postId},true).then(function(res){
+              vm1.tabs.select(0)
               console.log("success setting viewables")
             }).catch()
           }else{
             console.log("not in there")
             vm.setList(resu,vm1.postId).then(function(res){
+              vm1.tabs.select(0)
               console.log("Added to viewables.",res)
               console.log(res)
             }).catch(function(err){
@@ -297,45 +364,92 @@ export class ItemCreatePage {
     var file=e.target.files[0]
     var pic= this.generateFileName(file)
     vm.currentFile=file.name
-    var where=""
-    if(vm.get=1){
-      where="/images/"
-    }else if(vm.get=2){
-      where="/videos/"
-    }else if(vm.get=3){
-      where="/files/"
-    }
-    var url=this.fbs.currentUser().uid+where+pic
-    var pst = this.post
-    console.log("this is file",file)
-    var task= this.fbs.setStorage(url,file)
-    var sub=task.on('state_changed',function(snap:any){
-      console.log(snap.bytesTransferred)
-      console.log(snap.totalBytes)
+    if(file.type.match("image.*")){
+      var k=[]
+      k.push(file)
+      vm.ir.resize(k,450,450).subscribe(res=>{
+        file=res
+        var where=""
+        if(vm.get=1){
+          where="/images/"
+        }else if(vm.get=2){
+          where="/videos/"
+        }else if(vm.get=3){
+          where="/files/"
+        }
+        var url=this.fbs.currentUser().uid+where+pic
+        var pst = this.post
+        console.log("this is file",file)
+        var task= this.fbs.setStorage(url,file)
+        var sub=task.on('state_changed',function(snap:any){
+          console.log(snap.bytesTransferred)
+          console.log(snap.totalBytes)
 
-      vm.progress=(Number(snap.bytesTransferred)/Number(snap.totalBytes))*100
-      console.log(vm.progress)
-      console.log("this is your snapshot, ",snap)
+          vm.progress=(Number(snap.bytesTransferred)/Number(snap.totalBytes))*100
+          console.log(vm.progress)
+          console.log("this is your snapshot, ",snap)
 
-    },
-    function(err){
-        console.log("This is your error",err)
-    })
-    task.then(function(snap){
-      console.log(snap)
-        vm.fbs.getStorage(url).then(function(res:any){
-          if(vm.get===1){
-            pst.content.imageUrl=res
-          }else if(vm.get===2){
-            pst.content.videoUrl=res
-          }else if(vm.get===3){
-            pst.content.fileUrl=res
-          }
-          vm.complete=true
-          vm.uploading=false
+        },
+        function(err){
+            console.log("This is your error",err)
         })
-    })
+        task.then(function(snap){
+          console.log(snap)
+            vm.fbs.getStorage(url).then(function(res:any){
+              if(vm.get===1){
+                pst.content.imageUrl=res
+              }else if(vm.get===2){
+                pst.content.videoUrl=res
+              }else if(vm.get===3){
+                pst.content.fileUrl=res
+              }
+              vm.complete=true
+              vm.uploading=false
+            })
+        })
+      },err=>{
+        console.log("errrrrrrror ",err)
+      })
+    }else{
+      var where=""
+      if(vm.get=1){
+        where="/images/"
+      }else if(vm.get=2){
+        where="/videos/"
+      }else if(vm.get=3){
+        where="/files/"
+      }
+      var url=this.fbs.currentUser().uid+where+pic
+      var pst = this.post
+      console.log("this is file",file)
+      var task= this.fbs.setStorage(url,file)
+      var sub=task.on('state_changed',function(snap:any){
+        console.log(snap.bytesTransferred)
+        console.log(snap.totalBytes)
 
+        vm.progress=(Number(snap.bytesTransferred)/Number(snap.totalBytes))*100
+        console.log(vm.progress)
+        console.log("this is your snapshot, ",snap)
+
+      },
+      function(err){
+          console.log("This is your error",err)
+      })
+      task.then(function(snap){
+        console.log(snap)
+          vm.fbs.getStorage(url).then(function(res:any){
+            if(vm.get===1){
+              pst.content.imageUrl=res
+            }else if(vm.get===2){
+              pst.content.videoUrl=res
+            }else if(vm.get===3){
+              pst.content.fileUrl=res
+            }
+            vm.complete=true
+            vm.uploading=false
+          })
+      })
+    }
 
     // this.fbs.setStorage(url,file).then(function(res:any){
     //   vm.progress=(res.bytesTransfered/res.totalBytes)
@@ -447,6 +561,7 @@ export class ItemCreatePage {
     this.reach=0
     this.post = new Post(this.fbs,this.navCtrl)
     this.currentFile=null
+    this.tabs.select(0)
     //this.app.getRootNav().getActiveChildNav().select(1)
   //  getRootNav().getActiveChildNav().select(1)
   //  this.navCtrl.parent.select(0)

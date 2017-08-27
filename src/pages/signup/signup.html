@@ -2,36 +2,42 @@
 
   <ion-navbar>
     <ion-title>{{ 'SIGNUP_TITLE' | translate }}</ion-title>
+    <!-- <ion-buttons end>
+      <button ion-button icon-only><ion-icon *ngIf="connected" name=""></ion-icon><ion-icon *ngIf="!connected"name=""></ion-icon></button>
+    </ion-buttons> -->
   </ion-navbar>
 
+    <div *ngIf="connected&&show" style="background:green;color:white;text-align:center">You are connected!</div>
+    <div *ngIf="!connected" style="background:red;color:white;text-align:center">No internet connection</div>
 </ion-header>
 
 
 <ion-content style="background:black;color:white">
 
 
-    <ion-footer>
-      <ion-list style="color:white;text-color:white">
 
-        <ion-item style="color:white">
+      <ion-list padding style="color:white;text-color:white">
+
+        <ion-item no-lines style="color:white">
           <ion-label fixed>Username</ion-label>
-          <ion-input type="text" [(ngModel)]="account.username" name="name" placeholder="Pick a username"></ion-input>
+          <ion-input no-lines #name type="text" [(ngModel)]="account.username" name="name" placeholder="Pick a username"></ion-input>
+          <ion-note>{{available}}</ion-note>
         </ion-item>
 
 
-        <ion-item style="color:white">
+        <ion-item no-lines style="color:white">
           <ion-label fixed>Signup Code</ion-label>
-          <ion-input [(ngModel)]="account.code" name="code" placeholder="Enter the code we just sent you"></ion-input>
+          <ion-input no-lines [(ngModel)]="account.code" name="code" placeholder="Enter the code we just sent you"></ion-input>
         </ion-item>
-        <ion-item style="color:white">
+        <ion-item no-lines style="color:white">
           <ion-label fixed>Referred By</ion-label>
-          <ion-input type="text" name="referrer" [(ngModel)]="account.refer" placeholder="Only if you have one :)" ></ion-input>
+          <ion-input no-lines type="text" name="referrer" [(ngModel)]="account.refer" placeholder="Only if you have one :)" ></ion-input>
         </ion-item>
       </ion-list>
       <div padding>
         <button ion-button (click)="doSignup()" color="light" block>{{ 'SIGNUP_BUTTON' | translate }}</button>
       </div>
-    </ion-footer>
+
 </ion-content>
 <!--
 Want to add a Username? Here you go:

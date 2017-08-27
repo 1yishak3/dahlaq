@@ -12,7 +12,7 @@ export class Chat {
     videos:{},
     files:{}
   }
-
+  deleted=false
   constructor(private message?:Message) {
     // Quick and dirty extend/assign fields to this model
   }

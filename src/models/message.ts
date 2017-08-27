@@ -7,7 +7,19 @@ export class Message {
   video:string
   file:string
   read:boolean
-  constructor(private messageContent?: any) {
+  sent:boolean
+  senderUid:any
+  resUid:any
+  constructor(private mc?: any) {
+    this.sender=mc.sender
+    this.receiver=mc.receiver
+    this.content=mc.content
+    this.time=mc.time
+    this.picture=mc.picture
+    this.read=mc.read
+    this.sent=mc.sent
+    this.senderUid=mc.senderUid
+    this.resUid=mc.resUid
     // Quick and dirty extend/assign fields to this model
   }
 

@@ -2,8 +2,13 @@
 
   <ion-navbar>
     <ion-title>{{ 'LOGIN_TITLE' | translate }}</ion-title>
+    <!-- <ion-buttons end>
+      <button ion-button icon-only><ion-icon *ngIf="connected" name=""></ion-icon><ion-icon *ngIf="!connected"name=""></ion-icon></button> -->
+    <!-- </ion-buttons> -->
   </ion-navbar>
 
+    <div *ngIf="connected&&show" style="background:green;color:white;text-align:center">You are connected!</div>
+    <div *ngIf="!connected" style="background:red;color:white;text-align:center">No internet connection</div>
 </ion-header>
 
 

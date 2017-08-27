@@ -1,7 +1,11 @@
 <ion-header>
   <ion-navbar>
-    Post Title
+    Details
+    <ion-buttons end>
+      <button ion-button icon-only><ion-icon *ngIf="connected" name=""></ion-icon><ion-icon *ngIf="!connected"name=""></ion-icon></button>
+    </ion-buttons>
   </ion-navbar>
+
 </ion-header>
 <ion-content style="background:black;">
     <ion-row style="color:white">
@@ -64,10 +68,10 @@
     Post Stats
   </ion-item>
   <div>
-    <ion-item  style="color:white;"no-lines>
+    <ion-item  style="color:white;" no-lines>
       {{post.likes}} people like this post
     </ion-item>
-    <ion-item  style="color:white;"no-lines>
+    <ion-item  style="color:white;" no-lines>
       {{post.dislikes}} people dislike this post
     </ion-item>
     <ion-item no-lines  style="color:white;">

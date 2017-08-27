@@ -13,7 +13,7 @@ export class Post {
   poster={
     username:"",
     digits:"",
-    uId:"",
+    uid:"",
     profilePic:"",
     desiredReach:1,
   }
@@ -366,11 +366,11 @@ export class Post {
     })
 
   }
-  detailPost(post:Post){
-    this.navCtrl.push(PostPage,{
-      post:post
-    })
-  }
+  // detailPost(post:Post){
+  //   this.navCtrl.push(PostPage,{
+  //     post:post
+  //   })
+  // }
   // sync(){
   //   this.fbs.setDatabase("/posts"+this.postId+"/",this,false)
   // }
