@@ -145,6 +145,7 @@ export class ListMasterPage {
         var dat=data[i]
         dat["currentPic"]=res.currentPic
         dat["bio"]=res.bio
+        dat["username"]=res.username
         console.log("ABout to push ranks")
         vm.people.push(dat)
         console.log(vm.people)

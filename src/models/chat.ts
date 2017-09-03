@@ -1,4 +1,4 @@
-import { Message } from "./message"
+
 export class Chat {
   summary={
     users:{},
@@ -13,7 +13,7 @@ export class Chat {
     files:{}
   }
   deleted=false
-  constructor(private message?:Message) {
+  constructor() {
     // Quick and dirty extend/assign fields to this model
   }
 

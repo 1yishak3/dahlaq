@@ -1,5 +1,8 @@
 {
   "name": "Dahlaq",
   "app_id": "78e6a99e",
-  "type": "ionic-angular"
+  "type": "ionic-angular",
+  "integrations": {
+    "cordova": {}
+  }
 }

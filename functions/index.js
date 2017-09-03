@@ -249,7 +249,7 @@ exports.senseFame = functions.database.ref("/users/{uid}/fame").onWrite(e => {
   //reorder the adminsList users list accordingly
 
   const reachLimit = function(fame) {
-    var limit = Math.ceil(fame) * 100
+    var limit = Math.ceil(fame * 100)
     if(limit<10){
       return 10
     }else{
@@ -263,21 +263,21 @@ exports.senseFame = functions.database.ref("/users/{uid}/fame").onWrite(e => {
       var uids = []
       var fames = []
       var key = ""
-      for (var i = 0; i < uids.length; i++) {
+      for (var i = 0; i < nums.length; i++) {
 
-        if (ls[i].uid === uid) {
-          key = i
-          uids.push(ls[i].uid)
+        if (ls[nums[i]].uid === uid) {
+          key1 = nums[i]
+          uids.push(ls[nums[i]].uid)
           fames.push(fame)
         } else {
-          uids.push(ls[i].uid)
-          fames.push(ls[i].fame)
+          uids.push(ls[nums[i]].uid)
+          fames.push(ls[nums[i]].fame)
         }
       }
-      var key = uids.indexOf(uid)
 
+      var key= uids.indexOf(uid)
       if (tell === -1) {
-        var i = key + 1
+        var i = Number(key) + 1
         while (fames[i] > fames[key] && i < fames.length) {
           i++
         }
@@ -297,7 +297,7 @@ exports.senseFame = functions.database.ref("/users/{uid}/fame").onWrite(e => {
         }
         return newSet
       } else if (tell === 1) {
-        var i = key - 1
+        var i =Number(key) - 1
         while (fames[i] < fames[key] && i >= 0) {
           i--
         }
@@ -308,7 +308,7 @@ exports.senseFame = functions.database.ref("/users/{uid}/fame").onWrite(e => {
           fames[j + 1] = fames[j]
           j--
         }
-        fames[newPos] = ls[uid] //?
+        fames[newPos] = ls[key1].fame //?
         uids[newPos] = uid
         var newSet = []
         for (var l = 0; l < uids.length; l++) {
@@ -559,7 +559,7 @@ exports.fillUp = functions.database.ref("/users/{uid}/viewables").onWrite(e => {
   }
 })
 exports.chooseUp = functions.database.ref("/users/{uid}/basic/online").onWrite(e => {
-  if (e.data.val()){
+  if (e.data.val().on){
     var pplRef = e.data.adminRef.parent.parent.child("people")
     var sgRef = e.data.adminRef.parent.parent.child("suggestedPeople")
     var adminRef = e.data.adminRef.parent.parent.parent.parent.child("adminsLists/users")
@@ -615,7 +615,11 @@ exports.chooseUp = functions.database.ref("/users/{uid}/basic/online").onWrite(e
     return fameRef.once('value').then(function(snap){
       var list=snap.val()
       var suggestList=pick2(uid,list)
+      if(suggestList.length!==0){
       return sgRef.set(suggestList)
+    }else{
+      return sgRef.set(0)
+    }
     })
   }
 })
@@ -827,22 +831,22 @@ exports.sent=functions.database.ref("/chats/{cid}/content/messages/{mid}").onWri
 //     })
 //   }
 // })
-exports.checkUserV=functions.database.ref("/users/{uid}/properties/digits").onCreate(e =>{
-  var uid=e.params.uid
-  var num=e.data.val()
-  return admin.auth().getUser(uid).then(function(res){
-    var number=res.phoneNumber
-    if(number){
-      if(num!==number){
-        console.log("number 1",num)
-        console.log("number 2",number)
-        return admin.auth().deleteUser(uid).then(function(res){
-          return e.data.adminRef.parent.parent.remove()
-        })
-      }
-    }
-  })
-})
+// exports.checkUserV=functions.database.ref("/users/{uid}/properties/digits").onCreate(e =>{
+//   var uid=e.params.uid
+//   var num=e.data.val()
+//   return admin.auth().getUser(uid).then(function(res){
+//     var number=res.phoneNumber
+//     if(number){
+//       if(num!==number){
+//         console.log("number 1",num)
+//         console.log("number 2",number)
+//         return admin.auth().deleteUser(uid).then(function(res){
+//           return e.data.adminRef.parent.parent.remove()
+//         })
+//       }
+//     }
+//   })
+// })
 exports.proPic2=functions.database.ref("/users/{uid}/basic/currentPic").onWrite(e =>{
   if(e.data.val()!==""){
     var uid=e.params.uid
@@ -855,14 +859,34 @@ exports.proPic2=functions.database.ref("/users/{uid}/basic/currentPic").onWrite(
 
 ////Newly added SYNC IMMEDIATELY
 exports.digitVerify=functions.database.ref("/users/{uid}/properties/digits").onWrite(e=>{
-  admin.auth().getUser(e.params.uid).then((res)=>{
-    var num=res.phoneNumber
-    if(num){
-      if(e.data.val()!==num){
-        return e.data.adminRef.set(num)
+  // admin.auth().getUser(e.params.uid).then((res)=>{
+  //   var num=res.phoneNumber
+  //   if(num){
+  //     if(e.data.val()!==num){
+  //       return e.data.adminRef.set(num)
+  //     }
+  //   }
+  // })
+  const checkify=function(num){
+    if ((num.length===10&&num[0]==='0'&&num[1]!=='0')||(num.length===9&&num[0]!==0)){
+      if(num.length===10){
+        return "+251"+num.substring(1,num.lastIndexOf(''))
+      }
+      else{
+        return "+251"+num
       }
     }
-  })
+    else{
+      return null
+    }
+  }
+  var numbe=e.data.val()
+  var numb=numbe.substring(3,numbe.lastIndexOf(""))
+  var num=checkify(numb)
+  if(num){
+    return e.data.adminRef.set()
+  }
+
 })
 
 

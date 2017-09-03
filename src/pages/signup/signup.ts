@@ -33,6 +33,7 @@ export class SignupPage {
   confirmationResult: any
   show:any=true
   timer:any
+  phone:any
   constructor(public nw:Network,
     public fbs:FirebaseService,
     public navCtrl: NavController,
@@ -45,7 +46,7 @@ export class SignupPage {
     this.translateService.get('SIGNUP_ERROR').subscribe((value) => {
       this.signupErrorString = value;
     })
-    this.confirmationResult = this.nvp.get("confirm")
+    this.phone=this.nvp.get("num")
     this.person=new Uzer()
     var vm=this
     var disc=nw.onDisconnect().subscribe(()=>{
@@ -60,10 +61,10 @@ export class SignupPage {
       },5000)
     })
   }
-  checkU(str,str2){
+  checkU(str){
     var vm=this
     var truth1=false;
-    var truth2=false;
+
     var truth3=false;
     return new Promise(function(resolve,reject){
       vm.fbs.getDatabase("/ref",true).then(function(res){
@@ -75,13 +76,15 @@ export class SignupPage {
         }else{
           truth1=true
         }
-        if(str2.length>=6&&!isNaN(str2)){
-          truth2=true
-        }
         if(str.length>4&&str.indexOf(" ")===-1&&str.length<23){
           truth3=true
         }
-        resolve (truth2&&truth3&&truth1)
+        var f=(truth3&&truth1)
+        if(f){
+          resolve (f)
+        }else{
+          reject(f)
+        }
       })
     })
 
@@ -146,9 +149,9 @@ export class SignupPage {
     })
     load1.present()
     //this.person=new Uzer()
-    this.checkU(this.account.username,this.account.code).then((sth)=>{
-      console.log(sth)
-      if(sth){
+
+
+
         this.once=this.once+1
         var vm=this.fbs
         var vm1=this
@@ -158,11 +161,11 @@ export class SignupPage {
         console.log(this.confirmationResult)
         if (this.once<2){
           console.log("I got here...then something happened")
-          this.confirmationResult.confirm(this.account.code).then((resp) => {
+      this.checkU(this.account.username).then((sth)=>{
             load1.dismiss()
             load1=this.loadCtrl.create({content:"Creating your account..."})
             load1.present()
-            this.person.properties.digits=vm.currentUser().phoneNumber
+            this.person.properties.digits=this.phone
             //console.log(this.person.properties.digits)
             this.person.basic.uid=vm.currentUser().uid
             this.person.basic.referrer=this.account.refer
@@ -243,27 +246,22 @@ export class SignupPage {
             })
 
           }).catch( (err) => {
-
+            load1.dismiss()
             //this.navCtrl.push(MainPage); // TODO: Remove this when you add your signup endpoint
             vm.currentUser().delete()
             // Unable to sign up
             console.log("I'm not in: ",err)
             let toast = this.toastCtrl.create({
-              message: "Yooo How is this even possible?",
+              message: "Your entries are invalid. "+this.available+".",
               duration: 3000,
               position: 'top'
             });
             toast.present();
           });
-        }
-      }else{
-        let toast = this.toastCtrl.create({
-          message: "Your entries are invalid. "+this.available+".",
-          duration: 3000,
-          position: 'top'
-        });
-        toast.present();
+        }else{
+        load1.dismiss()
+
       }
-    })
+
   }
 }

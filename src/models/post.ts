@@ -66,9 +66,8 @@ export class Post {
  // }
   bootstrap(){
     var vm=this
-    console.log("THIS IS YOUR PostID PLEASE DON'T BE NULL",this.postId)
+  
     this.fbs.getDatabase("/posts/"+this.postId,false).then(function(res:any){
-      console.log("how many times am I actually being called?",res)
       //var pst:any= res
       vm.poster=res.poster
       vm.content=res.content
@@ -84,7 +83,7 @@ export class Post {
         vm.reports=Object.keys(res.content.reports).length
         vm.reported=(vm.content.reports[vm.uid]!==undefined)
       }
-      console.log("stats", vm.liked,vm.disliked,vm.reported)
+
     }).catch(function(err){
       console.log("an error has occured, ",err)
     })

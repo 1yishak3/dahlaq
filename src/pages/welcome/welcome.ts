@@ -4,7 +4,8 @@ import { NavController,Events,ToastController, LoadingController } from 'ionic-a
 import { LoginPage } from '../login/login';
 import { SignupPage } from '../signup/signup';
 import { FirebaseService } from '../../providers/firebase'
-
+import { User } from '../../providers/user'
+import{ MainPage } from '../pages'
 /**
  * The Welcome Page is a splash page that quickly describes the app,
  * and then directs the user to create an account or log in.
@@ -25,7 +26,7 @@ export class WelcomePage {
     "password":""
   }
   confirmationResult: any
-  constructor(public loadCtrl:LoadingController,public tc:ToastController,public events:Events,public navCtrl: NavController, public fire : FirebaseService) {
+  constructor(public c:User,public loadCtrl:LoadingController,public tc:ToastController,public events:Events,public navCtrl: NavController, public fire : FirebaseService) {
     this.fbs=fire
     this.ev=events
    }
@@ -39,32 +40,39 @@ export class WelcomePage {
     var vm=this
     //navCtrl.push(LoginPage,{'confirm':"what?"})
     var load1=this.loadCtrl.create({
-      content:"Sending you your SMS code..."
+      content:"Logging you in..."
     })
 
     load1.present()
-    this.fbs.recaptcha("login-button").then(value => {
-      console.log("success reCaptcha")
-      vm.recaptchaVerifier=value
-      vm.fbs.login(vm.creds, vm.recaptchaVerifier).then(function(res){
-        console.log("We have a response: ", res)
-        load1.dismiss()
-        navCtrl.push(LoginPage,{"confirm":res})
-      }).catch(function(err){
-      //  vm.fbs.currentUser().delete()
-        load1.dismiss()
-        console.log("Error loging in. Cause: ",err)
+
+    vm.fbs.login(vm.creds,vm.creds.password).then(function(res){
+      // console.log("We have a response: ", res)
+      // var num=vm.c.checkify(this.creds.digits)
+
+      load1.dismiss()
+      navCtrl.push(MainPage)
+
+    }).catch(function(err){
+    //  vm.fbs.currentUser().delete()
+      load1.dismiss()
+      if(err="Password"){
         var toast=vm.tc.create({
-          message: "Sorry, an error has occured. Make sure you are connected to the internet, and that you have entered a valid Ethiopian phone number.",
-          duration: 3000,
+          message: "Please enter a password. Type a new one if this is your first time at Dahlaq, or type your old password if you're returning.",
+          duration: 5000,
           position: 'top'
         })
         toast.present()
-        //navCtrl.push(LoginPage)
+
+      }else{
+      console.log("Error loging in. Cause: ",err)
+      var toast=vm.tc.create({
+        message: "Couldn't log you in. Make sure you are connected to the internet, and that you have entered a valid phone number and password combo.",
+        duration: 5000,
+        position: 'top'
       })
-    }).catch(function(err){
-      load1.dismiss()
-      console.log("error recaptcha ",err)
+      toast.present()
+      }
+      //navCtrl.push(LoginPage)
     })
 
   }
@@ -78,21 +86,18 @@ export class WelcomePage {
 
     var recaptchaVerifier1 = this.recaptchaVerifier1*/
     var load1=this.loadCtrl.create({
-      content:"Sending you your SMS code..."
+      content:"Signing you up..."
     })
     load1.present()
 
     var vm=this
-    this.fbs.recaptcha("signup-button").then(value => {
-      console.log("success reCaptcha",value)
-      this.recaptchaVerifier1=value
+
       var confirmationResult;
       var navCtrl=this.navCtrl
-      vm.fbs.createUser(vm.creds, vm.recaptchaVerifier1).then(function(res){
-        console.log("This is the conf code",res)
+      vm.fbs.createUser(vm.creds,vm.creds.password).then(function(res){
         load1.dismiss()
-        confirmationResult = res
-        navCtrl.push(SignupPage,{"confirm":confirmationResult})
+
+        navCtrl.push(SignupPage,{"num":vm.creds.digits})
       }).catch(function(err){
         load1.dismiss()
         if(vm.fbs.currentUser()){
@@ -116,16 +121,6 @@ export class WelcomePage {
         //toast saying An error with the network occured, click back and try again.
         //navCtrl.push(SignupPage,{"confirm":confirmationResult})
       })
-    }).catch(function(err){
-      load1.dismiss()
-       var toast=vm.tc.create({
-        message: "Sorry, something went wrong in verifying your number. Please try again.",
-        duration: 3000,
-        position: 'top'
-      })
-      toast.present()
-      console.log("error recaptcha ",err)
-    })
 
 
 

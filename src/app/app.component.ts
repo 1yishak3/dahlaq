@@ -1,5 +1,5 @@
 import { Component, ViewChild } from '@angular/core';
-import { Platform, Nav, Config } from 'ionic-angular';
+import { Platform, Nav, Config,LoadingController } from 'ionic-angular';
 
 import { StatusBar } from '@ionic-native/status-bar';
 import { SplashScreen } from '@ionic-native/splash-screen';
@@ -22,6 +22,7 @@ import { Settings } from '../providers/providers';
 
 import { TranslateService } from '@ngx-translate/core'
 import {FirebaseService} from '../providers/firebase'
+import {Deploy} from '@ionic/cloud-angular'
 
 @Component({
   /*template: `<ion-menu [content]="content">
@@ -65,24 +66,48 @@ export class MyApp {
     { title: 'Search', component: SearchPage }
   ]
 
-  constructor(private translate: TranslateService, private platform: Platform,public fbs: FirebaseService, settings: Settings, private config: Config, private statusBar: StatusBar, private splashScreen: SplashScreen) {
+  constructor(public lc:LoadingController,public deploy:Deploy,private translate: TranslateService, private platform: Platform,public fbs: FirebaseService, settings: Settings, private config: Config, private statusBar: StatusBar, private splashScreen: SplashScreen) {
     this.initTranslate();
-  //  this.user = this.fbs.currentUser()
-    // console.log("this is you", this.user)
-    // fbs.firebaseAuth().onAuthStateChanged(user=>{
-    //   if(user){
+    this.user = this.fbs.currentUser()
+    console.log("this is you", this.user)
+    let loader = this.lc.create();
+    loader.present();
+    var auth=this.fbs.getAuth()
+    auth.onAuthStateChanged(user=>{
+      if(user){
+        loader.dismiss()
+        this.nav.setRoot(TabsPage)
+      }else{
+        loader.dismiss()
+        this.nav.setRoot(WelcomePage)
+      }
+    })
+    let fireBaseUser = this.fbs.currentUser();
+    console.log(fireBaseUser);
+    this.rootPage = fireBaseUser ? TabsPage : LoginPage;
+    // this.user=fbs.currentUser()
+    // if(this.user){
     //     this.rootPage=TabsPage
     //   }else{
     //     this.rootPage=WelcomePage
     //   }
-    // })
-    if(this.user){
-        this.rootPage=TabsPage
-      }else{
-        this.rootPage=WelcomePage
-      }
-    console.log(this.rootPage)
+    // console.log(this.rootPage)
+    // firebase.auth().onAuthStateChanged(function(user) {
+    //   if (user) {
+    //     // User is signed in.
+    //   } else {
+    //     // No user is signed in.
+    //   }
+    // });
     this.platform.ready().then(() => {
+      // this.deploy.check().then((snapshotAvailable: boolean) => {
+      //   if (snapshotAvailable) {
+      //     // When snapshotAvailable is true, you can apply the snapshot
+      //     this.deploy.download().then(() => {
+      //      return this.deploy.extract()
+      //     });
+      //   }
+      // });
       // Okay, so the platform is ready and our plugins are available.
       // Here you can do any higher level native things you might need.
       this.statusBar.styleDefault();

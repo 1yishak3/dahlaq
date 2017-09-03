@@ -9,10 +9,10 @@ importScripts('./build/sw-toolbox.js');
 importScripts('../node_modules/firebase/firebase-app')
 importScripts('../node_modules/firebase/firebase-messaging')
 
-firebase.initializeApp({
-  // get this from Firebase console, Cloud messaging section
-  'messagingSenderId': '***'
-});
+// firebase.initializeApp({
+//   // get this from Firebase console, Cloud messaging section
+//   'messagingSenderId': '***'
+// });
 
 const messaging = firebase.messaging();
 

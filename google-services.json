@@ -1,0 +1,42 @@
+{
+  "project_info": {
+    "project_number": "500593695235",
+    "firebase_url": "https://dahlaq-c7e0f.firebaseio.com",
+    "project_id": "dahlaq-c7e0f",
+    "storage_bucket": "dahlaq-c7e0f.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:500593695235:android:764d2cb7da3280eb",
+        "android_client_info": {
+          "package_name": "com.yitzhaqm.app1"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "500593695235-b5rubtlqimc819o2gaurhtc03e8cqfig.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCVkT1F0YuawA7G2AkchgW9IvLvrbs9qWE"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

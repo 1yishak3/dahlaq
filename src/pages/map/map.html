@@ -1,11 +1,11 @@
 <ion-header>
   <ion-navbar>
     <ion-title *ngIf="!search">Chats</ion-title>
-    <ion-buttons *ngIf="!search"end>
+    <!-- <ion-buttons *ngIf="!search"end>
       <button ion-button icon-only (click)="searchOn()">
         <ion-icon name="search"></ion-icon>
       </button>
-    </ion-buttons>
+    </ion-buttons> -->
     <!--ion-buttons *ngIf="search" end>
       <button ion-button icon-only (click)="searchOn()">
         <ion-icon name="close"></ion-icon>
@@ -14,11 +14,11 @@
     <!-- <ion-buttons end>
       <button ion-button icon-only><ion-icon *ngIf="connected" name=""></ion-icon><ion-icon *ngIf="!connected"name=""></ion-icon></button>
     </ion-buttons> -->
-    <ion-searchbar *ngIf="search" (ionInput)="getItems($event)" placeholder="Search for Chats"></ion-searchbar>
+    <!-- <ion-searchbar *ngIf="search" (ionInput)="getItems($event)" placeholder="Search for Chats"></ion-searchbar> -->
   </ion-navbar>
 
-    <div *ngIf="connected&&show" style="background:green;color:white;text-align:center">You are connected!</div>
-    <div *ngIf="!connected" style="background:red;color:white;text-align:center">No internet connection</div>
+    <!-- <div *ngIf="connected&&show" style="background:green;color:white;text-align:center">You are connected!</div>
+    <div *ngIf="!connected" style="background:red;color:white;text-align:center">No internet connection</div> -->
 
 </ion-header>
 
@@ -76,11 +76,11 @@
         <img [src]="summary.currentPic"/>
       </ion-avatar>
       <div style="color:white;">
-        <h2>{{summary.users[summary.oUid].username}}</h2>
-        <ion-note style="color:rgb(110,110,110)">{{summary.lastMessage.content}}</ion-note>
+        <h2>{{username(summary)}}</h2>
+        <ion-note style="color:rgb(110,110,110)">{{summary.lastMessage.sender}}: {{summary.lastMessage.content}}</ion-note>
       </div>
-      <ion-badge color="light" *ngIf="(summary.users[uid].unread).length!==0" item-end>
-        {{Object.keys(summary.users[uid].unread).length}}
+      <ion-badge color="light" *ngIf="unread(summary)!==0" item-end>
+        {{unread(summary)}}
       </ion-badge>
       <!--A badge showing number of unread messages in the chat.-->
       <!--ion-item-options>

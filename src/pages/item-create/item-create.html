@@ -23,8 +23,8 @@
     </ion-buttons-->
   </ion-navbar>
 
-    <div *ngIf="connected&&show" style="background:green;color:white;text-align:center">You are connected!</div>
-    <div *ngIf="!connected" style="background:red;color:white;text-align:center">No internet connection</div>
+    <!-- <div *ngIf="connected&&show" style="background:green;color:white;text-align:center">You are connected!</div>
+    <div *ngIf="!connected" style="background:red;color:white;text-align:center">No internet connection</div> -->
 </ion-header>
 
 <ion-content style="background:black">
@@ -88,7 +88,7 @@
       </div-->
       <ion-item style="color:white;background:clear" no-lines>
           <ion-label>Maximum Reach</ion-label>
-          <ion-range [(ngModel)]="reach" [max]="max" pin="true" color="light">
+          <ion-range [(ngModel)]="reach" [max]="max" pin="true" color="primary">
             <ion-label range-left>0</ion-label>
             <ion-label range-right>{{max}}</ion-label>
           </ion-range>

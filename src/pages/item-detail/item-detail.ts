@@ -1,5 +1,5 @@
 import { Component,NgZone,OnInit } from '@angular/core';
-import { NavController, NavParams,LoadingController } from 'ionic-angular';
+import { NavController, NavParams,LoadingController,ModalController } from 'ionic-angular';
 
 import { Items } from '../../providers/providers';
 import { SettingsPage } from '../settings/settings'
@@ -31,9 +31,9 @@ export class ItemDetailPage {
   connected:boolean
   show:any=true
   showEverything:boolean=false
-  constructor(public lc:LoadingController,public nw:Network,public sm:StreamingMedia,public fbs:FirebaseService,public navCtrl: NavController, navParams: NavParams, items: Items) {
-    this.uid = navParams.get('person') || fbs.currentUser().uid;
-    this.check=fbs.currentUser().uid===this.uid;
+
+  constructor(public mc:ModalController,public lc:LoadingController,public nw:Network,public sm:StreamingMedia,public fbs:FirebaseService,public navCtrl: NavController, public navParams: NavParams, public items: Items) {
+
     var vm=this
     var disc=nw.onDisconnect().subscribe(()=>{
       vm.connected=false
@@ -46,23 +46,25 @@ export class ItemDetailPage {
       },5000)
     })
 
-    this.getProfile().then(e=>{
-      this.profile=e
-    })
+
 
     //this.props=Object.keys(this.profile.properties)
 
   }
   getProfile(){
+    var l= this.lc.create({content:"Loading Profile..."})
+    l.present()
     return new Promise((resolve,reject)=>{
       this.fbs.getDatabase("/users/"+this.uid,false).then((res)=>{
           var f=new Uzer()
           for(let i in res){
             f[i]=res[i]
           }
+          l.dismiss()
           resolve(f)
         //console.log(this.profile)
       }).catch((err)=>{
+        l.dismiss()
         reject("ugh")
         console.log("Error is, ",err)
       })
@@ -93,6 +95,8 @@ export class ItemDetailPage {
     // })
   }
   ionViewWillEnter(){
+    this.uid = this.navParams.get('person') || this.fbs.currentUser().uid;
+    this.check=this.fbs.currentUser().uid===this.uid;
     // var vm=this
     // var cr=this.lc.create({
     //   content:"Loading profile..."
@@ -122,7 +126,7 @@ export class ItemDetailPage {
     //this.ready=false
     var vm=this
     return new Promise(function(resolve,reject){
-      vm.uid=vm.fbs.currentUser().uid
+
       //if disconnected take most recent cached posts and show them
       //if connected-
       vm.arrayStopped=1 //and then go with the below procedure
@@ -243,21 +247,39 @@ export class ItemDetailPage {
   }
   openChat(e){
     var vm=this
-    this.fbs.getDatabase("/users/"+this.fbs.currentUser().uid+"/people/",true).then(function(res){
+    this.fbs.getDatabase("/users/"+this.fbs.currentUser().uid+"/people",true).then((res)=>{
       var chat=""
-      for(let i in res){
-        if(res[i].indexOf(vm.uid)!==-1){
-          chat=res[i]
-          break
+      console.log("in 1")
+      if(res){
+        for(let i in res){
+          if(res[i].indexOf(vm.uid)!==-1){
+            chat=res[i]
+            break
+          }
         }
       }
+      console.log("in 2")
       if(chat!==""){
-        vm.fbs.getDatabase("/chats/"+chat+"/summary",true).then(function(res){
-          vm.navCtrl.push(ChatPage,{person:res})
+        vm.fbs.getDatabase("/chats/"+chat+"/summary",true).then((res)=>{
+          var addModal = this.mc.create(ChatPage,{person:res,fbs:this.fbs});
+          addModal.onDidDismiss(item => {
+            //maybe set it in storage  for safe keeping?
+            //the refresh chat thing?
+          })
+          addModal.present();
+
         })
       }else if(chat===""){
+        console.log("in 3")
         var be:any=vm.profile
-        vm.navCtrl.push(ChatPage,{person:be.basic})
+        console.log("be is set", be.basic)
+        var addModal = this.mc.create(ChatPage,{person:be.basic,fbs:this.fbs});
+        console.log("this happens??")
+        addModal.onDidDismiss(item => {
+          //maybe set it in storage  for safe keeping?
+          //the refresh chat thing?
+        })
+        addModal.present();
       }
     })
   }

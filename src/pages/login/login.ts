@@ -30,6 +30,7 @@ export class LoginPage {
   cCode: any
   connected:boolean
   show:any=true
+  phone:any
   constructor(public loadCtrl: LoadingController,
     public navCtrl: NavController,
     public user: User,
@@ -44,6 +45,7 @@ export class LoginPage {
     })
     this.fbs=fbss
     this.cCode = this.nvp.get("confirm")
+    this.phone= this.nvp.get("num")
     var vm=this
     var disc=nw.onDisconnect().subscribe(()=>{
       vm.connected=false
@@ -69,7 +71,7 @@ export class LoginPage {
     this.once=this.once+1
     if (this.once<2){
       //this.navCtrl.push(MainPage);
-      this.cCode.confirm(this.account.code).then((res)=>{
+      this.cCode.verifyCheck(this.phone,this.account.code).then((res)=>{
         if(vm.fbss.currentUser().displayName===""){
           load.dismiss()
             let toast = this.toastCtrl.create({

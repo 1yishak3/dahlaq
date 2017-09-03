@@ -6,25 +6,32 @@
   </ion-navbar>
 </ion-header>
 
-<ion-content style="background:black" no-bounce>
+<ion-content style="background:rgb(36, 36, 36)" no-bounce>
   <ion-slides pager="true" centeredSlides="true" (ionSlideWillChange)="onSlideChangeStart($event)">
     <ion-slide>
-      <img [src]="" class="slide-image" />
+
+      <img  class="splash-logo" />
       <h2 class="slide-title">While we create your fabulous new account, take the crash course that follows. You'll thank us! </h2>
       <p>Psst...There's a huge surprise at the end!</p>
     </ion-slide>
     <ion-slide *ngFor="let slide of slides">
-      <img src="../../assets/icon/dahlaq.png" class="slide-image" />
+
+      <img class=" splash-logo" />
+
       <h2 class="slide-title" [innerHTML]="slide.title"></h2>
       <p [innerHTML]="slide.description"></p>
     </ion-slide>
     <ion-slide>
+
+      <img  class="splash-logo" />
+
       <h2 class="slide-title">And for the surprise...</h2>
       <p>Dahlaq is on the verge of becoming completely unblockable. You read right! And even from the government! Dahlaq is dedicated to providing you uninterrupted access to information in spite of everything. We hope you enjoy using our app as much as we did making it. Have fun!</p>
-      <button ion-button icon-end color="light" large (click)="startApp()">
-        Enter Dahlaq
-        <ion-icon name="arrow-forward"></ion-icon>
-      </button>
+
+        <button ion-button icon-end color="light" block (click)="startApp()">
+          Enter Dahlaq
+          <ion-icon name="arrow-forward"></ion-icon>
+        </button>
     </ion-slide>
   </ion-slides>
 </ion-content>

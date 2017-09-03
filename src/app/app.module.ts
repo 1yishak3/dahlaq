@@ -3,7 +3,8 @@ import { BrowserModule } from '@angular/platform-browser';
 import { HttpModule, Http } from '@angular/http';
 import { IonicApp, IonicModule, IonicErrorHandler } from 'ionic-angular';
 import * as firebase from 'firebase'
-import { MdProgressSpinnerModule } from '@angular/material';
+import {Deploy} from '@ionic/cloud-angular'
+
 //var dFire = firebase.initializeApp(environment.firebase)
 //import {ngSanitize} from 'angular-sanitize'
 import 'firebase/auth'
@@ -49,7 +50,7 @@ import { User } from '../providers/user';
 import { FirebaseService } from '../providers/firebase'
 
 import { Camera } from '../providers/camera';
-import { GoogleMaps } from '@ionic-native/google-maps';
+
 import { SplashScreen } from '@ionic-native/splash-screen';
 import { StatusBar } from '@ionic-native/status-bar';
 
@@ -128,7 +129,6 @@ export function provideSettings(storage: Storage) {
   ],
   imports: [
     //ionicMaterial,
-    MdProgressSpinnerModule,
     BrowserModule,
     HttpModule,
     TranslateModule.forRoot({
@@ -183,7 +183,6 @@ export function provideSettings(storage: Storage) {
     Api,
     Items,
     User,
-    GoogleMaps,
     SplashScreen,
     StatusBar,
     { provide: Settings, useFactory: provideSettings, deps: [Storage] },
