@@ -3,8 +3,10 @@ import { BrowserModule } from '@angular/platform-browser';
 import { HttpModule, Http } from '@angular/http';
 import { IonicApp, IonicModule, IonicErrorHandler } from 'ionic-angular';
 import * as firebase from 'firebase'
-import { MdProgressSpinnerModule } from '@angular/material';
+import {Deploy} from '@ionic/cloud-angular'
+
 //var dFire = firebase.initializeApp(environment.firebase)
+//import {ngSanitize} from 'angular-sanitize'
 import 'firebase/auth'
 import 'firebase/messaging'
 import 'firebase/database'
@@ -16,13 +18,15 @@ import 'firebase/storage'
 //import { AngularFireStorageModule } from 'angularfire2/auth';
 //import ionicMaterial from '../../bower_components/ionic-material/dist/ionic.material'
 import { Storage, IonicStorageModule } from '@ionic/storage';
+import { Network } from '@ionic-native/network'
 import { Elastic } from 'angular2-elastic'
 import { AutosizeModule } from 'ionic2-autosize'
 import { environment } from '../environments/environment'
 import { EmojiPickerModule } from '@ionic-tools/emoji-picker';
 import { MyApp } from './app.component';
 import { StreamingMedia } from '@ionic-native/streaming-media'
-
+//import { ImageResizer } from '@ionic-native/image-resizer'
+import { Ng2ImgToolsModule } from 'ng2-img-tools'
 import { CardsPage } from '../pages/cards/cards';
 import { ChatPage } from '../pages/chat-detail/chat-detail';
 import { ItemCreatePage } from '../pages/item-create/item-create';
@@ -46,7 +50,7 @@ import { User } from '../providers/user';
 import { FirebaseService } from '../providers/firebase'
 
 import { Camera } from '../providers/camera';
-import { GoogleMaps } from '@ionic-native/google-maps';
+
 import { SplashScreen } from '@ionic-native/splash-screen';
 import { StatusBar } from '@ionic-native/status-bar';
 
@@ -59,6 +63,26 @@ import { TruncatePipe } from '../pipes/truncate'
 //import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 //import { LueggModule } from 'angularjs-scroll-glue'
+import { CloudSettings, CloudModule } from '@ionic/cloud-angular';
+import { LinkyModule } from 'angular-linky'
+
+const cloudSettings: CloudSettings = {
+  'core': {
+    'app_id': '78e6a99e'
+  },
+  'push': {
+    'sender_id': '500593695235',
+    'pluginConfig': {
+      'ios': {
+        'badge': true,
+        'sound': true
+      },
+      'android': {
+        'iconColor': '#343434'
+      }
+    }
+  }
+};
 
 // The translate loader needs to know where to load i18n files
 // in Ionic's static asset pipeline.
@@ -105,7 +129,6 @@ export function provideSettings(storage: Storage) {
   ],
   imports: [
     //ionicMaterial,
-    MdProgressSpinnerModule,
     BrowserModule,
     HttpModule,
     TranslateModule.forRoot({
@@ -120,7 +143,11 @@ export function provideSettings(storage: Storage) {
     Elastic,
     AutosizeModule,
     EmojiPickerModule.forRoot(),
-    NoopAnimationsModule
+    NoopAnimationsModule,
+    Ng2ImgToolsModule,
+//    ngSanitize,
+    LinkyModule,
+    CloudModule.forRoot(cloudSettings)
   //  LueggModule
   ],
   bootstrap: [IonicApp],
@@ -147,6 +174,8 @@ export function provideSettings(storage: Storage) {
     //ItemCreatePage,
     //PopoverPage,
     File,
+    Network,
+    //ImageResizer,
     MediaCapture,
     StreamingMedia,
     Camera,
@@ -154,7 +183,6 @@ export function provideSettings(storage: Storage) {
     Api,
     Items,
     User,
-    GoogleMaps,
     SplashScreen,
     StatusBar,
     { provide: Settings, useFactory: provideSettings, deps: [Storage] },

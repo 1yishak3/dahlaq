@@ -1,25 +1,37 @@
 <ion-header no-shadow>
   <ion-navbar>
     <ion-buttons end *ngIf="showSkip">
-      <button ion-button (click)="startApp()" color="primary">{{ 'TUTORIAL_SKIP_BUTTON' | translate}}</button>
+      <button ion-button (click)="startApp()" color="light">Skip Ahead</button>
     </ion-buttons>
   </ion-navbar>
 </ion-header>
 
-<ion-content no-bounce>
-  <ion-slides pager="true" (ionSlideWillChange)="onSlideChangeStart($event)">
+<ion-content style="background:rgb(36, 36, 36)" no-bounce>
+  <ion-slides pager="true" centeredSlides="true" (ionSlideWillChange)="onSlideChangeStart($event)">
+    <ion-slide>
+
+      <img  class="splash-logo" />
+      <h2 class="slide-title">While we create your fabulous new account, take the crash course that follows. You'll thank us! </h2>
+      <p>Psst...There's a huge surprise at the end!</p>
+    </ion-slide>
     <ion-slide *ngFor="let slide of slides">
-      <img [src]="slide.image" class="slide-image" />
+
+      <img class=" splash-logo" />
+
       <h2 class="slide-title" [innerHTML]="slide.title"></h2>
       <p [innerHTML]="slide.description"></p>
     </ion-slide>
     <ion-slide>
-      <img src="assets/img/ica-slidebox-img-4.png" class="slide-image" />
-      <h2 class="slide-title">{{ 'TUTORIAL_SLIDE4_TITLE' | translate }}</h2>
-      <button ion-button icon-end large clear (click)="startApp()">
-        {{ 'TUTORIAL_CONTINUE_BUTTON' | translate }}
-        <ion-icon name="arrow-forward"></ion-icon>
-      </button>
+
+      <img  class="splash-logo" />
+
+      <h2 class="slide-title">And for the surprise...</h2>
+      <p>Dahlaq is on the verge of becoming completely unblockable. You read right! And even from the government! Dahlaq is dedicated to providing you uninterrupted access to information in spite of everything. We hope you enjoy using our app as much as we did making it. Have fun!</p>
+
+        <button ion-button icon-end color="light" block (click)="startApp()">
+          Enter Dahlaq
+          <ion-icon name="arrow-forward"></ion-icon>
+        </button>
     </ion-slide>
   </ion-slides>
 </ion-content>

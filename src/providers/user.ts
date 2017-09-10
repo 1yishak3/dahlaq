@@ -52,9 +52,13 @@ export class User {
     }
   }
   emailify(num){
-    var foomail = "@yitzhaqm.com"
-    var number = num.substring(4,num.lastIndexOf(''))
-    return number+foomail
+    if(num){
+      var foomail = "@yitzhaqm.com"
+      var number = num.substring(1,num.lastIndexOf(''))
+      return number+foomail
+    }else{
+      return null
+    }
   }
   login(accountInfo: any) {
     let seq = this.api.post('login', accountInfo).share();

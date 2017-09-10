@@ -2,7 +2,18 @@
 
   <ion-navbar>
     <ion-title>Edit Your Profile</ion-title>
+    <!-- <ion-buttons end>
+      <button ion-button icon-only><ion-icon *ngIf="connected" name=""></ion-icon><ion-icon *ngIf="!connected"name=""></ion-icon></button> -->
+    <!-- </ion-buttons> -->
+    <!-- <ion-buttons>
+      <button icon-only clear ion-button (click)="saveAndGoToProfile()">
+        <ion-icon color="light" name="checkmark"></ion-icon>
+      </button>
+    </ion-buttons> -->
   </ion-navbar>
+
+    <!-- <div *ngIf="connected&&show" style="background:green;color:white;text-align:center">You are connected!</div>
+    <div *ngIf="!connected" style="background:red;color:white;text-align:center">No internet connection</div> -->
 
 </ion-header>
 
@@ -12,28 +23,20 @@
   </div-->
   <input type="file" #fileInput style="height: 0px;width:0px" accept="image/*"name="files[]" (change)="onChangeInput($event)" />
 
-  <ion-fab bottom left>
-    <button *ngIf="isUser " ion-button color="light" clear><ion-icon style="font-size:40px" color="light" name="save"></ion-icon></button>
-    <ion-fab-list side="right">
-      <button ion-fab color="light" (click)="saveAndGoToProfile()"><ion-icon color="dark"name="upload"></ion-icon></button>
-      <button ion-fab color="light" (click)="exitToProfileWithoutSaving($event)"><ion-icon color="dark" name="close"></ion-icon></button>
-    </ion-fab-list>
-    <ion-fab-list>
-
+  <ion-fab top right>
+    <button ion-fab mini color="light" icon-only clear><ion-icon style="font-size:40px" color="dark" name="more"></ion-icon></button>
+    <ion-fab-list side="bottom">
+      <button ion-fab  (click)="saveAndGoToProfile()"><ion-icon color="dark"name="checkmark"></ion-icon></button>
+      <button ion-fab (click)="exitToProfileWithoutSaving()"><ion-icon color="dark" name="close"></ion-icon></button>
     </ion-fab-list>
   </ion-fab>
   <div style="background:#1a1a1a;color:white" padding>
     <ion-row>
       <ion-col>
-        <a (click)=showChoices($event,true)>
-          <ion-avatar *ngIf="profilec.basic.currentPic!==''">
-            <img style="border-radius:100%"[src]="profilec.basic.currentPic"/>
-          </ion-avatar>
-          <div class="profile-image-placeholder" *ngIf="profilec.basic.currentPic===''">
-            <ion-icon name="add"></ion-icon>
-            <div>
-              Add A Profile Pic
-            </div>
+        <a (click)=showChoices($event)>
+          <div>
+            <img *ngIf="!uploading" style="width:100%;height:100%" [src]="profilec.basic.currentPic"/>
+            <ion-spinner text-center style="top:15px" color="light" *ngIf="uploading"></ion-spinner>
           </div>
         </a>
       </ion-col>
@@ -56,9 +59,25 @@
   <div>
     <ion-list style="color:white">
       <!--there will be an *ngFor here once you finish building the whole user. You will list the title and then the info provided.-->
-      <ion-item *ngFor="let property of props">
-        <ion-label fixed>{{property}}</ion-label>
-        <ion-input type="text" [(ngModel)]="profilec.properties[property]"></ion-input>
+      <ion-item no-lines style="color:white">
+        <ion-label stacked>Sefer | Mender</ion-label>
+        <ion-input no-lines type="text" [(ngModel)]="profilec.properties['sefer']"></ion-input>
+      </ion-item>
+      <ion-item no-lines style="color:white">
+        <ion-label stacked>Fews | Food</ion-label>
+        <ion-input no-lines type="text" [(ngModel)]="profilec.properties['fews']"></ion-input>
+      </ion-item>
+      <ion-item no-lines style="color:white">
+        <ion-label stacked>Relationship Status</ion-label>
+        <ion-input no-lines type="text" [(ngModel)]="profilec.properties['relationshipStatus']"></ion-input>
+      </ion-item>
+      <ion-item no-lines style="color:white">
+        <ion-label stacked>Interested In</ion-label>
+        <ion-input no-lines type="text" [(ngModel)]="profilec.properties['interestedIn']"></ion-input>
+      </ion-item>
+      <ion-item no-lines style="color:white">
+        <ion-label stacked>Timirt Dereja | Education</ion-label>
+        <ion-input no-lines type="text" [(ngModel)]="profilec.properties['education']"></ion-input>
       </ion-item>
     </ion-list>
 

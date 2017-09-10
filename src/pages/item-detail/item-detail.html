@@ -1,9 +1,14 @@
 <ion-header>
 
   <ion-navbar>
-    <ion-title>Profile</ion-title>
+    <ion-title>{{profile?.basic.username}}</ion-title>
+    <!-- <ion-buttons end>
+      <button ion-button icon-only><ion-icon *ngIf="connected" name=""></ion-icon><ion-icon *ngIf="!connected"name=""></ion-icon></button>
+    </ion-buttons> -->
   </ion-navbar>
-
+<!--
+    <div *ngIf="connected&&show" style="background:green;color:white;text-align:center">You are connected!</div>
+    <div *ngIf="!connected" style="background:red;color:white;text-align:center">No internet connection</div> -->
 </ion-header>
 
 
@@ -11,51 +16,73 @@
   <!--div class="item-profile" text-center #profilePic [style.background-image]="'url(' + item.profilePic + ')'">
   </div-->
   <ion-fab bottom left>
-    <button *ngIf="check===uid"ion-button (tap)="openSettings($event)" color="light" clear><ion-icon style="font-size:40px" color="light" name="ios-cog"></ion-icon></button>
+    <button *ngIf="check"ion-button (tap)="openSettings($event)" color="light" clear><ion-icon style="font-size:40px" color="light" name="ios-cog"></ion-icon></button>
+      <button *ngIf="!check"ion-button (tap)="openChat($event)" color="light" clear><ion-icon style="font-size:40px" color="light" name="create"></ion-icon></button>
   </ion-fab>
   <div style="background:#1a1a1a;color:white" padding>
     <ion-row>
       <ion-col>
-        <ion-avatar>
-          <img style="border-radius:100%"[src]="profile.basic.currentPic"/>
-        </ion-avatar>
+
+          <img style="width:100%;height:100%" [src]="profile?.basic.currentPic"/>
+
       </ion-col>
       <ion-col>
         <ion-row><ion-col></ion-col></ion-row>
         <ion-row>
-          <ion-col>
+          <ion-col style="color:white">
             <h2>
-              {{ profile.basic.username }}
+              {{ profile?.basic.username }}
               <ion-badge color="light">
-                #{{profile.basic.rank}}
+                #{{profile?.basic.rank}}
               </ion-badge>
             </h2>
           </ion-col>
         </ion-row>
         <ion-row>
           <ion-col>
-            <h4>"{{profile.basic.bio}}"</h4>
+            <h4>*{{profile?.basic.bio}}*</h4>
           </ion-col>
         </ion-row>
       </ion-col>
     </ion-row>
   </div>
-  <div>
+  <div >
     <ion-list style="color:white">
       <!--there will be an *ngFor here once you finish building the whole user. You will list the title and then the info provided.-->
-      <ion-item *ngFor="let property of props ">
-        <ion-label fixed>{{property}}</ion-label>
-        {{profile.properties[property]}}
+      <ion-item no-lines style="color:white">
+        <ion-label style="color:rgb(155, 158, 148)">#</ion-label>
+        <div item-content>{{profile?.properties.digits}}</div>
+      </ion-item>
+      <ion-item no-lines style="color:white">
+        <ion-label style="color:rgb(155, 158, 148)">Sefer</ion-label>
+        <div item-content [innerText]="profile?.properties.sefer"></div>
+      </ion-item>
+      <ion-item no-lines style="color:white">
+        <ion-label style="color:rgb(155, 158, 148)">Fews</ion-label>
+        <div item-content [innerText]="profile?.properties.fews"></div>
+      </ion-item>
+      <ion-item no-lines style="color:white">
+        <ion-label style="color:rgb(155, 158, 148)">Relationship Status</ion-label>
+        <div item-content [innerText]="profile?.properties.relationshipStatus"></div>
+      </ion-item>
+      <ion-item no-lines style="color:white">
+        <ion-label style="color:rgb(155, 158, 148)">Interested In</ion-label>
+        <div item-content [innerText]="profile?.properties.interestedIn"></div>
+      </ion-item>
+
+      <ion-item no-lines style="color:white">
+        <ion-label style="color:rgb(155, 158, 148)">Education</ion-label>
+        <div item-content [innerText]="profile?.properties.education"></div>
       </ion-item>
     </ion-list>
 
     <!--Definitely Edited-->
+    <hr>
     <ion-list [virtualScroll]="userPosts">
       <ion-card  *virtualItem="let post">
-        <a (click)="post.detailPost(post)" style="background:black;" clear>
         <ion-item>
           <ion-avatar item-start>
-            <ion-img [src]="post.userImage"></ion-img>
+            <ion-img [src]="profile?.basic.currentPic" ></ion-img>
           </ion-avatar>
           <ion-note>
             <h2 style="color:white">{{post.poster.username}}</h2>
@@ -65,15 +92,16 @@
           <p item-end style="color:grey">{{post.time|momentjs}}</p>
         </ion-item>
 
-        <ion-img *ngIf="post.content.imageUrl!==''"[src]="post.content.imageUrl"></ion-img>
-        <div icon-center (click)="playVideo(post.content.videoUrl)" *ngIf="post.content.videoUrl!==''" style="height:50px" >
-          <ion-icon style="font-size:25px;position:relative"></ion-icon>
+        <div padding text-center *ngIf="post.content.imageUrl!==''||post.content.videoUrl!==''"style="width:inherit;height:250px" padding>
+          <ion-img style="width:inherit;" *ngIf="post.content.imageUrl!==''"[src]="post.content.imageUrl"></ion-img>
+          <div style="width:inherit;height:inherit;background:black" icon-center (click)="playVideo(post.content.videoUrl)" *ngIf="post.content.videoUrl!==''">
+            <ion-icon color="light" style="font-size:50px;position:relative"></ion-icon>
+          </div>
         </div>
 
         <ion-card-content>
-          <p style="color:white">{{post.content.description|truncate:150: '...Click to read more.'}}</p>
+          <p style="color:white">{{post.content.description}}</p>
         </ion-card-content>
-        </a>
         <ion-row>
           <ion-col>
             <button *ngIf="!post.liked"(click)="post.like()" ion-button color="light" clear small icon-start block>

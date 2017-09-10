@@ -13,8 +13,12 @@
   <div padding>
     <ion-list>
       <ion-item style="color:white">
-        <ion-label fixed>+251</ion-label>
-        <ion-input type="tel" [(ngModel)]="creds.digits" name="phone" placeholder="Your Phone Number"></ion-input>
+        <ion-label >+251</ion-label>
+        <ion-input type="tel" [(ngModel)]="creds.digits" name="phone" placeholder="Your number"></ion-input>
+      </ion-item>
+      <ion-item style="color:white">
+        <ion-label >Your Password</ion-label>
+        <ion-input type="password" [(ngModel)]="creds.password" name="pass" placeholder="New? Make one!"></ion-input>
       </ion-item>
 
     </ion-list>

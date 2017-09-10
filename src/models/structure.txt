@@ -1,3 +1,58 @@
+
+<div class="talk-bubble round" *ngIf="message.sender===oUser&&(message.time>messages[i-1].time-60000&&message.time<messages[i-1].time+60000)">
+  <ion-row>
+    <img *ngIf="message.picture!==''" [src]="message.picture"/>
+
+    <div [innerHtml]="message.content|linky"></div>
+  </ion-row>
+  <ion-row>
+    <ion-col col-3>
+      {{message.time|momentjs}}
+    </ion-col>
+  </ion-row>
+</div>
+<div class="talk-bubble tri-right round left-top" *ngIf="message.sender===oUser&&(message.time<messages[i-1].time-60000||message.time>messages[i-1].time+60000)">
+  <ion-row>
+      <img *ngIf="message.picture!==''" [src]="message.picture"/>
+    <div [innerHtml]="message.content|linky"></div>
+  </ion-row>
+  <ion-row>
+    <ion-col col-3>
+      {{message.time|momentjs}}
+    </ion-col>
+  </ion-row>
+</div>
+<div class="talk-bubble round" *ngIf="message.sender===user&&(message.time>messages[i-1].time-60000&&message.time<messages[i-1].time+60000)">
+  <ion-row>
+      <img *ngIf="message.picture!==''" [src]="message.picture"/>
+    <div [innerHtml]="message.content|linky"></div>
+  </ion-row>
+  <ion-row>
+    <ion-col col-11>
+      {{message.time|momentjs}}
+    </ion-col>
+    <ion-col col-1>
+      <ion-icon color="light" name="checkmark" *ngIf="message.sent&&!message.read"></ion-icon>
+      <ion-icon color="primary" name="checkmark" *ngIf="message.read"></ion-icon>
+    </ion-col>
+  </ion-row>
+</div>
+<div class="talk-bubble tri-right round right-top" *ngIf="message.sender===user&&(message.time<messages[i-1].time-60000||message.time>messages[i-1].time+60000)">
+  <ion-row>
+      <img *ngIf="message.picture!==''" [src]="message.picture"/>
+    <div [innerHtml]="message.content|linky"></div>
+  </ion-row>
+  <ion-row>
+    <ion-col col-11>
+      {{message.time|momentjs}}
+    </ion-col>
+    <ion-col col-1>
+      <ion-icon color="light" name="checkmark" *ngIf="message.sent&&!message.read"></ion-icon>
+      <ion-icon color="primary" name="checkmark" *ngIf="message.read"></ion-icon>
+    </ion-col>
+  </ion-row>
+</div>
+
 What the data will look like.
 #habeshaHi!
 

@@ -2,7 +2,7 @@
 
   <ion-navbar>
     <ion-title>{{ 'ITEM_CREATE_TITLE' | translate }}</ion-title>
-    <ion-buttons end>
+    <ion-buttons start>
       <button ion-button (click)="cancel()">
         <span color="primary" showWhen="ios">
           {{ 'CANCEL_BUTTON' | translate }}
@@ -10,6 +10,9 @@
         <ion-icon name="md-close" showWhen="android,windows"></ion-icon>
       </button>
     </ion-buttons>
+    <!-- <ion-buttons end>
+      <button ion-button icon-only><ion-icon *ngIf="connected" name=""></ion-icon><ion-icon *ngIf="!connected"name=""></ion-icon></button>
+    </ion-buttons> -->
     <!--ion-buttons end>
       <button ion-button (click)="done()" [disabled]="isReadyToSave" strong>
         <span color="primary" showWhen="ios">
@@ -20,13 +23,15 @@
     </ion-buttons-->
   </ion-navbar>
 
+    <!-- <div *ngIf="connected&&show" style="background:green;color:white;text-align:center">You are connected!</div>
+    <div *ngIf="!connected" style="background:red;color:white;text-align:center">No internet connection</div> -->
 </ion-header>
 
 <ion-content style="background:black">
   <div style="background-color:#1a1a1a;color:white">
     <input type="file" #fileInput style="height: 0px;width:0px" accept="image/*"name="files[]" (change)="onChangeInput($event)" />
     <input type="file" #fileInput1 style="height: 0px;width:0px" accept="video/*" name="files[]"  (change)="onChangeInput($event)"/>
-    <input type="file" #fileInput2 style="height: 0px;width:0px" accept="application/*"name="files[]" (change)="onChangeInput($event)"/>
+    <!-- <input type="file" #fileInput2 style="height: 0px;width:0px" accept="application/*"name="files[]" (change)="onChangeInput($event)"/> -->
     <ion-grid>
       <ion-row>
         <ion-col>
@@ -47,11 +52,11 @@
                 <ion-icon color="light" name="ios-videocam"></ion-icon>
               </button>
             </ion-col>
-            <ion-col>
+            <!-- <ion-col>
               <button ion-button clear (click)="showChoices($event, null,3)">
                 <ion-icon color="light" name="document"></ion-icon>
               </button>
-            </ion-col>
+            </ion-col> -->
           </ion-row>
           <ion-row>
               <!--md-progress-spinner
@@ -82,12 +87,11 @@
         <div class="profile-image" [style.backgroundImage]="getProfileImageStyle()" *ngIf="this.form.controls.profilePic.value"></div>
       </div-->
       <ion-item style="color:white;background:clear" no-lines>
-          <ion-label >Maximum Reach</ion-label>
-          <ion-select [(ngModel)]="reach">
-            <!--ion-option *ngFor="#name of namesList" [value]="name.shortName" [checked]="false">{{name.shortName}}</ion-option-->
-            <ion-option [value]=10>10</ion-option>
-            <ion-option [value]=15>15</ion-option>
-          </ion-select>
+          <ion-label>Maximum Reach</ion-label>
+          <ion-range [(ngModel)]="reach" [max]="max" pin="true" color="primary">
+            <ion-label range-left>0</ion-label>
+            <ion-label range-right>{{max}}</ion-label>
+          </ion-range>
         <!--ion-item>
           <ion-input type="text" placeholder="{{ 'ITEM_ABOUT_PLACEHOLDER' | translate }}" formControlName="about"></ion-input>
         </ion-item-->

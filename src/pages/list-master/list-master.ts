@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { NavController, ModalController } from 'ionic-angular';
+import { NavController, ModalController,LoadingController } from 'ionic-angular';
 
 import { ItemCreatePage } from '../item-create/item-create';
 import { ItemDetailPage } from '../item-detail/item-detail';
@@ -10,26 +10,56 @@ import { Items } from '../../providers/providers';
 import { Uzer } from '../../models/uzer'
 import { Item } from '../../models/item';
 import { FirebaseService } from '../../providers/firebase'
+import {Network} from '@ionic-native/network'
+import * as _ from 'lodash'
 @Component({
   selector: 'page-list-master',
   templateUrl: 'list-master.html'
 })
 export class ListMasterPage {
-  currentItems: Item[];
+  //currentItems: Item[];
   search:boolean=false
   searching: any=false
   searchCtrl:FormControl
   searchTerm:string=""
-  ranks: Array<string>
-  viewList:Array<string>
-  people:Array<Uzer>
+  ranks: Array<any>
+  viewList:Array<any>=[]
+  people:Array<any>=[]
   startAt:number
-  notor:Array<string>
-  fam:Array<string>
-  basis:number
+  notor:Array<string>=[]
+  fam:Array<string>=[]
+  basis:any
   master={}
-  constructor(public fbs:FirebaseService,public http:Http,public navCtrl: NavController, public items: Items, public modalCtrl: ModalController) {
+  connected:boolean
+  constructor(public lc:LoadingController,public nw:Network,public fbs:FirebaseService,public http:Http,public navCtrl: NavController, public items: Items, public modalCtrl: ModalController) {
     this.searchCtrl=new FormControl()
+    var vm=this
+    var disc=nw.onDisconnect().subscribe(()=>{
+      vm.connected=false
+    })
+    var conc=nw.onConnect().subscribe(()=>{
+      vm.connected=false
+    })
+    var vm=this
+
+    // this.fbs.getDatabase("/notorList",false).then(function(res){
+    //   if(res){
+    //     for (let i=0;i<Object.keys(res).length;i++){
+    //       vm.notor.push(res[i])
+    //     }
+    //   }else{
+    //     vm.notor=null
+    //   }
+    // }).catch(function(err){
+    //   //to  be taken care of
+    //   console.log("check internet connection")
+    // // })
+    // vm.master["1"]=vm.fam
+    // vm.master["2"]=vm.notor
+    // if(vm.notor===null){
+    //   vm.basis="1"
+    // }
+
 
   }
 
@@ -37,33 +67,39 @@ export class ListMasterPage {
    * The view loaded, let's query our items for the list
 
    */
-  ionWillEnter(){
+  ionViewWillEnter(){
+    var lc=this.lc.create({
+      content:"Loading the ranks..."
+    })
+    lc.present()
     var vm=this
-    this.fbs.getDatabase("/namesList/1",false).then(function(res){
+    vm.fam=[]
+    this.fbs.getDatabase("/fameList",false).then(function(res){
+      console.log("Got fameList...time to display", res)
       for (let i=0;i<Object.keys(res).length;i++){
-        vm.fam.push(res[i])
+        console.log("in for loop rank")
+        var key=Object.keys(res)[i]
+        vm.fam.push(res[key])
       }
+      vm.ranks=vm.fam
+      if(vm.fam){
+        vm.getItems();
+      }else{
+        console.log("fam is undefined? Why??", vm.fam)
+      }
+      lc.dismiss()
     }).catch(function(err){
       //to  be taken care of
-      console.log("check internet connection")
+      lc.dismiss()
+      console.log("check internet connection ranks, ",err)
     })
-    this.fbs.getDatabase("/namesList/2",false).then(function(res){
-      for (let i=0;i<Object.keys(res).length;i++){
-        vm.notor.push(res[i])
-      }
-    }).catch(function(err){
-      //to  be taken care of
-      console.log("check internet connection")
-    })
-    vm.master["1"]=vm.fam
-    vm.master["2"]=vm.notor
-    vm.ranks=vm.master[vm.basis]
-  }
-  ionViewDidLoad() {
-    this.getItems();
+
     this.searchCtrl.valueChanges.debounceTime(500).subscribe(search=>{
       this.getItems()
     })
+  }
+  ionViewDidLoad() {
+
   }
   onSearchInput(){
     this.searching = true;
@@ -71,13 +107,12 @@ export class ListMasterPage {
   searchOn(){
     this.search=!this.search
   }
-  openItem(person: Uzer) {
-    this.navCtrl.push(ItemDetailPage, {
-      person: person
-    });
+  openItem(person) {
+      this.navCtrl.push(ItemDetailPage, {
+        person: person.uid
+      });
   }
   getItems(){
-    this.ranks=this.master[this.basis]
     this.filterAndGetRanks(this.searchTerm).then(function(res){
         this.searching=false;
     }).catch(function(err){
@@ -89,49 +124,53 @@ export class ListMasterPage {
   filterAndGetRanks(searchTerm){
     var vm=this
     return new Promise(function(resolve,reject){
+      console.log("I have entered filter and get ranks")
       if(searchTerm!=""){
         vm.viewList=vm.ranks.filter((person) => {
-            return person.toLowerCase().indexOf(searchTerm.toLowerCase()) > -1;
+            return person.username.toLowerCase().indexOf(searchTerm.toLowerCase()) > -1;
         });
         vm.loadIt(vm.viewList)
+        resolve("done")
       }else{
-        vm.viewList=vm.ranks
-        vm.loadIt(vm.ranks)
+        vm.viewList=_.cloneDeep(vm.ranks)
+        vm.loadIt(vm.viewList)
       }
     })
   }
   loadIt(data){
     var vm=this
+    vm.people=[]
     for(let i in data){
-      this.fbs.getDatabase("/uidList/"+i,false).then(function(res){
-        this.fbs.getDatabase("/users/"+res,false).then(function(res){
-          vm.people.push(res)
-        }).catch(function(err){
-
-        })
+      this.fbs.getDatabase("/users/"+data[i].uid+"/basic",false).then(function(res:any){
+        var dat=data[i]
+        dat["currentPic"]=res.currentPic
+        dat["bio"]=res.bio
+        dat["username"]=res.username
+        console.log("ABout to push ranks")
+        vm.people.push(dat)
+        console.log(vm.people)
       }).catch(function(err){
-
+        console.log("sadd...unable to bring basics of guy")
       })
-      if(Number(i)===14||Number(i)===this.ranks.length-1){
-        this.startAt=Number(i)
-        break
-      }
+      if(Number(i)===25||Number(i)===data.length-1){
+      this.startAt=Number(i)
+      break
+    }
     }
   }
   pullToAddMore(e){
     var vm=this
     for(let i in this.viewList){
       var j=Number(i)+this.startAt
-      this.fbs.getDatabase("/uidList/"+j,false).then(function(res){
-        this.fbs.getDatabase("/users/"+res,false).then(function(res){
-          vm.people.push(res)
-        }).catch(function(err){
-
-        })
+      this.fbs.getDatabase("/users/"+this.viewList[j].uid+"/basic",false).then(function(res:any){
+        var dat=this.viewList[j]
+        dat["currentPic"]=res.currentPic
+        dat["bio"]=res.bio
+        vm.people.push(dat)
       }).catch(function(err){
 
       })
-      if(Number(i)===14||Number(i)===this.ranks.length-1){
+      if(Number(i)===25||Number(i)===this.viewList.length-1){
         this.startAt=Number(i)+this.startAt
         e.complete()
         break

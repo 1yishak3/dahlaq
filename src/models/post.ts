@@ -13,7 +13,7 @@ export class Post {
   poster={
     username:"",
     digits:"",
-    uId:"",
+    uid:"",
     profilePic:"",
     desiredReach:1,
   }
@@ -66,9 +66,8 @@ export class Post {
  // }
   bootstrap(){
     var vm=this
-    console.log("THIS IS YOUR PostID PLEASE DON'T BE NULL",this.postId)
+  
     this.fbs.getDatabase("/posts/"+this.postId,false).then(function(res:any){
-      console.log("how many times am I actually being called?",res)
       //var pst:any= res
       vm.poster=res.poster
       vm.content=res.content
@@ -84,9 +83,19 @@ export class Post {
         vm.reports=Object.keys(res.content.reports).length
         vm.reported=(vm.content.reports[vm.uid]!==undefined)
       }
-      console.log("stats", vm.liked,vm.disliked,vm.reported)
+
     }).catch(function(err){
       console.log("an error has occured, ",err)
+    })
+    this.fbs.getDatabase("/posts/"+this.postId+"/content/reach",true).then(function(res){
+      var reach = res
+      if(reach===0){
+        reach={}
+        reach[vm.uid]=Date.now()
+      }
+      vm.fbs.setDatabase("/posts/"+vm.postId+"/content/reach",reach,true).then(function(res){
+        console.log("reach updated")
+      })
     })
   }
   /*function toggleStar(postRef, uid) {
@@ -356,11 +365,11 @@ export class Post {
     })
 
   }
-  detailPost(post:Post){
-    this.navCtrl.push(PostPage,{
-      post:post
-    })
-  }
+  // detailPost(post:Post){
+  //   this.navCtrl.push(PostPage,{
+  //     post:post
+  //   })
+  // }
   // sync(){
   //   this.fbs.setDatabase("/posts"+this.postId+"/",this,false)
   // }
