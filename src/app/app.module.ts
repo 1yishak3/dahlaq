@@ -22,9 +22,11 @@ import { Network } from '@ionic-native/network'
 import { Elastic } from 'angular2-elastic'
 import { AutosizeModule } from 'ionic2-autosize'
 import { environment } from '../environments/environment'
-import { EmojiPickerModule } from '@ionic-tools/emoji-picker';
+//import { EmojiPickerModule } from '@ionic-tools/emoji-picker';
 import { MyApp } from './app.component';
 import { StreamingMedia } from '@ionic-native/streaming-media'
+import { EmojiPickerComponent } from '../assets/emoji-picker/emoji-picker'
+import {EmojiProvider} from '../providers/emoji'
 //import { ImageResizer } from '@ionic-native/image-resizer'
 import { Ng2ImgToolsModule } from 'ng2-img-tools'
 import { CardsPage } from '../pages/cards/cards';
@@ -50,6 +52,7 @@ import { User } from '../providers/user';
 import { FirebaseService } from '../providers/firebase'
 
 import { Camera } from '../providers/camera';
+import {Camera as Cam} from '@ionic-native/camera'
 
 import { SplashScreen } from '@ionic-native/splash-screen';
 import { StatusBar } from '@ionic-native/status-bar';
@@ -65,6 +68,7 @@ import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 //import { LueggModule } from 'angularjs-scroll-glue'
 import { CloudSettings, CloudModule } from '@ionic/cloud-angular';
 import { LinkyModule } from 'angular-linky'
+import { IonicImageLoader } from 'ionic-image-loader'
 
 const cloudSettings: CloudSettings = {
   'core': {
@@ -124,7 +128,8 @@ export function provideSettings(storage: Storage) {
     WelcomePage,
     PostPage,
     MomentjsPipe,
-    TruncatePipe
+    TruncatePipe,
+    EmojiPickerComponent
   //  PopoverPage
   ],
   imports: [
@@ -142,12 +147,14 @@ export function provideSettings(storage: Storage) {
     IonicStorageModule.forRoot(),
     Elastic,
     AutosizeModule,
-    EmojiPickerModule.forRoot(),
+//    EmojiPickerModule.forRoot(),
     NoopAnimationsModule,
     Ng2ImgToolsModule,
 //    ngSanitize,
     LinkyModule,
-    CloudModule.forRoot(cloudSettings)
+    CloudModule.forRoot(cloudSettings),
+    IonicImageLoader.forRoot(),
+
   //  LueggModule
   ],
   bootstrap: [IonicApp],
@@ -173,6 +180,8 @@ export function provideSettings(storage: Storage) {
   providers: [
     //ItemCreatePage,
     //PopoverPage,
+    Cam,
+    EmojiProvider,
     File,
     Network,
     //ImageResizer,

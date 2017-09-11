@@ -1,6 +1,6 @@
 import { Component, ElementRef, ViewChild, Renderer2, AfterViewChecked } from '@angular/core';
 
-import { NavController, NavParams, ViewController,AlertController,LoadingController } from 'ionic-angular';
+import { NavController, NavParams, ViewController,AlertController,LoadingController,Content, TextInput } from 'ionic-angular';
 import { FirebaseService } from '../../providers/firebase'
 import { FormControl } from '@angular/forms';
 import 'rxjs/add/operator/debounceTime';
@@ -19,6 +19,7 @@ export class ChatPage implements AfterViewChecked{
   @ViewChild('text') text:any
   @ViewChild('content') cont:any
   @ViewChild('fileInput') fileInput:ElementRef
+  @ViewChild(Content) content:Content
   person:any
   messages:Array<any>=[]
   textarea: any
@@ -55,6 +56,8 @@ export class ChatPage implements AfterViewChecked{
   sub:any
   fbs:any
   pic:any
+  _isOpenEmojiPicker = false
+  tpd:any
   constructor(public ir:Ng2ImgToolsService,
     public camera:Camera,
     public lc:LoadingController,
@@ -118,11 +121,11 @@ export class ChatPage implements AfterViewChecked{
    }
 
    ngAfterViewChecked(){
-     this.subscribe()
+    // this.subscribe()
      //console.log("this.text",this.text)
      if(this.spoken){
        if(this.message.length<41){
-         console.log("I'm here")
+
          this.text._elementRef.nativeElement.style.overflow="hidden";
          this.text._elementRef.nativeElement.style.height="35px"
        }
@@ -138,21 +141,37 @@ export class ChatPage implements AfterViewChecked{
   }
   keydown(event){
     console.log("keydown event has been triggered")
+    if(this.tpd){
+      vm.fbs.setDatabase("/chats/"+vm.chatId+"/users/"+vm.fbs.currentUser().uid+"/typing",true,true)
+      .then((res)=>{
+        console.log("Set it already")
+        this.tpd=false
+      })
+      .catch((err)=>{
+        console.log("err, ",err)
+        this.tpd=true
+      })
+    }
     var vm=this
     clearTimeout(timer)
     var then=vm.message
-    var timer=setTimeout(function(){
+    var timer=setTimeout(()=>{
+      console.log("In the timeout...")
+
       var now=vm.message
       if(now===then){
+        console.log("setting database")
         vm.fbs.setDatabase("/chats/"+vm.chatId+"/users/"+vm.fbs.currentUser().uid+"/typing",false,true)
-        .then(function(res){
-
+        .then((res)=>{
+          console.log("Set it already")
+          this.tpd=true
         })
-        .catch(function(err){
-
+        .catch((err)=>{
+          this.tpd=false
+          console.log("err, ",err)
         })
       }
-    },1000)
+    },666)
 
 
 
@@ -252,8 +271,20 @@ export class ChatPage implements AfterViewChecked{
     }
   }
   handleEmoji(e){
-    this.message=this.message+e.char
+    this._isOpenEmojiPicker = !this._isOpenEmojiPicker;
+       if (!this._isOpenEmojiPicker) {
+           this.text.setFocus();
+       }
+       this.content.resize();
+       this.scrollToBottom();
   }
+  scrollToBottom() {
+       setTimeout(() => {
+           if (this.content.scrollToTop) {
+               this.content.scrollToTop();
+           }
+       }, 400)
+   }
 
   signalTyping(){
     var val=true
@@ -351,8 +382,8 @@ export class ChatPage implements AfterViewChecked{
     var vm1=this.generateFileName
     if(!upload){
       var fp=this.processFile
-      this.camera.takePicture(1).then(function(data){
-        cam.getFile(data[0].fullpath).then(function(file){
+      this.camera.takePicture(1).then(function(data:any){
+        cam.getFile(data.fullpath).then(function(file){
           var pic = vm1(file)
           var url="/"+vm.currentUser().uid+"/images/"+pic
           this.complete=false
@@ -378,7 +409,7 @@ export class ChatPage implements AfterViewChecked{
     vm.currentFile=file.name
     var k=[]
     k.push(file)
-    vm.ir.resize(k,600,400).subscribe(res=>{
+    vm.ir.resize(k,450,450).subscribe(res=>{
       file=res
       var where="/images/"
 
@@ -511,6 +542,10 @@ export class ChatPage implements AfterViewChecked{
   }
   sendMessage(){
     //if vm.messages was initially zero, indicates a new chat initiation so call upon create chat.
+    if (!this._isOpenEmojiPicker) {
+      this.text.setFocus();
+    }
+
     if((this.pictureUrl!==""||this.message!=="")&&!this.uploading){
       console.log(this.message)
 
@@ -564,7 +599,7 @@ export class ChatPage implements AfterViewChecked{
   doneSending(){
     return new Promise((resolve,reject)=>{
       var vm=this
-      this.subc.unsubscribe()
+
       var thi={}
       thi["sender"]=vm.sendable.sender
       thi["receiver"]=vm.sendable.receiver
@@ -612,7 +647,7 @@ export class ChatPage implements AfterViewChecked{
 
   }
   cancel() {
-    this.subc.unsubscribe()
+
     this.viewCtrl.dismiss();
   }
 }

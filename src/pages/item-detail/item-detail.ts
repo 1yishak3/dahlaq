@@ -132,7 +132,7 @@ export class ItemDetailPage {
       vm.arrayStopped=1 //and then go with the below procedure
       vm.newList=[]
       console.log(vm.uid)
-      vm.fbs.getDatabase("/users/"+vm.uid+"/userPosts",true,null).then(function(snap){
+      vm.fbs.getDatabase("/users/"+vm.uid+"/userPosts",true).then(function(snap){
         console.log(snap)
 
         console.log("this is the snap from userPosts: ",snap)
@@ -161,7 +161,7 @@ export class ItemDetailPage {
           console.log("in the if loop of userposts")
           for(let i in vm.newList){
             console.log("are you in the for loop?", vm.dud)
-            vm.fbs.getDatabase("/posts/"+vm.newList[i],true,vm.uid).then(function(res){
+            vm.fbs.getDatabase("/posts/"+vm.newList[i],true).then(function(res){
               var post=new Post(vm.fbs,vm.navCtrl,vm.newList[i],true)
               for(let i in res){
                 post[i]=res[i]
@@ -217,7 +217,7 @@ export class ItemDetailPage {
       for(let i in vm.newList){
         var k =j+Number(i)
         console.log(i,k)
-        vm.fbs.getDatabase("/posts/"+vm.newList[k],false,vm.uid).then(function(res){
+        vm.fbs.getDatabase("/posts/"+vm.newList[k],false).then(function(res){
           var post = new Post(vm.fbs,vm.navCtrl,vm.newList[k],true)
           for(let i in res){
             post[i]=res[i]

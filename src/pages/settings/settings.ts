@@ -178,8 +178,8 @@ export class SettingsPage {
     var vm1=this.generateFileName
     if(!upload){
       var fp=this.processFile
-      this.camera.takePicture(1).then(function(data){
-        cam.getFile(data[0].fullpath).then(function(file){
+      this.camera.takePicture(1).then(function(data:any){
+        cam.getFile(data.fullpath).then(function(file){
           var pic = vm1(file)
           var url="/"+vm.currentUser().uid+"/images/"+pic
           fp(url,file)

@@ -99,6 +99,7 @@ export class ItemCreatePage {
     if(bool===true){
       let pop = this.alertCtrl.create({
         title:"Choose Method",
+        cssClass:"black",
         buttons:[{
           text:"Open Camera",
           handler:dat=>{
@@ -295,18 +296,19 @@ export class ItemCreatePage {
     var vm2=this
     if(!upload){
       var fp=this.processFile
-      this.camera.takePicture(1).then(function(data){
-
-        cam.getFile(data[0].fullpath).then(function(file:any){
+      this.camera.takePicture(1).then(function(data:any){
+        console.log(data,data.fullPath)
+        cam.getFile(data).then(function(file:any){
+          console.log("this is the file, ",file)
           var pic = vm1(file)
           vm2.currentFile=file.name
           var url="/"+vm.currentUser().uid+"/images/"+pic
           fp(url,file)
         }).catch(function(err){
-
+          console.log("Error, ", err)
         })
       }).catch(function(err){
-
+        console.log("Error taking picture, ",err)
       })
     }else{
     //  console.log(this.fileInput)
@@ -334,9 +336,9 @@ export class ItemCreatePage {
     var vm2=this
     if(!upload){
       var fp=this.processFile
-      this.camera.takeVideo(1).then(function(data){
+      this.camera.takeVideo(1).then(function(data:any){
 
-        cam.getFile(data[0].fullpath).then(function(file:any){
+        cam.getFile(data).then(function(file:any){
           var pic = vm1(file)
           vm2.currentFile=file.name
           var url=vm.currentUser().uid+"/videos/"+pic
@@ -366,6 +368,7 @@ export class ItemCreatePage {
     vm.currentFile=file.name
     if(file.type.match("image.*")){
       var k=[]
+      console.log(file)
       k.push(file)
       vm.ir.resize(k,450,450).subscribe(res=>{
         file=res
@@ -487,11 +490,12 @@ export class ItemCreatePage {
     var URL=t.snapshot.downloadUrl
   }
   processFile(url,fil) {
+    console.log("Processing...")
     this.uploading=true
     var vm = this.fbs
     var vm1=this
     var pst =  this.post
-    fil.file(function(file){
+    fil.file((file)=>{
       var task= this.fbs.setStorage(url,file)
       task.on('state_changed',function(snap:any){
         console.log(snap.bytesTransferred)

@@ -23,6 +23,8 @@ import { Settings } from '../providers/providers';
 import { TranslateService } from '@ngx-translate/core'
 import {FirebaseService} from '../providers/firebase'
 import {Deploy} from '@ionic/cloud-angular'
+import {Storage} from '@ionic/storage'
+import {ImageLoaderConfig} from 'ionic-image-loader'
 
 @Component({
   /*template: `<ion-menu [content]="content">
@@ -65,26 +67,35 @@ export class MyApp {
     { title: 'Settings', component: SettingsPage },
     { title: 'Search', component: SearchPage }
   ]
+  status:boolean
 
-  constructor(public lc:LoadingController,public deploy:Deploy,private translate: TranslateService, private platform: Platform,public fbs: FirebaseService, settings: Settings, private config: Config, private statusBar: StatusBar, private splashScreen: SplashScreen) {
+  constructor(public ilc:ImageLoaderConfig,public stg:Storage,public lc:LoadingController,public deploy:Deploy,private translate: TranslateService, private platform: Platform,public fbs: FirebaseService, settings: Settings, private config: Config, private statusBar: StatusBar, private splashScreen: SplashScreen) {
     this.initTranslate();
     this.user = this.fbs.currentUser()
-    console.log("this is you", this.user)
-    let loader = this.lc.create();
-    loader.present();
     var auth=this.fbs.getAuth()
-    auth.onAuthStateChanged(user=>{
-      if(user){
-        loader.dismiss()
-        this.nav.setRoot(TabsPage)
+    this.stg.get("log").then((res)=>{
+      this.status=res
+      if(res){
+        this.rootPage=TabsPage
       }else{
-        loader.dismiss()
-        this.nav.setRoot(WelcomePage)
+        this.rootPage=WelcomePage
       }
     })
-    let fireBaseUser = this.fbs.currentUser();
-    console.log(fireBaseUser);
-    this.rootPage = fireBaseUser ? TabsPage : LoginPage;
+
+    auth.onAuthStateChanged(user=>{
+      if(this.status===undefined&&this.status===null){
+        if(user){
+          this.nav.setRoot(TabsPage)
+          this.stg.set("log",true)
+          this.stg.set("uzer",this.fbs.currentUser())
+        }else{
+          this.nav.setRoot(WelcomePage)
+          this.stg.set("log",false)
+          this.stg.set("uzer",this.fbs.currentUser())
+        }
+      }
+    })
+
     // this.user=fbs.currentUser()
     // if(this.user){
     //     this.rootPage=TabsPage
@@ -100,6 +111,7 @@ export class MyApp {
     //   }
     // });
     this.platform.ready().then(() => {
+      ilc.enableSpinner(false)
       // this.deploy.check().then((snapshotAvailable: boolean) => {
       //   if (snapshotAvailable) {
       //     // When snapshotAvailable is true, you can apply the snapshot
@@ -115,6 +127,7 @@ export class MyApp {
     });
 
   }
+
   // samp(){
   //   var vm=this
   //   var consRef=this.fbs.getRef("/users/"+this.fbs.currentUser().uid+"/connections")

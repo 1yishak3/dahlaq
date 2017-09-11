@@ -68,10 +68,10 @@ export class ListMasterPage {
 
    */
   ionViewWillEnter(){
-    var lc=this.lc.create({
-      content:"Loading the ranks..."
-    })
-    lc.present()
+    // var lc=this.lc.create({
+    //   content:"Loading the ranks..."
+    // })
+    // lc.present()
     var vm=this
     vm.fam=[]
     this.fbs.getDatabase("/fameList",false).then(function(res){
@@ -87,14 +87,15 @@ export class ListMasterPage {
       }else{
         console.log("fam is undefined? Why??", vm.fam)
       }
-      lc.dismiss()
+      // lc.dismiss()
     }).catch(function(err){
       //to  be taken care of
-      lc.dismiss()
+      // lc.dismiss()
       console.log("check internet connection ranks, ",err)
     })
 
     this.searchCtrl.valueChanges.debounceTime(500).subscribe(search=>{
+      console.log("I am detecting changes in search parameter and proceeding with getting items")
       this.getItems()
     })
   }
@@ -125,13 +126,22 @@ export class ListMasterPage {
     var vm=this
     return new Promise(function(resolve,reject){
       console.log("I have entered filter and get ranks")
-      if(searchTerm!=""){
+      if(searchTerm!==""){
+        console.log(vm.ranks)
+        // vm.ranks[0]["username"]="Mohammed"
+        // vm.ranks[1]["username"]="Minyelshewa"
         vm.viewList=vm.ranks.filter((person) => {
-            return person.username.toLowerCase().indexOf(searchTerm.toLowerCase()) > -1;
+            console.log("filter? Person", person)
+            var car=person.username.toLowerCase().indexOf(searchTerm.toLowerCase())
+            console.log(car,car>-1)
+            return  car > -1;
         });
+        console.log("viewlist? ",vm.viewList)
         vm.loadIt(vm.viewList)
         resolve("done")
       }else{
+        console.log(searchTerm)
+        console.log("emptyyyy")
         vm.viewList=_.cloneDeep(vm.ranks)
         vm.loadIt(vm.viewList)
       }
@@ -146,7 +156,8 @@ export class ListMasterPage {
         dat["currentPic"]=res.currentPic
         dat["bio"]=res.bio
         dat["username"]=res.username
-        console.log("ABout to push ranks")
+        dat["rank"]=Number(res.rank)+1
+        console.log("About to push ranks")
         vm.people.push(dat)
         console.log(vm.people)
       }).catch(function(err){

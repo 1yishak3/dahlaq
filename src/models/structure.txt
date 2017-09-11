@@ -1,3 +1,32 @@
+Things that have to be tracked for change:
+
+Basic in profile
+Properties in profile
+Summary in Chat
+Messages in Chat
+Posts
+FameList
+I'll have to look at the database and add some.
+
+//ToDo
+
+Posts don't work after message sending fixed
+
+File browsing plugin yasfelgal cause it's not working for fren ---ish This will be postponed
+
+
+Firebase functions need caching fix
+and fame list updates must MUST MUST include username to make things easier during searches. Peace.
+
+
+If:
+
+Try implementing the inAppBrowser thing eski
+
+
+
+
+
 
 <div class="talk-bubble round" *ngIf="message.sender===oUser&&(message.time>messages[i-1].time-60000&&message.time<messages[i-1].time+60000)">
   <ion-row>

@@ -72,7 +72,7 @@ export class MapPage {
               }
 
               this.people[i]=chat
-              
+
             })
           }
         }else{
@@ -88,14 +88,14 @@ export class MapPage {
   }
 
   ionViewWillEnter() {
-    if(this.firstTime){
-      var ch=this.lc.create({
-        content:"Loading chats..."
-      })
-      ch.present()
-    }
+    // if(this.firstTime){
+    //   var ch=this.lc.create({
+    //     content:"Loading chats..."
+    //   })
+    //   ch.present()
+    // }
     this.refreshChats().then(()=>{
-      if(this.firstTime){  ch.dismiss()}
+      // if(this.firstTime){  ch.dismiss()}
       this.firstTime=false
 
     })

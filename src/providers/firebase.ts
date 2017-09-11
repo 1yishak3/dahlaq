@@ -178,7 +178,7 @@ export class FirebaseService {
           if(res!==c&&res){
               if(ctrl){
                 var load= this.lc.create({
-                  content:"Getting stuff..."
+                  content:"Getting new stuff..."
                 })
                 load.present()
               }
@@ -187,7 +187,9 @@ export class FirebaseService {
               firebase.database().ref(url).once('value').then((res)=>{
                 console.log(res.val())
                 if(ctrl){load.dismiss()}
+
                 var x=res.val()
+                if(x){
                 this.stg.set(url+"/cache",x.cache).then(()=>{
                   this.stg.get(url).then((res)=>{
                     var what=res||[]
@@ -200,6 +202,9 @@ export class FirebaseService {
                 })
 
                 resolve(res.val())
+              }else{
+                resolve()
+              }
               }).catch(function(err) {
                 console.log(err)
                 if(ctrl){load.dismiss()}
@@ -278,17 +283,22 @@ export class FirebaseService {
 
     var cr;
     console.log(email + "---" + password)
-    return new Promise(function(resolve, reject) {
+    return new Promise((resolve, reject)=>{
       firebase.auth().setPersistence(firebase.auth.Auth.Persistence.LOCAL)
-        .then(function() {
+        .then(()=>{
       if (email === null) {
         reject("notEthiopian")
       }
-      firebase.auth().createUserWithEmailAndPassword(email, password).then(function(d) {
+      firebase.auth().createUserWithEmailAndPassword(email, password).then((d)=>{
         console.log("Account creation successful, proceeding with phone number verification,", d)
         var user = firebase.auth().currentUser
+        this.stg.set("log",true).then(value => {
+          this.stg.set("uzer",this.currentUser()).then(()=>{
+            resolve(email)
+          })
 
-        resolve(email)
+        })
+
 
       }).catch(function(err) {
         console.log("Account not created", err)
@@ -341,9 +351,9 @@ export class FirebaseService {
     var email = this.user.emailify(num)
     var password = pass
     var vm = this
-    return new Promise(function(resolve, reject) {
+    return new Promise((resolve, reject)=>{
       firebase.auth().setPersistence(firebase.auth.Auth.Persistence.LOCAL)
-        .then(function() {
+        .then(()=>{
 
           // Existing and future Auth states are now persisted in the current
           // session only. Closing the window would clear any existing state even
@@ -352,9 +362,17 @@ export class FirebaseService {
           // New sign-in will be persisted with session persistence.
           if (pass&&pass!=="") {
             firebase.auth().signInWithEmailAndPassword(email, password).then((res) => {
-              resolve("Signed In!")
+              this.stg.set("log",true).then(value => {
+                this.stg.set("uzer",this.currentUser()).then(()=>{
+                  resolve("Signed in!")
+                })
+              })
+
             }).catch((err) => {
-              reject(err)
+              this.stg.set("log",false).then(value => {
+                reject(err)
+              })
+
             })
           }else{
             reject("Password")

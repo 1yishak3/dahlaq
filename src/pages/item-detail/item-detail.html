@@ -23,7 +23,7 @@
     <ion-row>
       <ion-col>
 
-          <img style="width:100%;height:100%" [src]="profile?.basic.currentPic"/>
+          <img-loader useImg style="width:100%;height:100%" [src]="profile?.basic.currentPic"></img-loader>
 
       </ion-col>
       <ion-col>
@@ -33,7 +33,7 @@
             <h2>
               {{ profile?.basic.username }}
               <ion-badge color="light">
-                #{{profile?.basic.rank}}
+                #{{profile?.basic.rank +1 }}
               </ion-badge>
             </h2>
           </ion-col>
@@ -78,11 +78,11 @@
 
     <!--Definitely Edited-->
     <hr>
-    <ion-list [virtualScroll]="userPosts">
-      <ion-card  *virtualItem="let post">
+    <ion-list [virtualScroll]="userPosts" approxItemHeight="500px">
+      <ion-card *virtualItem="let post">
         <ion-item>
           <ion-avatar item-start>
-            <ion-img [src]="profile?.basic.currentPic" ></ion-img>
+            <img-loader useImg [src]="profile?.basic.currentPic" ></img-loader>
           </ion-avatar>
           <ion-note>
             <h2 style="color:white">{{post.poster.username}}</h2>
@@ -92,8 +92,8 @@
           <p item-end style="color:grey">{{post.time|momentjs}}</p>
         </ion-item>
 
-        <div padding text-center *ngIf="post.content.imageUrl!==''||post.content.videoUrl!==''"style="width:inherit;height:250px" padding>
-          <ion-img style="width:inherit;" *ngIf="post.content.imageUrl!==''"[src]="post.content.imageUrl"></ion-img>
+        <div *ngIf="post.content.imageUrl!==''||post.content.videoUrl!==''"style="width:inherit;height:150px" padding>
+          <img-loader useImg style="width:inherit; height:150px" *ngIf="post.content.imageUrl!==''"[src]="post.content.imageUrl"></img-loader>
           <div style="width:inherit;height:inherit;background:black" icon-center (click)="playVideo(post.content.videoUrl)" *ngIf="post.content.videoUrl!==''">
             <ion-icon color="light" style="font-size:50px;position:relative"></ion-icon>
           </div>

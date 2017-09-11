@@ -128,8 +128,9 @@ page-content {
        left: 0;
      }
      .msg-content {
-       color: #343434;
+       color: #fff;
        span.triangle {
+         background-color: $toUserBackgroundColor;
          border-top-width: 0;
          border-right-width: 0;
          left: -5px;
