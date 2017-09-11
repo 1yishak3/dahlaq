@@ -112,14 +112,28 @@ export class MyApp {
     // });
     this.platform.ready().then(() => {
       ilc.enableSpinner(false)
-      // this.deploy.check().then((snapshotAvailable: boolean) => {
-      //   if (snapshotAvailable) {
-      //     // When snapshotAvailable is true, you can apply the snapshot
-      //     this.deploy.download().then(() => {
-      //      return this.deploy.extract()
-      //     });
-      //   }
-      // });
+      this.deploy.check().then((snapshotAvailable: boolean) => {
+        if (snapshotAvailable) {
+          // When snapshotAvailable is true, you can apply the snapshot
+          this.deploy.download().then(() => {
+            this.deploy.getSnapshots().then((snapshots) => {
+              console.log('Snapshots', snapshots);
+              // snapshots will be an array of snapshot uuids
+              this.deploy.info().then((x) => {
+                console.log('Current snapshot infos', x);
+                for (let suuid of snapshots) {
+                  if (suuid !== x.deploy_uuid) {
+                    this.deploy.deleteSnapshot(suuid);
+                  }
+                }
+              })
+            });
+           return this.deploy.extract()
+
+          });
+
+        }
+      });
       // Okay, so the platform is ready and our plugins are available.
       // Here you can do any higher level native things you might need.
       this.statusBar.styleDefault();

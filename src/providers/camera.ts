@@ -7,10 +7,11 @@ import { File,FileEntry } from '@ionic-native/file'
 //import {ImageResizer} from '@ionic-native/image-resizer'
 import { Ng2ImgToolsService } from 'ng2-img-tools'
 import { Camera as Cam} from '@ionic-native/camera'
+import { ImageResizer, ImageResizerOptions } from '@ionic-native/image-resizer';
 @Injectable()
 export class Camera{
 
-  constructor(public c:Cam,public ir:Ng2ImgToolsService,public plt:Platform,public fl: File,public mc:MediaCapture){
+  constructor(public imageResizer:ImageResizer,public c:Cam,public ir:Ng2ImgToolsService,public plt:Platform,public fl: File,public mc:MediaCapture){
 
   }
   takePicture(limit){
@@ -65,29 +66,56 @@ export class Camera{
     })
   }
   getFile(data:any){
+    var path="file://"+data.fullPath.substring(7,data.fullPath.lastIndexOf("/"))
+    var options = {
+       uri: data.fullPath ,
+       folderName: 'dahlaq-c7e0f',
+       quality: 90,
+       width: 450,
+       height: 450
+    } as ImageResizerOptions;
+
+
     var vm=this
     return new Promise ((resolve,reject)=>{
       vm.plt.ready().then((res)=>{
-        var path="file://"+data.fullPath.substring(7,data.fullPath.lastIndexOf("/"))
+
         console.log(path)
-        this.fl.readAsDataURL(path,data.name).then((res:any)=>{
-          var file=res
-          console.log("Let's see what happens,",file)
-          if(file.type.match("image.*")){
-            var k=[]
-            k.push(file)
-            vm.ir.resize(k,450,450).subscribe(res2=>{
-              console.log(res2)
-              resolve(res2)
-            },err=>{
-              console.log("errrrrrrror ",err)
+
+
+          if(data.type.match("image.*")){
+
+
+            this.imageResizer.resize(options).then((filePath: string) =>{
+              console.log('FilePath', filePath)
+              var pathe="file://"+filePath.substring(7,filePath.lastIndexOf("/"))
+              var subs=filePath.substring(filePath.lastIndexOf("/")+1,filePath.lastIndexOf(""))
+              console.log(subs)
+              this.fl.readAsDataURL(pathe,subs).then((res:any)=>{
+                var file=res
+                console.log("fileee",file)
+                resolve(file)
+              }).catch((err)=>{
+                console.log("Shit, turned out to be an error", err)
+                reject(err)
+              })
+
             })
+            .catch(e => {
+              reject(e)
+              console.log(e)
+            });
+
           }else{
-            resolve(file)
+            this.fl.readAsDataURL(path,data.name).then((res:any)=>{
+              var file=res
+              resolve(file)
+            }).catch((err)=>{
+              console.log("Shit, turned out to be an error", err)
+              reject(err)
+            })
           }
-        }).catch((err)=>{
-          console.log("Shit, turned out to be an error", err)
-        })
+
         // vm.gf(url).then(function(res:FileEntry){
         //
         //   res.file((res)=>{

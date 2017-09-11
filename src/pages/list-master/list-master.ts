@@ -31,8 +31,10 @@ export class ListMasterPage {
   basis:any
   master={}
   connected:boolean
+  keeper:any
   constructor(public lc:LoadingController,public nw:Network,public fbs:FirebaseService,public http:Http,public navCtrl: NavController, public items: Items, public modalCtrl: ModalController) {
     this.searchCtrl=new FormControl()
+    this.keeper={}
     var vm=this
     var disc=nw.onDisconnect().subscribe(()=>{
       vm.connected=false
@@ -134,7 +136,21 @@ export class ListMasterPage {
             console.log("filter? Person", person)
             var car=person.username.toLowerCase().indexOf(searchTerm.toLowerCase())
             console.log(car,car>-1)
-            return  car > -1;
+            if(car>-1){
+              if(!vm.keeper[person.username]){
+                vm.keeper[person.username]=true
+                return car>-1
+              }else if(vm.keeper[person.username]){
+                return car<-1
+              }else{
+                return car>-1
+              }
+            }else{
+              if(vm.keeper[person.username]){
+                delete vm.keeper[person.username]
+              }
+              return car>-1
+            }
         });
         console.log("viewlist? ",vm.viewList)
         vm.loadIt(vm.viewList)

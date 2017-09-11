@@ -72,21 +72,18 @@ export class ItemCreatePage {
 
   }
   ionViewWillEnter(){
-    var c=this.loadCtrl.create({
-      content:"Getting your limit..."
-    })
-    c.present()
+
     var vm=this
     this.fbs.getDatabase("/users/"+this.uid+"/reachLimit",true).then((max)=>{
 
       this.fbs.getDatabase("/users/"+this.uid+"/basic",true).then((res)=>{
         vm.max=max
         this.basic=res
-        c.dismiss()
+
       })
     }).catch((err)=>{
       console.log(err)
-      c.dismiss()
+
     })
 
   }
@@ -285,25 +282,24 @@ export class ItemCreatePage {
   }
   generateFileName(typ){
     var type=typ.name
-    var name = this.fbs.currentUser().uid+"_"+Date.now()+"_"+type.substring(type.lastIndexOf("."),type.lastIndexOf(""))
+    var name = this.uid+"_"+Date.now()+"_"+type.substring(type.lastIndexOf("."),type.lastIndexOf(""))
     console.log(name)
     return name
   }
   getPicture(upload) {
     var cam=this.camera
     var vm = this.fbs
-    var vm1=this.generateFileName
     var vm2=this
     if(!upload){
       var fp=this.processFile
-      this.camera.takePicture(1).then(function(data:any){
+      this.camera.takePicture(1).then((data:any)=>{
         console.log(data,data.fullPath)
-        cam.getFile(data).then(function(file:any){
+        cam.getFile(data).then((file:any)=>{
           console.log("this is the file, ",file)
-          var pic = vm1(file)
-          vm2.currentFile=file.name
+          var pic = this.generateFileName(data)
+          vm2.currentFile=data.name
           var url="/"+vm.currentUser().uid+"/images/"+pic
-          fp(url,file)
+          this.processFile(url,file)
         }).catch(function(err){
           console.log("Error, ", err)
         })
@@ -336,13 +332,13 @@ export class ItemCreatePage {
     var vm2=this
     if(!upload){
       var fp=this.processFile
-      this.camera.takeVideo(1).then(function(data:any){
+      this.camera.takeVideo(1).then((data:any)=>{
 
-        cam.getFile(data).then(function(file:any){
-          var pic = vm1(file)
-          vm2.currentFile=file.name
+        cam.getFile(data).then((file:any)=>{
+          var pic = this.generateFileName(data)
+          vm2.currentFile=data.name
           var url=vm.currentUser().uid+"/videos/"+pic
-          fp(url,file)
+          this.processFile(url,file)
         }).catch(function(err){
 
         })
@@ -495,16 +491,16 @@ export class ItemCreatePage {
     var vm = this.fbs
     var vm1=this
     var pst =  this.post
-    fil.file((file)=>{
-      var task= this.fbs.setStorage(url,file)
-      task.on('state_changed',function(snap:any){
+      console.log("fileeee2",fil)
+      var task= this.fbs.setStorage(url,fil,true)
+      task.on('state_changed',(snap:any)=>{
         console.log(snap.bytesTransferred)
         console.log(snap.totalBytes)
 
         vm1.progress=(Number(snap.bytesTransferred)/Number(snap.totalBytes))*100
         console.log(vm1.progress)
         if(vm1.progress===100){
-          vm.getStorage(url).then(function(res:any){
+          vm.getStorage(url).then((res:any)=>{
             if(vm1.get===1){
               pst.content.imageUrl=res
             }else if(vm1.get===2){
@@ -519,7 +515,7 @@ export class ItemCreatePage {
         }
 
         console.log("this is your snapshot, ",snap)
-      },function(err){
+      },(err)=>{
           console.log("This is your error",err)
       })
       // this.fbs.setStorage(url,file).then(function(res:any){
@@ -548,9 +544,7 @@ export class ItemCreatePage {
       //   console.log("error uploading file",err)
       //   vm1.uploading=false
       // })
-    },function(err){
-      console.log(err)
-    })
+
   }
 
   getProfileImageStyle() {
@@ -566,6 +560,8 @@ export class ItemCreatePage {
     this.post = new Post(this.fbs,this.navCtrl)
     this.currentFile=null
     this.tabs.select(0)
+    this.complete=false
+    this.uploading=false
     //this.app.getRootNav().getActiveChildNav().select(1)
   //  getRootNav().getActiveChildNav().select(1)
   //  this.navCtrl.parent.select(0)

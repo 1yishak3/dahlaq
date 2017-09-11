@@ -26,9 +26,10 @@
     "@ionic-native/camera": "^3.12.1",
     "@ionic-native/core": "3.12.1",
     "@ionic-native/file": "^4.2.1",
+    "@ionic-native/file-chooser": "^4.2.1",
     "@ionic-native/file-transfer": "^4.2.1",
     "@ionic-native/google-maps": "3.12.1",
-    "@ionic-native/image-resizer": "^4.1.0",
+    "@ionic-native/image-resizer": "^4.2.1",
     "@ionic-native/media-capture": "^4.1.0",
     "@ionic-native/network": "^4.1.0",
     "@ionic-native/photo-viewer": "^4.1.0",
@@ -58,6 +59,7 @@
     "cordova-plugin-fcm": "^2.1.2",
     "cordova-plugin-file": "^4.3.3",
     "cordova-plugin-file-transfer": "^1.6.3",
+    "cordova-plugin-filechooser": "^1.0.1",
     "cordova-plugin-inappbrowser": "^1.7.1",
     "cordova-plugin-media-capture": "^1.4.3",
     "cordova-plugin-network-information": "^1.3.3",
@@ -71,6 +73,7 @@
     "firebase": "^4.2.0",
     "firebase-admin": "^5.2.1",
     "firebase-functions": "^0.6.2",
+    "info.protonet.imageresizer": "^0.1.1",
     "ionic-angular": "3.5.0",
     "ionic-image-loader": "^4.2.1",
     "ionic-plugin-deploy": "^0.6.7",
@@ -119,7 +122,9 @@
       "ionic-plugin-keyboard": {},
       "ionic-plugin-deploy": {},
       "cordova-plugin-file-transfer": {},
-      "cordova-plugin-camera": {}
+      "cordova-plugin-camera": {},
+      "info.protonet.imageresizer": {},
+      "cordova-plugin-filechooser": {}
     },
     "platforms": []
   }

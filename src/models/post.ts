@@ -66,7 +66,7 @@ export class Post {
  // }
   bootstrap(){
     var vm=this
-  
+
     this.fbs.getDatabase("/posts/"+this.postId,false).then(function(res:any){
       //var pst:any= res
       vm.poster=res.poster
@@ -89,8 +89,13 @@ export class Post {
     })
     this.fbs.getDatabase("/posts/"+this.postId+"/content/reach",true).then(function(res){
       var reach = res
+      if(!reach){
+        reach={}
+      }
       if(reach===0){
         reach={}
+        reach[vm.uid]=Date.now()
+      }else{
         reach[vm.uid]=Date.now()
       }
       vm.fbs.setDatabase("/posts/"+vm.postId+"/content/reach",reach,true).then(function(res){

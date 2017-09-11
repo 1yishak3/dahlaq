@@ -4,6 +4,7 @@ import { HttpModule, Http } from '@angular/http';
 import { IonicApp, IonicModule, IonicErrorHandler } from 'ionic-angular';
 import * as firebase from 'firebase'
 import {Deploy} from '@ionic/cloud-angular'
+import { ImageResizer, ImageResizerOptions } from '@ionic-native/image-resizer';
 
 //var dFire = firebase.initializeApp(environment.firebase)
 //import {ngSanitize} from 'angular-sanitize'
@@ -180,6 +181,7 @@ export function provideSettings(storage: Storage) {
   providers: [
     //ItemCreatePage,
     //PopoverPage,
+    ImageResizer,
     Cam,
     EmojiProvider,
     File,

@@ -9,10 +9,16 @@ FameList
 I'll have to look at the database and add some.
 
 //ToDo
-
+////issues
 Posts don't work after message sending fixed
+Searching gives multiple results repeatedly
+images still having a hard time being represented
+smoother entrance is essential
 
-File browsing plugin yasfelgal cause it's not working for fren ---ish This will be postponed
+
+As for the inAppBrowser, I am thinking of implementing it before official distribution. inAppBrowser will local storage. That is where I will keep the
+confirmation code object. I will extract that once the person is done playing the recaptcha game. the browser will disappear and user will be prompted to input the code and stuff will proceeding
+this will require readjusting the backend if it actually works, but so what right?
 
 
 Firebase functions need caching fix

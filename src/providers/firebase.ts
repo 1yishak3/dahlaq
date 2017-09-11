@@ -268,8 +268,13 @@ export class FirebaseService {
       })
     })
   }
-  setStorage(url, value) {
-    var uploadTask = firebase.storage().ref().child(url).put(value)
+  setStorage(url, value,cam?) {
+    var uploadTask
+    if(cam){
+      uploadTask = firebase.storage().ref().child(url).putString(value,'data_url')
+    }else{
+      uploadTask = firebase.storage().ref().child(url).put(value)
+    }
     return uploadTask
   }
   currentUser() {
