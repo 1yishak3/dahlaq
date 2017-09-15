@@ -8,7 +8,7 @@
     <ion-row>
         <ion-col col-2>
         <ion-avatar style="position:absolute;bottom:5px;left:10px" start>
-          <img style="width:45px;height;45px;border-radius:100%;"[src]="pic">
+          <img style="width:45px;height;45px;border-radius:100%;"[src]="cpic">
 
         </ion-avatar>
       </ion-col>
@@ -67,8 +67,8 @@
           <p class="line-breaker" [innerHtml]="message.content|linky"></p>
           <ion-note style="color:grey;font-size:12px">
             {{message.time|momentjs}}&nbsp;&nbsp;&nbsp;
-            <ion-icon color="light" name="checkmark" *ngIf="message.sent&&!message.read"></ion-icon>
-            <ion-icon color="primary" name="checkmark" *ngIf="message.read"></ion-icon>
+            <ion-icon color="light" name="checkmark" *ngIf="message.sent&&!message.read&&message.sender === user"></ion-icon>
+            <ion-icon color="primary" name="checkmark" *ngIf="message.read&&message.sender === user"></ion-icon>
           </ion-note>
         </div>
       </div>

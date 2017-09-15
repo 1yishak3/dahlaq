@@ -5,7 +5,7 @@ import { IonicApp, IonicModule, IonicErrorHandler } from 'ionic-angular';
 import * as firebase from 'firebase'
 import {Deploy} from '@ionic/cloud-angular'
 import { ImageResizer, ImageResizerOptions } from '@ionic-native/image-resizer';
-
+import { Keyboard } from '@ionic-native/keyboard';
 //var dFire = firebase.initializeApp(environment.firebase)
 //import {ngSanitize} from 'angular-sanitize'
 import 'firebase/auth'
@@ -144,7 +144,20 @@ export function provideSettings(storage: Storage) {
         deps: [Http]
       }
     }),
-    IonicModule.forRoot(MyApp),
+    IonicModule.forRoot(MyApp, {
+        platforms : {
+          ios : {
+            // These options are available in ionic-angular@2.0.0-beta.2 and up.
+            scrollAssist: false,    // Valid options appear to be [true, false]
+            autoFocusAssist: false  // Valid options appear to be ['instant', 'delay', false]
+          },
+          android:{
+            scrollAssist: false,    // Valid options appear to be [true, false]
+            autoFocusAssist: false
+          }
+          // http://ionicframework.com/docs/v2/api/config/Config/)
+        }
+      }),
     IonicStorageModule.forRoot(),
     Elastic,
     AutosizeModule,
@@ -180,7 +193,8 @@ export function provideSettings(storage: Storage) {
   ],
   providers: [
     //ItemCreatePage,
-    //PopoverPage,
+    //PopoverPage
+    Keyboard,
     ImageResizer,
     Cam,
     EmojiProvider,

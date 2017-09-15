@@ -148,16 +148,44 @@ export class FirebaseService {
     })
   }
   getLimited(url, num,by) {
-    return new Promise(function(resolve, reject) {
-      firebase.database().ref(url).orderByChild(by).limitToLast(num).on("child_added",(snapshot)=>{
-  // This callback will be triggered exactly two times, unless there are
-  // fewer than two dinosaurs stored in the Database. It will also get fired
-  // for every new, heavier dinosaur that gets added to the data set.
-      console.log(snapshot.key);
-      resolve(snapshot.val())
-    },(err)=>{
-      reject(err)
-    });
+    return new Promise((resolve, reject)=>{
+      this.stg.get('recentFiftiCache').then((snap)=>{
+        if(snap){
+          firebase.database().ref(url.substring(0,url.lastIndexOf("/"))+"/mCache").once("value",(snaperro)=>{
+            if(snap!==snaperro.val()){
+              firebase.database().ref(url).orderByChild(by).limitToLast(num).on("value",(snapshot)=>{
+                // This callback will be triggered exactly two times, unless there are
+                // fewer than two dinosaurs stored in the Database. It will also get fired
+                // for every new, heavier dinosaur that gets added to the data set.
+                console.log(snapshot.key);
+                resolve(snapshot.val())
+              },(err)=>{
+                reject(err)
+              });
+            }else{
+              this.stg.get('recentFifti').then((tin)=>{
+                resolve(tin)
+              })
+            }
+          }).catch((err)=>{
+            console.log("no connection maybe?")
+            this.stg.get('recentFifti').then((tin)=>{
+              resolve(tin)
+            })
+          })
+        }else{
+          firebase.database().ref(url).orderByChild(by).limitToLast(num).on("value",(snapshot)=>{
+            // This callback will be triggered exactly two times, unless there are
+            // fewer than two dinosaurs stored in the Database. It will also get fired
+            // for every new, heavier dinosaur that gets added to the data set.
+            console.log(snapshot.key);
+            resolve(snapshot.val())
+          },(err)=>{
+            reject(err)
+          });
+        }
+      })
+
 
     })
   }
@@ -175,7 +203,9 @@ export class FirebaseService {
     return new Promise((resolve, reject)=>{
       this.stg.get(url+"/cache").then((c)=>{
         firebase.database().ref(url+"/cache").once('value').then((res)=>{
-          if(res!==c&&res){
+          if(res.val()){
+            if(res.val()!=c){
+              console.log("Jesus Lord save me",res.val(),c)
               if(ctrl){
                 var load= this.lc.create({
                   content:"Getting new stuff..."
@@ -183,12 +213,12 @@ export class FirebaseService {
                 load.present()
               }
 
-
-              firebase.database().ref(url).once('value').then((res)=>{
-                console.log(res.val())
+              console.log("How are you even here")
+              firebase.database().ref(url).once('value').then((r)=>{
+                console.log("This is res from fuckit",r.val())
                 if(ctrl){load.dismiss()}
 
-                var x=res.val()
+                var x=r.val()
                 if(x){
                 this.stg.set(url+"/cache",x.cache).then(()=>{
                   this.stg.get(url).then((res)=>{
@@ -203,23 +233,47 @@ export class FirebaseService {
 
                 resolve(res.val())
               }else{
-                resolve()
+                resolve(null)
               }
               }).catch(function(err) {
                 console.log(err)
                 if(ctrl){load.dismiss()}
                 reject(err)
               })
-
+            }else{
+              this.stg.get(url).then((w)=>{
+                resolve(url)
+              }).catch((d)=>{
+                reject("error")
+              })
+            }
           }else{
-            this.stg.get(url).then((res)=>{
-              if(res){
-                resolve(res)
-              }else{
-                reject("Sorry, cache has null too.")
-              }
+            firebase.database().ref(url).once('value').then((res)=>{
+              console.log("yolo",res.val())
+              // if(ctrl){load.dismiss()}
 
-            }).catch((err)=>{
+              var x=res.val()
+              if(x){
+              this.stg.set(url+"/cache",x.cache).then(()=>{
+                this.stg.get(url).then((res)=>{
+                  var what=res||[]
+                  for(let i in x){
+                    what.push(x[i])
+                  }
+                  this.stg.set(url,what)
+                })
+
+              })
+
+              resolve(res.val())
+            }else{
+              resolve(null)
+            }
+            }).catch(function(err) {
+              console.log(err)
+              // if(ctrl){load.dismiss().catch((err)=>{
+              //   console.log(err)
+              // })}
               reject(err)
             })
           }
@@ -367,8 +421,11 @@ export class FirebaseService {
           // New sign-in will be persisted with session persistence.
           if (pass&&pass!=="") {
             firebase.auth().signInWithEmailAndPassword(email, password).then((res) => {
+              console.log("is this the prob?")
               this.stg.set("log",true).then(value => {
+                console.log("or is this")
                 this.stg.set("uzer",this.currentUser()).then(()=>{
+                  console.log("This???")
                   resolve("Signed in!")
                 })
               })

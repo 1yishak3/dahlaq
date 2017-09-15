@@ -35,10 +35,13 @@ export class Post {
   disliked:boolean
   uid:any
 
-  constructor(public fbs:FirebaseService,public navCtrl:NavController,public pId?:string, public tr?:boolean){
+  constructor(public fbs:FirebaseService,public navCtrl:NavController,public pId?:string, public tr?:boolean,public paste?:any){
   //  console.log("this is this: ",fbs)
     this.uid=fbs.currentUser().uid
     this.postId=pId
+    for(let i in paste){
+      this[i]=paste[i]
+    }
   //  console.log("this is the uid: ",this.uid)
 
     // this.likes= (Object.keys(this.content.likes)).length

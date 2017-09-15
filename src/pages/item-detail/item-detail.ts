@@ -8,8 +8,9 @@ import { Post } from '../../models/post'
 import { Uzer } from '../../models/uzer'
 import { StreamingMedia } from '@ionic-native/streaming-media'
 import * as _ from 'lodash'
-import {ChatPage} from '../chat-detail/chat-detail'
+import { ChatPage } from '../chat-detail/chat-detail'
 import { Network } from '@ionic-native/network'
+import { SearchPage } from '../search/search'
 @Component({
   selector: 'page-item-detail',
   templateUrl: 'item-detail.html'
@@ -52,19 +53,18 @@ export class ItemDetailPage {
 
   }
   getProfile(){
-    var l= this.lc.create({content:"Loading Profile..."})
-    l.present()
+
     return new Promise((resolve,reject)=>{
       this.fbs.getDatabase("/users/"+this.uid,false).then((res)=>{
           var f=new Uzer()
           for(let i in res){
             f[i]=res[i]
           }
-          l.dismiss()
+
           resolve(f)
         //console.log(this.profile)
       }).catch((err)=>{
-        l.dismiss()
+        
         reject("ugh")
         console.log("Error is, ",err)
       })
@@ -120,7 +120,7 @@ export class ItemDetailPage {
         this.profile=res
       }
     })
-    this.getNewstuff()
+  //  this.getNewstuff()
   }
   getNewstuff(){
     //this.ready=false
@@ -194,6 +194,9 @@ export class ItemDetailPage {
         reject(err)
       })
     })
+  }
+  seePosts(){
+    this.navCtrl.push(SearchPage,{profile:this.profile})
   }
   playVideo(videoUrl){
     var options = {

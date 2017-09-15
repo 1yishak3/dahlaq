@@ -1,5 +1,5 @@
 import { Component, ViewChild, ElementRef} from '@angular/core';
-import { NavController, Nav, Events, LoadingController } from 'ionic-angular';
+import { NavController, Nav, Events, LoadingController,Content,Platform } from 'ionic-angular';
 import { PostPage } from '../post/post'
 import { FirebaseService } from '../../providers/firebase'
 import { WelcomePage } from '../welcome/welcome'
@@ -17,6 +17,7 @@ import { Storage } from '@ionic/storage'
 export class CardsPage {
   cardItems: any[];
   @ViewChild(Nav) nav: Nav;
+  @ViewChild(Content) content:Content
   viewables=[]
   profile:Uzer
   uid:string
@@ -31,7 +32,7 @@ export class CardsPage {
   firstTime:boolean=true
   noPosts:boolean=false
   show:any=true
-  constructor(public sg:Storage,public lc:LoadingController, public nw:Network,public sm:StreamingMedia,public navCtrl: NavController, public events : Events ,public fbs:FirebaseService) {
+  constructor(public platform:Platform,public sg:Storage,public lc:LoadingController, public nw:Network,public sm:StreamingMedia,public navCtrl: NavController, public events : Events ,public fbs:FirebaseService) {
     var urd;
    this.sg.get("uzer").then((res)=>{
      urd=this.fbs.currentUser()||res
@@ -59,6 +60,11 @@ export class CardsPage {
    })
   }
   ionViewWillEnter(){
+    // this.platform.ready().then(()=>{
+    //
+    //
+    // })
+    this.content.scrollToTop(10)
     if (this.viewables.length>=50){
       for(let i=0;i<14;i++){
         this.viewables.pop()
@@ -68,7 +74,19 @@ export class CardsPage {
       this.firstTime=true
     }
     if(this.fbs.currentUser()){
-      this.getNewstuff().then(function(res){
+      if(this.viewables.length<=3){
+        this.viewables=[]
+        setTimeout(()=>{
+          this.viewables=this.liste
+        },10)
+      }
+
+
+      this.getNewstuff().then((res)=>{
+
+        this.content.resize()
+
+        console.log("got to resize",this.viewables)
 
         console.log("Got the stuff ;)")
       }).catch(function(err){
@@ -201,6 +219,7 @@ export class CardsPage {
               }
             }
           }
+
           //else{
           //   console.log("snap is null")
           //   vm.sg.get('mostRecent').then((y)=>{

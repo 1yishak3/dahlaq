@@ -25,7 +25,8 @@
  </ion-refresher-->
  <!-- <ion-spinner color="light" *ngIf="ready!==true" name="bubbles"></ion-spinner> -->
   <div text-center style="color:rgb(50, 50, 50);text-align:center" *ngIf="viewables.length===0">There are currently no posts available. Start posting to see more posts!</div>
-  <ion-list [virtualScroll]="viewables" approxItemHeight="500px">
+
+  <ion-list [virtualScroll]="viewables" approxItemHeight="250px">
     <ion-card *virtualItem="let post">
       <ion-item>
         <ion-avatar item-start>
@@ -81,12 +82,13 @@
         </ion-col>
       </ion-row>
     </ion-card>
-    <ion-infinite-scroll (ionInfinite)="pullToAddMore($event)">
-      <ion-infinite-scroll-content
-      loadingSpinner="circles"
-      loadingText="Loading more of your posts..."></ion-infinite-scroll-content>
-    </ion-infinite-scroll>
+
   </ion-list>
+  <ion-infinite-scroll (ionInfinite)="pullToAddMore($event)">
+    <ion-infinite-scroll-content color="light"
+    loadingSpinner="circles"
+    loadingText="Loading more of your posts..."></ion-infinite-scroll-content>
+  </ion-infinite-scroll>
   <!--ion-footer>
     <div>
       <button ion-item no-lines text-center

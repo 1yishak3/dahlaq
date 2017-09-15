@@ -1,7 +1,9 @@
 page-cards {
+
 .top{
   z-index: inherit;
 };
+ ion-scroll { white-space: nowrap; };
 $spinner-ios-bubbles-color:#fff;
 $loading-md-spinner-color:#fff;
 $loading-md-background:clear;

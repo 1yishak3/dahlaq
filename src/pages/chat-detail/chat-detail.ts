@@ -1,6 +1,6 @@
 import { Component, ElementRef, ViewChild, Renderer2, AfterViewChecked } from '@angular/core';
 
-import { NavController, NavParams, ViewController,AlertController,LoadingController,Content, TextInput } from 'ionic-angular';
+import { NavController, NavParams, ViewController,AlertController,LoadingController,Content, TextInput, Platform } from 'ionic-angular';
 import { FirebaseService } from '../../providers/firebase'
 import { FormControl } from '@angular/forms';
 import 'rxjs/add/operator/debounceTime';
@@ -11,6 +11,8 @@ import {Network} from '@ionic-native/network'
 import { Camera } from '../../providers/camera'
 import { Ng2ImgToolsService} from 'ng2-img-tools'
 import {ItemDetailPage} from '../item-detail/item-detail'
+import { Keyboard } from '@ionic-native/keyboard';
+import {Storage} from '@ionic/storage'
 @Component({
   selector: 'page-content',
   templateUrl: 'chat-detail.html',
@@ -52,13 +54,17 @@ export class ChatPage implements AfterViewChecked{
   complete:any
   uploading:any
   progress:any
-  tempMes:any
+  tempMes:any=[]
   sub:any
-  fbs:any
   pic:any
   _isOpenEmojiPicker = false
   tpd:any
-  constructor(public ir:Ng2ImgToolsService,
+  fbs:FirebaseService
+  cpic:any
+  cacher:any
+  constructor(public platform:Platform,
+    public sg:Storage,public keyb:Keyboard,
+    public ir:Ng2ImgToolsService,
     public camera:Camera,
     public lc:LoadingController,
     public nw:Network,
@@ -69,30 +75,70 @@ export class ChatPage implements AfterViewChecked{
     public viewCtrl:ViewController) {
     this.firstTime=true
     console.log("here?")
+
     this.person=navParam.get('person');
 
-    this.fbs=navParam.get('fbs')
+    this.fbs =navParam.get('fbs')
     console.log(this.person)
     this.user=this.fbs.currentUser().displayName
     this.uid=this.fbs.currentUser().uid
+    this.keyb=new Keyboard()
+    this.platform.ready().then((a)=>{
+      console.log("here?")
+      this.keyb.disableScroll(true)
+    })
+    this.keyb.onKeyboardShow().subscribe((v)=>{
+      console.log("yes please")
+
+
+      this.content.resize()
+      console.log("Am I being resized?1")
+    })
+    this.keyb.onKeyboardHide().subscribe((v)=>{
+      this.content.resize()
+      console.log("Am I being resized?2")
+    })
 
     if(this.person.chatId){
       this.spoken=true
       for(let i in this.person.users){
         if(i!==this.uid){
-          this.pic=this.person.users[i].image
+
           this.oUser=this.person.users[i].username
-          this.oUserUid=this.person.users[i].uid
+          this.oUserUid=i
         }
+        console.log(this.oUserUid)
+
 
       }
+      this.fbs.getDatabase("/users/"+this.oUserUid+"/basic/currentPic",true).then((res)=>{
+        console.log(res)
+        this.cpic=res
+      })
+      this.fbs.getRef("/chats/"+this.chatId+"/content/mCache").on("value",(cacher)=>{
+        if(this.cacher){
+          if(this.cacher!==cacher){
+            this.doMessaging()
+          }
+        }else{
+          this.doMessaging()
+        }
+      })
 
     }else{
-      this.pic=this.person.currentPic
+      this.cpic=this.person.currentPic
       this.oUser=this.person.username
       this.oUserUid=this.person.uid
       this.spoken=false
+      this.fbs.getDatabase("/users/"+this.oUserUid+"/basic/currentPic",true).then((res)=>{
+        console.log(res)
+        this.cpic=res
+      })
     }
+    this.fbs.getDatabase("/users/"+this.oUserUid+"/basic/currentPic",true).then((res)=>{
+      console.log(res)
+      this.cpic=res
+    })
     this.user=this.fbs.currentUser().displayName
     this.uid=this.fbs.currentUser().uid
 
@@ -104,6 +150,14 @@ export class ChatPage implements AfterViewChecked{
      this.navCtrl.push(ItemDetailPage,{person:this.oUserUid})
    }
    conquer(){
+     var online=this.fbs.getRef("/users/"+this.oUserUid+"/basic/online/")
+     online.on('value',(res)=>{
+       this.online=res.val()
+     })
+     this.sub=this.fbs.getRef("/chats/"+this.person.chatId+"/summary/users/"+this.oUserUid+"/typing")
+     this.sub.on('value',(snap)=>{
+       this.typing=snap.val()
+     })
      var vm=this
      vm.disc=vm.nw.onDisconnect().subscribe(()=>{
        vm.connected=false
@@ -142,7 +196,7 @@ export class ChatPage implements AfterViewChecked{
   keydown(event){
     console.log("keydown event has been triggered")
     if(this.tpd){
-      vm.fbs.setDatabase("/chats/"+vm.chatId+"/users/"+vm.fbs.currentUser().uid+"/typing",true,true)
+      this.fbs.setDatabase("/chats/"+this.chatId+"/users/"+this.fbs.currentUser().uid+"/typing",true,true)
       .then((res)=>{
         console.log("Set it already")
         this.tpd=false
@@ -180,15 +234,19 @@ export class ChatPage implements AfterViewChecked{
 
   }
   ionViewWillEnter(){
-    var online=this.fbs.getRef("/users/"+this.oUserUid+"/basic/online/")
-    online.on('value',(res)=>{
-      this.online=res.val()
-      console.log("status",this.online)
-    },(err)=>{
-      console.log("some error,",err)
-    })
+    console.log("entering")
+
+    // var online=this.fbs.getRef("/users/"+this.oUserUid+"/basic/online/")
+    // online.on('value',(res)=>{
+    //   this.online=res.val()
+    //   console.log("status",this.online)
+    // },(err)=>{
+    //   console.log("some error,",err)
+    // })
 
     //this.person=this.navParam.get('person');
+
+
     if(this.firstTime){
       console.log("FIRST TIME")
 
@@ -201,7 +259,7 @@ export class ChatPage implements AfterViewChecked{
       console.log("not a virgin")
       this.getNew()
       console.log(this.messages)
-      this.readAll()
+    //  this.readAll()
     }
 
   }
@@ -211,7 +269,7 @@ export class ChatPage implements AfterViewChecked{
       for(let i in unread){
         this.fbs.getDatabase("/chats/"+this.person.chatId+"/content/messages/"+unread[i],true).then((res:any)=>{
 
-          this.tempMes.push(new Message(res))
+          this.tempMes.push(new Message(this.fbs,res,this.person.chatId,unread[i]))
         })
       }
       this.tempMes.sort((a,b)=>{
@@ -232,28 +290,26 @@ export class ChatPage implements AfterViewChecked{
         if(i!==this.fbs.currentUser().uid){
             this.oUser=this.person.users[i].username
             this.oUserUid=i
-            var online=this.fbs.getRef("/users/"+this.oUserUid+"/basic/online/")
-            online.on('value',(res)=>{
-              vm.online=res.val()
-            })
-            this.sub=this.fbs.getRef("/chats/"+this.person.chatId+"/summary/users/"+this.oUserUid+"/typing")
-            this.sub.on('value',(snap)=>{
-              vm.typing=snap.val()
-            })
+
         }
       }
       this.messages.push(this.person.lastMessage)
-      this.fbs.getRef("/chats/"+this.person.chatId+"/content/messages",50,"time").orderByChild("time").limitToLast(50).on("value",(res)=>{
+      this.fbs.getLimited("/chats/"+this.person.chatId+"/content/messages",50,"time").then((res)=>{
         //chat arrangments here
         //for(let i in res){
         //  vm.chat[i]=res[i]
         //}
         // vm.chat.content.messages=res
+        this.sg.set("recentFifti",res)
+        this.fbs.getDatabase("/chats/"+this.chatId+"/content/mCache",true).then((re)=>{
+          this.sg.set("recentFiftiCache",re)
+          this.cacher=re
+        })
         vm.tempMes=[]
-        console.log(res.val())
-        var messages=res.val()
+        console.log(res)
+        var messages=res
         for (let i in messages){
-          vm.tempMes.push(messages[i])
+          vm.tempMes.push(new Message(this.fbs,messages[i],this.person.chatId,i))
         }
         console.log("tempMes",vm.tempMes)
         vm.tempMes.sort((a,b)=>{

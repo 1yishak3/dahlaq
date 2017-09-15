@@ -1,5 +1,5 @@
-import { Component, ViewChild } from '@angular/core';
-import { Platform, Nav, Config,LoadingController } from 'ionic-angular';
+import { Component, ViewChild, OnInit} from '@angular/core';
+import { Platform, Nav, Config,AlertController } from 'ionic-angular';
 
 import { StatusBar } from '@ionic-native/status-bar';
 import { SplashScreen } from '@ionic-native/splash-screen';
@@ -25,6 +25,7 @@ import {FirebaseService} from '../providers/firebase'
 import {Deploy} from '@ionic/cloud-angular'
 import {Storage} from '@ionic/storage'
 import {ImageLoaderConfig} from 'ionic-image-loader'
+import {Keyboard} from '@ionic-native/keyboard'
 
 @Component({
   /*template: `<ion-menu [content]="content">
@@ -69,10 +70,10 @@ export class MyApp {
   ]
   status:boolean
 
-  constructor(public ilc:ImageLoaderConfig,public stg:Storage,public lc:LoadingController,public deploy:Deploy,private translate: TranslateService, private platform: Platform,public fbs: FirebaseService, settings: Settings, private config: Config, private statusBar: StatusBar, private splashScreen: SplashScreen) {
+  constructor(public keyb:Keyboard,public ilc:ImageLoaderConfig,public stg:Storage,public ac:AlertController,public deploy:Deploy,private translate: TranslateService, private platform: Platform,public fbs: FirebaseService, settings: Settings, private config: Config, private statusBar: StatusBar, private splashScreen: SplashScreen) {
     this.initTranslate();
     this.user = this.fbs.currentUser()
-    var auth=this.fbs.getAuth()
+
     this.stg.get("log").then((res)=>{
       this.status=res
       if(res){
@@ -81,7 +82,21 @@ export class MyApp {
         this.rootPage=WelcomePage
       }
     })
+    platform.ready().then(()=>{
 
+      // Okay, so the platform is ready and our plugins are available.
+      // Here you can do any higher level native things you might need.
+      statusBar.styleDefault();
+      this.keyb=new Keyboard()
+      this.keyb.disableScroll(true)
+    })
+
+
+
+  }
+  ngOnInit(){
+    var auth=this.fbs.getAuth()
+    console.log("Doing on init")
     auth.onAuthStateChanged(user=>{
       if(this.status===undefined&&this.status===null){
         if(user){
@@ -111,7 +126,35 @@ export class MyApp {
     //   }
     // });
     this.platform.ready().then(() => {
-      ilc.enableSpinner(false)
+
+      this.ilc.enableSpinner(false)
+      this.update().then((res:any)=>{
+          console.log("in the then")
+          var ac=this.ac.create({
+            title: 'Dahlaq Be Like',
+            message: "We have an update! Restart your app to see what's new.",
+            buttons: [
+              {
+                text: 'YIMECHACHU',
+                role: 'cancel',
+                handler: () => {
+                  //console.log('Cancel clicked');
+                }
+              },
+            ]
+          })
+          ac.present()
+
+      })
+
+      // Okay, so the platform is ready and our plugins are available.
+      // Here you can do any higher level native things you might need.
+      this.statusBar.styleDefault();
+      this.splashScreen.hide();
+    });
+  }
+  update(){
+    return new Promise((resolve,reject)=>{
       this.deploy.check().then((snapshotAvailable: boolean) => {
         if (snapshotAvailable) {
           // When snapshotAvailable is true, you can apply the snapshot
@@ -119,29 +162,31 @@ export class MyApp {
             this.deploy.getSnapshots().then((snapshots) => {
               console.log('Snapshots', snapshots);
               // snapshots will be an array of snapshot uuids
-              this.deploy.info().then((x) => {
-                console.log('Current snapshot infos', x);
-                for (let suuid of snapshots) {
-                  if (suuid !== x.deploy_uuid) {
-                    this.deploy.deleteSnapshot(suuid);
+              this.deploy.extract().then(()=>{
+                console.log("well, this works")
+                this.deploy.info().then((x) => {
+                  console.log('Current snapshot infos', x);
+                  for (let suuid of snapshots) {
+                    if (suuid !== x.deploy_uuid) {
+                      this.deploy.deleteSnapshot(suuid);
+                    }
                   }
-                }
+                })
+                resolve("yuppieeee")
               })
+
+
             });
-           return this.deploy.extract()
+
 
           });
 
         }
       });
-      // Okay, so the platform is ready and our plugins are available.
-      // Here you can do any higher level native things you might need.
-      this.statusBar.styleDefault();
-      this.splashScreen.hide();
-    });
+
+    })
 
   }
-
   // samp(){
   //   var vm=this
   //   var consRef=this.fbs.getRef("/users/"+this.fbs.currentUser().uid+"/connections")

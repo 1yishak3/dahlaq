@@ -1,22 +1,79 @@
 <ion-header>
 
   <ion-navbar>
-    <ion-title>{{ 'SEARCH_TITLE' | translate }}</ion-title>
+    <ion-title>Posts from {{profile?.basic.username}}</ion-title>
   </ion-navbar>
 
 </ion-header>
 
 
-<ion-content>
-  <!--ion-searchbar color="dark" (ionInput)="getItems($event)" placeholder="{{ 'SEARCH_PLACEHOLDER' | translate }}"></ion-searchbar-->
+<ion-content color="dark" style="background:black">
+  <!--ion-searchbar color="dark" (ionInput)="getItems($event)" placeholder="{{ 'SEARCH_PLACEHOLDER' | translate }}"></ion-searchbar
+  [virtualScroll]="userPosts" approxItemHeight="250px"
+  *virtualItem="let post"
+-->
   <ion-list>
-    <button ion-item (click)="openItem(item)" *ngFor="let item of currentItems">
-      <ion-avatar item-start>
-        <img [src]="item.profilePic" />
-      </ion-avatar>
-      <h2>{{item.name}}</h2>
-      <p>{{item.about}}</p>
-      <ion-note item-end *ngIf="item.note">{{item.note}}</ion-note>
-    </button>
+    <ion-card *ngFor="let post of posts">
+      <ion-item>
+        <ion-avatar item-start>
+          <img-loader useImg [src]="profile?.basic.currentPic" ></img-loader>
+        </ion-avatar>
+        <ion-note>
+          <h2 style="color:white">{{post?.poster?.username}}</h2>
+          <ion-icon item-start name='ios-eye'></ion-icon>
+          {{post.reach}}
+        </ion-note>
+        <p item-end style="color:grey">{{post.time|momentjs}}</p>
+      </ion-item>
+
+      <div *ngIf="post.content.imageUrl!==''||post.content.videoUrl!==''"style="width:inherit;height:150px" padding>
+        <img-loader useImg style="width:inherit; height:150px" *ngIf="post.content.imageUrl!==''"[src]="post.content.imageUrl"></img-loader>
+        <div style="width:inherit;height:inherit;background:black" icon-center (click)="playVideo(post.content.videoUrl)" *ngIf="post.content.videoUrl!==''">
+          <ion-icon color="light" style="font-size:50px;position:relative"></ion-icon>
+        </div>
+      </div>
+
+      <ion-card-content>
+        <p style="color:white">{{post.content.description}}</p>
+      </ion-card-content>
+      <ion-row>
+        <ion-col>
+          <button *ngIf="!post.liked"(click)="post.like()" ion-button color="light" clear small icon-start block>
+              <ion-icon name='thumbs-up'></ion-icon>
+              {{post.likes}}| Like
+            </button>
+            <button *ngIf="post.liked"(click)="post.unlike()" ion-button color="primary" clear small icon-start block>
+                <ion-icon name='thumbs-up'></ion-icon>
+                {{post.likes}}| Like
+              </button>
+        </ion-col>
+        <ion-col>
+          <button *ngIf="!post.disliked"(click)="post.dislike()"ion-button color="light" clear small icon-start block>
+              <ion-icon name='thumbs-down'></ion-icon>
+              {{post.dislikes}}| Dislike
+            </button>
+            <button *ngIf="post.disliked"(click)="post.undislike()"ion-button color="primary" clear small icon-start block>
+                <ion-icon name='thumbs-down'></ion-icon>
+                {{post.dislikes}}| Dislike
+              </button>
+        </ion-col>
+        <ion-col center text-center>
+          <button *ngIf="!post.reported" (click)="post.report()" ion-button color="light" clear small icon-start block>
+              <ion-icon name='ios-redo'></ion-icon>
+              {{post.reports}}| Report
+          </button>
+          <button *ngIf="post.reported"(click)="post.unreport()" ion-button color="primary" clear small icon-start block>
+              <ion-icon name='ios-redo'></ion-icon>
+              {{post.reports}}| Report
+          </button>
+        </ion-col>
+      </ion-row>
+    </ion-card>
+
   </ion-list>
+  <ion-infinite-scroll (ionInfinite)="pullToAddMore($event)">
+    <ion-infinite-scroll-content color="light"
+    loadingSpinner="circles"
+    loadingText="Loading more of your posts..."></ion-infinite-scroll-content>
+  </ion-infinite-scroll>
 </ion-content>

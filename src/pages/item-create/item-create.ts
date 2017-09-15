@@ -1,13 +1,13 @@
 import { Component, ViewChild,ElementRef,OnInit } from '@angular/core';
 import { Validators, FormBuilder, FormGroup } from '@angular/forms';
-import { Nav,Tabs,NavController, ViewController,AlertController,LoadingController,ToastController } from 'ionic-angular';
+import { Nav,Tabs,NavController, ViewController,AlertController,LoadingController,ToastController ,Content, Platform} from 'ionic-angular';
 import { Post } from '../../models/post'
 import { Camera } from '../../providers/camera';
 import { FirebaseService } from '../../providers/firebase'
 import { Network } from '@ionic-native/network'
 //import { PopoverPage } from '../popovers/propop'
 import {Ng2ImgToolsService} from 'ng2-img-tools'
-
+import {Keyboard} from '@ionic-native/keyboard'
 @Component({
   selector: 'page-item-create',
   templateUrl: 'item-create.html'
@@ -16,6 +16,7 @@ export class ItemCreatePage {
   @ViewChild('fileInput') fileInput:ElementRef;
   @ViewChild('fileInput1') fileInput1:any;
   @ViewChild('fileInput2') fileInput2:ElementRef;
+  @ViewChild(Content) content:Content
 //  app:App
   isReadyToPost: boolean;
   post:Post
@@ -37,7 +38,9 @@ export class ItemCreatePage {
   show:any=true
   max:any
   basic:any
-  constructor(public ir: Ng2ImgToolsService ,
+  constructor(public platform:Platform,
+    public keyb:Keyboard,
+    public ir: Ng2ImgToolsService ,
     public nw:Network,
     public toastCtrl:ToastController,
     public loadCtrl: LoadingController,
@@ -56,7 +59,11 @@ export class ItemCreatePage {
     this.uploading=false
     this.true=false
     var vm=this
-
+    this.keyb=new Keyboard()
+    platform.ready().then((a)=>{
+      console.log("here lies disableScroll")
+      this.keyb.disableScroll(true)
+    })
     var disc=nw.onDisconnect().subscribe(()=>{
       vm.connected=false
     })
@@ -72,6 +79,16 @@ export class ItemCreatePage {
 
   }
   ionViewWillEnter(){
+    console.log("in after view init")
+    this.keyb.onKeyboardShow().subscribe((v)=>{
+      console.log("yes please")
+      this.content.resize()
+      console.log("Am I being resized?1")
+    })
+    this.keyb.onKeyboardHide().subscribe((v)=>{
+      this.content.resize()
+      console.log("Am I being resized?2")
+    })
 
     var vm=this
     this.fbs.getDatabase("/users/"+this.uid+"/reachLimit",true).then((max)=>{
@@ -90,6 +107,15 @@ export class ItemCreatePage {
   // ionViewWillEnter(){
   //
   // }
+  ionViewDidEnter(){
+    this.platform.ready().then(() => {
+      this.keyb.disableScroll(true);
+    });
+  }
+
+  ngAfterViewInit(){
+
+  }
   showChoices(e,bool,num){
     this.bool=bool
     this.get=num
@@ -567,7 +593,9 @@ export class ItemCreatePage {
   //  this.navCtrl.parent.select(0)
   }
   ionViewWillLeave(){
-
+    this.platform.ready().then(() => {
+      this.keyb.disableScroll(true);
+    });
   }
 
 
