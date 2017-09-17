@@ -1,5 +1,6 @@
 {
   "globalDependencies": {
-    "cordova": "registry:dt/cordova#0.0.0+20160819210047"
+    "cordova": "registry:dt/cordova#0.0.0+20160819210047",
+    "localforage": "registry:dt/localforage#0.0.0+20161102134758"
   }
 }

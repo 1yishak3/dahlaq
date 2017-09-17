@@ -33,6 +33,7 @@ export class SignupPage {
   confirmationResult: any
   show:any=true
   timer:any
+  pass:any
   phone:any
   constructor(public nw:Network,
     public fbs:FirebaseService,
@@ -46,7 +47,8 @@ export class SignupPage {
     this.translateService.get('SIGNUP_ERROR').subscribe((value) => {
       this.signupErrorString = value;
     })
-    this.phone=this.nvp.get("num")
+    this.pass=nvp.get("pass")
+    this.phone=nvp.get("num")
     this.person=new Uzer()
     var vm=this
     var disc=nw.onDisconnect().subscribe(()=>{
@@ -145,7 +147,7 @@ export class SignupPage {
   }
   doSignup() {
     var load1=this.loadCtrl.create({
-      content:"Verifying your number..."
+      content:"Verifying..."
     })
     load1.present()
     //this.person=new Uzer()
@@ -161,11 +163,11 @@ export class SignupPage {
         console.log(this.confirmationResult)
         if (this.once<2){
           console.log("I got here...then something happened")
-      this.checkU(this.account.username).then((sth)=>{
+          this.checkU(this.account.username).then((sth)=>{
             load1.dismiss()
             load1=this.loadCtrl.create({content:"Creating your account..."})
             load1.present()
-            this.person.properties.digits=this.phone
+            this.person.properties.digits=vm.currentUser().phoneNumber||""
             //console.log(this.person.properties.digits)
             this.person.basic.uid=vm.currentUser().uid
             this.person.basic.referrer=this.account.refer
@@ -238,6 +240,7 @@ export class SignupPage {
             }).catch(function(err){
               console.log("User Creation ERROR in Database",err)
                 vm.currentUser().delete()
+                vm1.navCtrl.pop()
             })
             vm.setDatabase("/adminsLists/users/"+vm.currentUser().uid,vm1.person.properties,true).then(function(res){
               console.log("Successfully added to admin's list")
@@ -248,7 +251,7 @@ export class SignupPage {
           }).catch( (err) => {
             load1.dismiss()
             //this.navCtrl.push(MainPage); // TODO: Remove this when you add your signup endpoint
-            vm.currentUser().delete()
+
             // Unable to sign up
             console.log("I'm not in: ",err)
             let toast = this.toastCtrl.create({
@@ -257,6 +260,7 @@ export class SignupPage {
               position: 'top'
             });
             toast.present();
+
           });
         }else{
         load1.dismiss()

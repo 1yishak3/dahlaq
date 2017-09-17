@@ -10,12 +10,14 @@
     </ion-buttons>
   </ion-navbar>
 
+
   <!-- <div *ngIf="connected&&show" style="background:green;color:white;text-align:center">You are connected!</div>
   <div *ngIf="!connected" style="background:red;color:white;text-align:center">No internet connection</div> -->
 </ion-header>
 
 
 <ion-content style="background:black;">
+
   <!--ion-refresher style="color:white"(ionRefresh)="refresher($event)">
    <ion-refresher-content style="text-color:white;color:white"
     pullingIcon="arrow-dropdown"
@@ -25,7 +27,7 @@
  </ion-refresher-->
  <!-- <ion-spinner color="light" *ngIf="ready!==true" name="bubbles"></ion-spinner> -->
   <div text-center style="color:rgb(50, 50, 50);text-align:center" *ngIf="viewables.length===0">There are currently no posts available. Start posting to see more posts!</div>
-
+  
   <ion-list [virtualScroll]="viewables" approxItemHeight="250px">
     <ion-card *virtualItem="let post">
       <ion-item>

@@ -7,6 +7,7 @@ import {Deploy} from '@ionic/cloud-angular'
 import { ImageResizer, ImageResizerOptions } from '@ionic-native/image-resizer';
 import { Keyboard } from '@ionic-native/keyboard';
 //var dFire = firebase.initializeApp(environment.firebase)
+import { InAppBrowser } from '@ionic-native/in-app-browser'
 //import {ngSanitize} from 'angular-sanitize'
 import 'firebase/auth'
 import 'firebase/messaging'
@@ -194,6 +195,7 @@ export function provideSettings(storage: Storage) {
   providers: [
     //ItemCreatePage,
     //PopoverPage
+    InAppBrowser,
     Keyboard,
     ImageResizer,
     Cam,

@@ -231,7 +231,7 @@ export class FirebaseService {
 
                 })
 
-                resolve(res.val())
+                resolve(r.val())
               }else{
                 resolve(null)
               }
@@ -405,10 +405,10 @@ export class FirebaseService {
       })
     })
   }
-  login(creds, pass?: any, verify?: any) {
-    var num = this.user.checkify(creds.digits)
-    var email = this.user.emailify(num)
-    var password = pass
+  login(e,p) {
+  
+    var email = e
+    var password = p
     var vm = this
     return new Promise((resolve, reject)=>{
       firebase.auth().setPersistence(firebase.auth.Auth.Persistence.LOCAL)

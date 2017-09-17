@@ -30,6 +30,7 @@
         "@ionic-native/file-transfer": "^4.2.1",
         "@ionic-native/google-maps": "3.12.1",
         "@ionic-native/image-resizer": "^4.2.1",
+        "@ionic-native/in-app-browser": "^4.2.1",
         "@ionic-native/keyboard": "^4.2.1",
         "@ionic-native/media-capture": "^4.1.0",
         "@ionic-native/network": "^4.1.0",

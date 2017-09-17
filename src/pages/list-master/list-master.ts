@@ -12,6 +12,8 @@ import { Item } from '../../models/item';
 import { FirebaseService } from '../../providers/firebase'
 import {Network} from '@ionic-native/network'
 import * as _ from 'lodash'
+import {Storage} from '@ionic/storage'
+
 @Component({
   selector: 'page-list-master',
   templateUrl: 'list-master.html'
@@ -32,7 +34,7 @@ export class ListMasterPage {
   master={}
   connected:boolean
   keeper:any
-  constructor(public lc:LoadingController,public nw:Network,public fbs:FirebaseService,public http:Http,public navCtrl: NavController, public items: Items, public modalCtrl: ModalController) {
+  constructor(public sg:Storage,public lc:LoadingController,public nw:Network,public fbs:FirebaseService,public http:Http,public navCtrl: NavController, public items: Items, public modalCtrl: ModalController) {
     this.searchCtrl=new FormControl()
     this.keeper={}
     var vm=this
@@ -69,6 +71,7 @@ export class ListMasterPage {
    * The view loaded, let's query our items for the list
 
    */
+  
   ionViewWillEnter(){
     // var lc=this.lc.create({
     //   content:"Loading the ranks..."

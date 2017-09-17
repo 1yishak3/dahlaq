@@ -59,6 +59,7 @@ export class CardsPage {
      },5000)
    })
   }
+
   ionViewWillEnter(){
     // this.platform.ready().then(()=>{
     //
