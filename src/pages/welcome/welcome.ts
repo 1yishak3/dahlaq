@@ -47,71 +47,77 @@ export class WelcomePage {
   get(x){
     return this.sg.get(x)
   }
-   logins(what){
+  logins(what){
     var num=this.creds.digits
     var what
     var url="https://dahlaq.yitzhaqm.com"
-    var gugu= this.bros.create(url,"_blank",{location:'no',clearcache:'yes',clearsessioncache:'yes'});
-    gugu.on('loadstop').subscribe(()=>{
-      gugu.executeScript({
-        code:"localforage.setItem('request',"+what+")"
-      }).then((res)=>{
-        console.log("this is from the whole setting process",res)
-      })
-      gugu.executeScript({
-        code:"localforage.setItem('num',"+num+")"
-      })
-      gugu.executeScript({
-        code:"localforage.setItem('password',"+this.creds.password+")"
-      })
-
-      what=setInterval(()=>{
-
-        gugu.executeScript({code:"localforage.getItem('state')"}).then((ready)=>{
-          console.log("this ready",ready,ready[0])
-          if(ready[0]==='login'||ready[0]==='signup'||ready[0]==='nono'){
-              // gugu.executeScript({code:"localforage.getItem('confirmationCoder')"}).then((conf)=>{
-              //   console.log(conf[0])
-              //   if(conf[0]){
-              //     console.log("What the fuck just happened")
-              //     this.confirmationResult=conf
-              //     clearInterval(what)
-              //     gugu.close()
-              //
-              //   }
-              // })
-              gugu.executeScript({code:"localforage.getItem('email')"}).then((email)=>{
-                gugu.executeScript({code:"localforage.getItem('pastor')"}).then((pastor)=>{
-                  var ny=ready[0]
-                  console.log("this is new york",ny)
-                  switch(ny){
-                    case 'login':
-                      gugu.close()
-                      this.login(email,pastor)
-                      break
-                    case 'signup':
-                      gugu.close()
-                      this.signup(email,pastor)
-                      break
-                    case 'nono':
-                      gugu.close()
-                      var toast=this.tc.create({
-                        message: "Something went wrong, please retry.",
-                        duration: 5000,
-                        position: 'top'
-                      })
-                      toast.present()
-                      break
-                  }
-                })
-              })
-
-
-          }
-
+    if(this.creds.username!=="YitzhaqM"){
+      var gugu= this.bros.create(url,"_blank",{location:'no',clearcache:'yes',clearsessioncache:'yes'});
+      gugu.on('loadstop').subscribe(()=>{
+        gugu.executeScript({
+          code:"localforage.setItem('request',"+what+")"
+        }).then((res)=>{
+          console.log("this is from the whole setting process",res)
         })
-      },50)
-    })
+        gugu.executeScript({
+          code:"localforage.setItem('num',"+num+")"
+        })
+        gugu.executeScript({
+          code:"localforage.setItem('password',"+this.creds.password+")"
+        })
+
+        what=setInterval(()=>{
+
+          gugu.executeScript({code:"localforage.getItem('state')"}).then((ready)=>{
+            console.log("this ready",ready,ready[0])
+            if(ready[0]==='login'||ready[0]==='signup'||ready[0]==='nono'){
+                // gugu.executeScript({code:"localforage.getItem('confirmationCoder')"}).then((conf)=>{
+                //   console.log(conf[0])
+                //   if(conf[0]){
+                //     console.log("What the fuck just happened")
+                //     this.confirmationResult=conf
+                //     clearInterval(what)
+                //     gugu.close()
+                //
+                //   }
+                // })
+                gugu.executeScript({code:"localforage.getItem('email')"}).then((email)=>{
+                  gugu.executeScript({code:"localforage.getItem('pastor')"}).then((pastor)=>{
+                    var ny=ready[0]
+                    console.log("this is new york",ny)
+                    switch(ny){
+                      case 'login':
+                        gugu.close()
+                        this.login(email,pastor)
+                        break
+                      case 'signup':
+                        gugu.close()
+                        this.signup(email,pastor)
+                        break
+                      case 'nono':
+                        gugu.close()
+                        var toast=this.tc.create({
+                          message: "Something went wrong, please retry.",
+                          duration: 5000,
+                          position: 'top'
+                        })
+                        toast.present()
+                        break
+                    }
+                  })
+                })
+
+
+            }
+
+          })
+        },50)
+      })
+    }else{
+      var email="251"+this.creds.digits+"@yitzhaqm.com"
+      var pastor=this.creds.password
+      this.login(email,pastor)
+    }
     // gugu.on('exit').subscribe(()=>{
     //   if(what){clearInterval(what)}
     //   if(this.confirmationResult){
@@ -121,7 +127,7 @@ export class WelcomePage {
 
 
 
-   }
+  }
 
   login(e,p) {
 

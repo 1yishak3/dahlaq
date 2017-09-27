@@ -1,11 +1,53 @@
-<ion-menu [content]="content">
-  <ion-content>
-    <ion-list>
-      <button menuClose ion-item *ngFor="let p of pages" (click)="openPage(p)">
-        {{p.title}}
-      </button>
-    </ion-list>
-  </ion-content>
-</ion-menu>
+<ion-header>
 
-<ion-nav #content [root]="rootPage"></ion-nav>
+  <ion-navbar>
+    <ion-title>About Dahlaq</ion-title>
+    <!-- <ion-buttons end>
+      <button ion-button icon-only>
+        <ion-icon color="light"*ngIf="connected" name="earth"></ion-icon>
+        <ion-icon color="danger" *ngIf="!connected" name="earth"></ion-icon>
+      </button>
+    </ion-buttons> -->
+  </ion-navbar>
+</ion-header>
+
+  <!-- <div *ngIf="connected&&show" style="background:green;color:white;text-align:center">You are connected!</div>
+  <div *ngIf="!connected" style="background:red;color:white;text-align:center">No internet connection</div> -->
+
+
+<ion-content style="background:black;">
+  <div padding>
+    <div style="color:white">
+      <p>What's 'Dahlaq'?</p>
+      <p padding>
+        Dahlaq? Well, search your history textbooks! We're kidding, you don't have to do that. The message? It's time we did stuff on our own! Besides, Facebook is SO last year! With you on our side, we can make Dahlaq awesome!
+      </p>
+    </div>
+    <div style="color:white">
+      <p>Okay, so who are you guys?</p>
+      <p padding>Dahlaq is a month old project (with pinches of procrastination) of an aspiring Ethiopian programmer. His name? Just call him yitzhaq...YitzhaqM ;) Of course, that programmer had some much needed help at the end from another Ethiopian friend. His name? Just call him Nati, NatiMinyel :) We swear we are Ethiopian! lol</p>
+    </div>
+    <div style="color:white">
+      <p>Why Dahlaq?</p>
+      <p padding>We think it is very important to have fun or be informed WITHOUT any form of interruption. We want our fellow Ethiopians to be able to enjoy social networking without the need to worry money or too much data consumption too!</p>
+    </div>
+    <div style="color:white">
+      <p>Are you really unblockable?</p>
+      <p padding>From the time of inception, Dahlaq has gathered a number of people to research the idea of being unblockable. We have been experimenting on the side, and, as of now, we are on the verge of producing a prototype of an unblockable version of this app. Please note, your app is NOT unblockable right now.</p>
+    </div>
+    <div style="color:white">
+      <p>Why isn't all this in Amharic?</p>
+      <p padding>It was hard to code in all the material in Amaharic or any other Ethiopian language because of lack of resources. BUT, we will soon have the option of changing into most of the Ethiopian languages, if you wish.</p>
+    </div>
+    <div style="color:white">
+      <p>How can I help?</p>
+      <p padding>All we want you to help with is having fun and making sure your friends are having fun too!</p>
+    </div>
+    <div style="color:white">
+      <p>Lingering questions?</p>
+      <p padding>Email yitzhaq @ contact@yitzhaqm.com OR just call Nati @ +251911199343. We will be sure to answer your questions quickly!</p>
+    </div>
+
+  </div>
+  <button clear ion-button (click)="goLegal()">All That Legal Stuff</button>
+</ion-content>

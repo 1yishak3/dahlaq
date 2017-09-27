@@ -406,7 +406,7 @@ export class FirebaseService {
     })
   }
   login(e,p) {
-  
+
     var email = e
     var password = p
     var vm = this
@@ -419,7 +419,7 @@ export class FirebaseService {
           // if a user forgets to sign out.
           // ...
           // New sign-in will be persisted with session persistence.
-          if (pass&&pass!=="") {
+          if (password&&password!=="") {
             firebase.auth().signInWithEmailAndPassword(email, password).then((res) => {
               console.log("is this the prob?")
               this.stg.set("log",true).then(value => {
