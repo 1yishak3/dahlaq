@@ -1,7 +1,6 @@
 import { Component } from '@angular/core';
 import { NavController, NavParams } from 'ionic-angular';
 
-import { ItemDetailPage } from '../item-detail/item-detail';
 
 import { Item } from '../../models/item';
 
@@ -47,7 +46,7 @@ export class SearchPage {
     for(var i=init;i<this.postList.length;i++){
       console.log("For loop",this.postList)
       pid=this.postList[i]
-      if(pid&&i!="cache"){
+      if(pid&&i!="cache"&&isNaN(pid)){
         this.fbs.getDatabase("/posts/"+pid,true).then((post:any)=>{
 
           if(post){
@@ -102,11 +101,7 @@ export class SearchPage {
   /**
    * Navigate to the detail page for this item.
    */
-  openItem(item: Item) {
-    this.navCtrl.push(ItemDetailPage, {
-      item: item
-    });
-  }
+
   playVideo(videoUrl){
     var options = {
     successCallback: function() {

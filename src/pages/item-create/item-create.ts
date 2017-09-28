@@ -245,13 +245,21 @@ export class ItemCreatePage {
           if(res===0){
             console.log("in here")
             vm.setDatabase(resu,{"0":vm1.postId},true).then(function(res){
-              vm1.tabs.select(0)
-              console.log("success setting viewables")
+              vm.setDatabase(resu+"/cache",Date.now(),true).then(()=>{
+                vm1.tabs.select(0)
+                console.log("success setting viewables")
+
+              })
+
             }).catch()
           }else{
             console.log("not in there")
             vm.setList(resu,vm1.postId).then(function(res){
-              vm1.tabs.select(0)
+              vm.setDatabase(resu+"/cache",Date.now(),true).then(()=>{
+                vm1.tabs.select(0)
+              
+
+              })
               console.log("Added to viewables.",res)
               console.log(res)
             }).catch(function(err){
@@ -388,7 +396,7 @@ export class ItemCreatePage {
     var file=e.target.files[0]
     var pic= this.generateFileName(file)
     vm.currentFile=file.name
-    if(file.type.match("image")==="image"){
+    if(file.type.substring(0,file.type.lastIndexOf('/'))=='image'){
       var k=[]
       console.log(file)
       k.push(file)
@@ -437,14 +445,16 @@ export class ItemCreatePage {
       })
     }else{
       var where=""
-      if(vm.get=1){
+      console.log("HEY NOT VIDEO")
+      console.log(vm.get)
+      if(vm.get===1){
         where="/images/"
-      }else if(vm.get=2){
+      }else if(vm.get===2){
         where="/videos/"
-      }else if(vm.get=3){
+      }else if(vm.get===3){
         where="/files/"
       }
-      if(file.type.match("video")==="video"){
+      if(file.type.substring(0,file.type.lastIndexOf('/'))=='video'){
         console.log("sensed a video")
         where="/videos/"
       }
@@ -467,14 +477,15 @@ export class ItemCreatePage {
       task.then(function(snap){
         console.log(snap)
           vm.fbs.getStorage(url).then(function(res:any){
+            console.log()
             if(vm.get===1){
-              pst.content.imageUrl=res
+            //  pst.content.imageUrl=res
             }else if(vm.get===2){
               pst.content.videoUrl=res
             }else if(vm.get===3){
               pst.content.fileUrl=res
             }
-            if(file.type.match("video")==="video"){
+            if(file.type.substring(0,file.type.lastIndexOf('/'))=='video'){
               console.log("sensed a video")
               pst.content.videoUrl=res
             }

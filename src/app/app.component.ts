@@ -17,7 +17,7 @@ import { SignupPage } from '../pages/signup/signup';
 import { TabsPage } from '../pages/tabs/tabs';
 import { TutorialPage } from '../pages/tutorial/tutorial';
 import { WelcomePage } from '../pages/welcome/welcome';
-
+import {ItemDetailPage} from '../pages/item-detail/item-detail'
 import { Settings } from '../providers/providers';
 
 import { TranslateService } from '@ngx-translate/core'
@@ -73,15 +73,17 @@ export class MyApp {
   constructor(public keyb:Keyboard,public ilc:ImageLoaderConfig,public stg:Storage,public ac:AlertController,public deploy:Deploy,private translate: TranslateService, private platform: Platform,public fbs: FirebaseService, settings: Settings, private config: Config, private statusBar: StatusBar, private splashScreen: SplashScreen) {
     this.initTranslate();
     this.user = this.fbs.currentUser()
-
+    console.log(ItemDetailPage)
     this.stg.get("log").then((res)=>{
       this.status=res
       if(res){
         this.rootPage=TabsPage
+
       }else{
         this.rootPage=WelcomePage
       }
     })
+
     platform.ready().then(()=>{
 
       // Okay, so the platform is ready and our plugins are available.
@@ -98,6 +100,9 @@ export class MyApp {
     var auth=this.fbs.getAuth()
     console.log("Doing on init")
     auth.onAuthStateChanged(user=>{
+      if(user){
+        this.stg.remove("/users/"+user.uid+"/viewables")
+      }
       if(this.status===undefined&&this.status===null){
         if(user){
           this.nav.setRoot(TabsPage)

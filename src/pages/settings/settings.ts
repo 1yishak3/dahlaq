@@ -1,6 +1,6 @@
 import { Component , ViewChild} from '@angular/core';
 //import { FormBuilder, FormGroup } from '@angular/forms';
-import { NavController, NavParams, AlertController, LoadingController,Tabs} from 'ionic-angular';
+import { NavController, NavParams, AlertController, LoadingController} from 'ionic-angular';
 
 //import { Settings } from '../../providers/settings';
 
@@ -8,7 +8,7 @@ import { TranslateService } from '@ngx-translate/core';
 import {FirebaseService } from '../../providers/firebase'
 import * as _ from 'lodash'
 import { Camera } from '../../providers/camera'
-import { PopoverPage } from '../popovers/propop'
+//import { PopoverPage } from '../popovers/propop'
 import { Network } from '@ionic-native/network'
 import { Ng2ImgToolsService} from 'ng2-img-tools'
 import {Storage} from '@ionic/storage'
@@ -38,7 +38,6 @@ export class SettingsPage {
   progress:number=0
   currentFile:string=""
   person:any
-  tabs:Tabs
   constructor( public sg:Storage,
     public ir:Ng2ImgToolsService,
     public lc:LoadingController,
@@ -50,7 +49,7 @@ export class SettingsPage {
     public translate: TranslateService,
     public fbs:FirebaseService)
   {
-    this.tabs=navCtrl.parent
+
     this.profile= navParams.get('user')
     this.profilec=(this.profile)
     this.props=Object.keys(this.profilec.properties)
@@ -62,15 +61,15 @@ export class SettingsPage {
       vm.connected=true
     })
   }
-  logout(){
-    this.fbs.getAuth().signOut().then(()=>{
-      this.sg.set("log",false)
-      this.navCtrl.pop()
-      this.tabs.select(0)
-      this.navCtrl.setRoot(WelcomePage)
-      this.navCtrl.popToRoot()
-    })
-  }
+  // logout(){
+  //   this.fbs.getAuth().signOut().then(()=>{
+  //     this.sg.set("log",false)
+  //     this.navCtrl.pop()
+  //     this.tabs.select(0)
+  //     this.navCtrl.setRoot(WelcomePage)
+  //     this.navCtrl.popToRoot()
+  //   })
+  // }
   goAbout(){
     this.navCtrl.push(MenuPage)
   }

@@ -63,7 +63,7 @@
     <div class="msg-detail">
       <div style="user-select: auto !important" class="msg-content">
           <span class="triangle"></span>
-          <img *ngIf="message.picture!==''" style="width:inherit;height:350px" [src]="message.picture"/>
+          <img-loader *ngIf="message.picture!==''" style="width:inherit;height:350px" [src]="message.picture" useImg></img-loader>
           <p class="line-breaker" [innerHtml]="message.content|linky"></p>
           <ion-note style="color:grey;font-size:12px">
             {{message.time|momentjs}}&nbsp;&nbsp;&nbsp;

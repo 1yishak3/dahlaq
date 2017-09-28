@@ -127,7 +127,8 @@
             "cordova-plugin-camera": {},
             "info.protonet.imageresizer": {},
             "cordova-plugin-filechooser": {},
-            "ionic-plugin-keyboard": {}
+            "ionic-plugin-keyboard": {},
+            "cordova-hot-code-push-plugin": {}
         },
         "platforms": [
             "android"

@@ -1,9 +1,7 @@
 import { Component, ViewChild } from '@angular/core';
 import { NavController, Nav } from 'ionic-angular';
 
-//import { ContentPage } from '../content/content';
-import { LoginPage } from '../login/login';
-import { SignupPage } from '../signup/signup';
+
 import {InAppBrowser} from '@ionic-native/in-app-browser'
 
 
@@ -21,10 +19,7 @@ export class MenuPage {
 
   constructor(public navCtrl: NavController, public bros:InAppBrowser) {
     // used for an example of ngFor and navigation
-    this.pages = [
-      { title: 'Sign in', component: LoginPage },
-      { title: 'Signup', component: SignupPage }
-    ];
+
   }
 
   // ionViewDidLoad() {

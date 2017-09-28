@@ -203,8 +203,10 @@ export class FirebaseService {
     return new Promise((resolve, reject)=>{
       this.stg.get(url+"/cache").then((c)=>{
         firebase.database().ref(url+"/cache").once('value').then((res)=>{
+          console.log(res.val())
+          console.log(c)
           if(res.val()){
-            if(res.val()!=c){
+            if(res.val()!==c){
               console.log("Jesus Lord save me",res.val(),c)
               if(ctrl){
                 var load= this.lc.create({
@@ -242,7 +244,36 @@ export class FirebaseService {
               })
             }else{
               this.stg.get(url).then((w)=>{
-                resolve(url)
+                if(!w){
+                  firebase.database().ref(url).once('value').then((r)=>{
+                    console.log("This is res from fuckit",r.val())
+
+
+                    var x=r.val()
+                    if(x){
+                    this.stg.set(url+"/cache",x.cache).then(()=>{
+                      this.stg.get(url).then((res)=>{
+                        var what=res||[]
+                        for(let i in x){
+                          what.push(x[i])
+                        }
+                        this.stg.set(url,what)
+                      })
+
+                    })
+
+                    resolve(r.val())
+                  }else{
+                    resolve(null)
+                  }
+                  }).catch(function(err) {
+                    console.log(err)
+                  
+                    reject(err)
+                  })
+                }else{
+                  resolve(w)
+                }
               }).catch((d)=>{
                 reject("error")
               })

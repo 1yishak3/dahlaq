@@ -21,13 +21,13 @@ import 'firebase/storage'
 //import ionicMaterial from '../../bower_components/ionic-material/dist/ionic.material'
 import { Storage, IonicStorageModule } from '@ionic/storage';
 import { Network } from '@ionic-native/network'
-import { Elastic } from 'angular2-elastic'
+//import { Elastic } from 'angular2-elastic'
 import { AutosizeModule } from 'ionic2-autosize'
 import { environment } from '../environments/environment'
 //import { EmojiPickerModule } from '@ionic-tools/emoji-picker';
 import { MyApp } from './app.component';
 import { StreamingMedia } from '@ionic-native/streaming-media'
-import { EmojiPickerComponent } from '../assets/emoji-picker/emoji-picker'
+import { EmojiPickerComponentModule } from '../assets/emoji-picker/emoji-picker.module'
 import {EmojiProvider} from '../providers/emoji'
 //import { ImageResizer } from '@ionic-native/image-resizer'
 import { Ng2ImgToolsModule } from 'ng2-img-tools'
@@ -46,7 +46,7 @@ import { TabsPage } from '../pages/tabs/tabs';
 import { TutorialPage } from '../pages/tutorial/tutorial';
 import { WelcomePage } from '../pages/welcome/welcome';
 import { PostPage } from '../pages/post/post'
-//import { PopoverPage } from '../pages/popovers/propop'
+import { PopoverPage } from '../pages/popovers/propop'
 import { Api } from '../providers/api';
 import { Items } from '../mocks/providers/items';
 import { Settings } from '../providers/settings';
@@ -131,7 +131,8 @@ export function provideSettings(storage: Storage) {
     PostPage,
     MomentjsPipe,
     TruncatePipe,
-    EmojiPickerComponent
+    PopoverPage
+
   //  PopoverPage
   ],
   imports: [
@@ -160,7 +161,7 @@ export function provideSettings(storage: Storage) {
         }
       }),
     IonicStorageModule.forRoot(),
-    Elastic,
+//    Elastic,
     AutosizeModule,
 //    EmojiPickerModule.forRoot(),
     NoopAnimationsModule,
@@ -169,6 +170,7 @@ export function provideSettings(storage: Storage) {
     LinkyModule,
     CloudModule.forRoot(cloudSettings),
     IonicImageLoader.forRoot(),
+    EmojiPickerComponentModule
 
   //  LueggModule
   ],
@@ -190,6 +192,7 @@ export function provideSettings(storage: Storage) {
     TutorialPage,
     WelcomePage,
     PostPage,
+    PopoverPage
   //  PopoverPage
   ],
   providers: [

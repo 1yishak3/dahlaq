@@ -137,17 +137,21 @@ export class CardsPage {
           //   ref.onDisconnect().set(null)
           // })
           var view=vm.fbs.getRef("/users/"+vm.uid+"/viewables")
-          view.onDisconnect().set(null).then((res)=>{
-            console.log("nullified, ready for repopulation")
-          })
+          // view.onDisconnect().set(null).then((res)=>{
+          //   console.log("nullified, ready for repopulation")
+          // })
+          console.log(snap)
           for (let k in snap){
-            var item=snap[k]
-            if(item){
-              if(vm.postz[item]===undefined){
-                vm.newList.unshift(item)
-                vm.postz[item]=true
+            if(isNaN(snap[k])){
+              var item=snap[k]
+              if(item){
+                if(vm.postz[item]===undefined){
+                  vm.newList.unshift(item)
+                  vm.postz[item]=true
+                }
               }
             }
+
           }
           console.log("this is the new list:",vm.newList)
           //var j = vm.profile.viewables.length-this.array
