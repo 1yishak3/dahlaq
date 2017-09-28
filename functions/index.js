@@ -459,7 +459,7 @@ exports.fillUp = functions.database.ref("/users/{uid}/viewables").onWrite(e => {
 
           if(k!=="cache"){
 
-            check(ev,pid).then(function(res){
+            check(ev,pid).then((res)=>{
               console.log("in checkkkk")
               var reached=res
               if(!reached){
@@ -468,26 +468,23 @@ exports.fillUp = functions.database.ref("/users/{uid}/viewables").onWrite(e => {
 
                     list.push(posts[k].pid)
                     newPrefs[pid]=true
-                  } else {
-                    continue
                   }
                 } else {
 
                   if (rand >= 0.5 &&!newPrefs[pid]) {
                     newPrefs[pid]=true
                     list.push(posts[k].pid)
-                  } else {
-                    continue
                   }
 
                 }
               }
-              if(list.length>=50){
-                break
-              }
 
             })
           }
+          if(list.length>=50){
+            break
+          }
+
 
         }
         // var j =0
@@ -1029,7 +1026,7 @@ exports.digitVerify=functions.database.ref("/users/{uid}/properties/digits").onW
   var numb=numbe.substring(3,numbe.lastIndexOf(""))
   var num=checkify(numb)
   if(num){
-    return e.data.adminRef.set()
+    return e.data.adminRef.set(num)
   }
 
 })

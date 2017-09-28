@@ -13,6 +13,7 @@ import { Network } from '@ionic-native/network'
 import { Ng2ImgToolsService} from 'ng2-img-tools'
 import {Storage} from '@ionic/storage'
 import {WelcomePage} from '../welcome/welcome'
+import {MenuPage} from '../menu/menu'
 /**
  * The Settings page is a simple form that syncs with a Settings provider
  * to enable the user to customize settings for the app.
@@ -69,6 +70,9 @@ export class SettingsPage {
       this.navCtrl.setRoot(WelcomePage)
       this.navCtrl.popToRoot()
     })
+  }
+  goAbout(){
+    this.navCtrl.push(MenuPage)
   }
   ionViewWillEnter(){
     // this.profile= this.navParams.get('user')

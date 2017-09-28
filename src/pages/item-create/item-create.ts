@@ -388,7 +388,7 @@ export class ItemCreatePage {
     var file=e.target.files[0]
     var pic= this.generateFileName(file)
     vm.currentFile=file.name
-    if(file.type.match("image.*")){
+    if(file.type.match("image")==="image"){
       var k=[]
       console.log(file)
       k.push(file)
@@ -444,6 +444,10 @@ export class ItemCreatePage {
       }else if(vm.get=3){
         where="/files/"
       }
+      if(file.type.match("video")==="video"){
+        console.log("sensed a video")
+        where="/videos/"
+      }
       var url=this.fbs.currentUser().uid+where+pic
       var pst = this.post
       console.log("this is file",file)
@@ -469,6 +473,10 @@ export class ItemCreatePage {
               pst.content.videoUrl=res
             }else if(vm.get===3){
               pst.content.fileUrl=res
+            }
+            if(file.type.match("video")==="video"){
+              console.log("sensed a video")
+              pst.content.videoUrl=res
             }
             vm.complete=true
             vm.uploading=false

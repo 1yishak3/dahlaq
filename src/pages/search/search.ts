@@ -8,7 +8,7 @@ import { Item } from '../../models/item';
 import { Items } from '../../providers/providers';
 import {FirebaseService} from '../../providers/firebase'
 import {Post} from '../../models/post'
-
+import {StreamingMedia} from '@ionic-native/streaming-media'
 @Component({
   selector: 'page-search',
   templateUrl: 'search.html'
@@ -22,7 +22,7 @@ export class SearchPage {
   listP:any={}
   posts:any
   initP:any=[]
-  constructor(public fbs:FirebaseService,public navCtrl: NavController, public navParams: NavParams, public items: Items) {
+  constructor(public fbs:FirebaseService,public sm:StreamingMedia,public navCtrl: NavController, public navParams: NavParams, public items: Items) {
     this.profile=navParams.get('profile')
     console.log(this.profile)
     this.postList=[]
@@ -106,6 +106,20 @@ export class SearchPage {
     this.navCtrl.push(ItemDetailPage, {
       item: item
     });
+  }
+  playVideo(videoUrl){
+    var options = {
+    successCallback: function() {
+      console.log("Video was closed without error.");
+    },
+    errorCallback: function(errMsg) {
+      console.log("Error! " + errMsg);
+    },
+    orientation: 'portrait',
+    shouldAutoClose: true,  // true(default)/false
+    controls: true // true(default)/false. Used to hide controls on fullscreen
+    };
+    this.sm.playVideo(videoUrl, options);
   }
 
 }
