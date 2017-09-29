@@ -39,8 +39,14 @@ export class Post {
   //  console.log("this is this: ",fbs)
     this.uid=fbs.currentUser().uid
     this.postId=pId
-    for(let i in paste){
-      this[i]=paste[i]
+    console.log(paste)
+    if(paste){
+      for(let i in paste){
+      //  console.log(i)
+        this[i]=paste[i]
+      }
+      this.poster=paste.poster
+      console.log(this.poster,paste.poster)
     }
   //  console.log("this is the uid: ",this.uid)
 

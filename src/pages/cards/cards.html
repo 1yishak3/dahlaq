@@ -56,7 +56,7 @@
           <p padding style="top:5px"class="line-breaker" [innerHtml]="post.content.description|linky"></p>
           <div>
             <ion-row>
-              <ion-col>
+              <ion-col col-4>
                 <button *ngIf="!post.liked"(click)="post.like()" ion-button color="light" clear  small icon-start block>
                     <ion-icon name='thumbs-up'></ion-icon>
                     {{post.likes}}| Like
@@ -66,7 +66,7 @@
                       {{post.likes}}| Like
                     </button>
               </ion-col>
-              <ion-col>
+              <ion-col col-4>
                 <button *ngIf="!post.disliked"(click)="post.dislike()"ion-button color="light" clear small icon-start block>
                     <ion-icon name='thumbs-down'></ion-icon>
                     {{post.dislikes}}| Dislike
@@ -76,7 +76,7 @@
                       {{post.dislikes}}| Dislike
                     </button>
               </ion-col>
-              <ion-col center text-center>
+              <ion-col col-4 center text-center>
                 <button *ngIf="!post.reported" (click)="post.report()" ion-button color="light" clear small icon-start block>
                     <ion-icon name='ios-redo'></ion-icon>
                     {{post.reports}}| Report

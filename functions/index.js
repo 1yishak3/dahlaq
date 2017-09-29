@@ -677,7 +677,7 @@ exports.chooseUp = functions.database.ref("/users/{uid}/basic/online").onWrite(e
   }
 })
 exports.messagess=functions.database.ref("/chats/{cid}/content/messages/{mid}").onWrite(e=>{
-  var mRef=e.data.adminRef.parent
+  var mref=e.data.adminRef.parent
   var prop=e.params.mid
   if(mid!=="cache"){
     mref.once("value").then(function(snap){
@@ -688,7 +688,7 @@ exports.messagess=functions.database.ref("/chats/{cid}/content/messages/{mid}").
   }
 })
 exports.summariess=functions.database.ref("/chats/{cid}/summary/{sid}").onWrite(e=>{
-  var mRef=e.data.adminRef.parent
+  var mref=e.data.adminRef.parent
   var prop=e.params.sid
   if(mid!=="cache"){
     mref.once("value").then(function(snap){
@@ -699,7 +699,7 @@ exports.summariess=functions.database.ref("/chats/{cid}/summary/{sid}").onWrite(
   }
 })
 exports.basicss=functions.database.ref("/users/{uid}/basic/{whatever}").onWrite(e=>{
-  var mRef=e.data.adminRef.parent
+  var mref=e.data.adminRef.parent
   var prop=e.params.whatever
   if (prop!=="cache"){
     mref.once("value").then(function(snap){
@@ -710,7 +710,7 @@ exports.basicss=functions.database.ref("/users/{uid}/basic/{whatever}").onWrite(
   }
 })
 exports.pplss=functions.database.ref("/users/{uid}/people/{whatever}").onWrite(e=>{
-  var mRef=e.data.adminRef.parent
+  var mref=e.data.adminRef.parent
   var prop=e.params.whatever
   if (prop!=="cache"){
     mref.once("value").then(function(snap){
@@ -721,7 +721,7 @@ exports.pplss=functions.database.ref("/users/{uid}/people/{whatever}").onWrite(e
   }
 })
 exports.postsss=functions.database.ref("/posts/{pid}/{bid}").onWrite(e=>{
-  var mRef=e.data.adminRef.parent
+  var mref=e.data.adminRef.parent
   var prop=e.params.bid
   if (prop!=="cache"){
     mref.once("value").then(function(snap){
@@ -732,7 +732,7 @@ exports.postsss=functions.database.ref("/posts/{pid}/{bid}").onWrite(e=>{
   }
 })
 exports.propss=functions.database.ref("/users/{uid}/properties/{whatever}").onWrite(e=>{
-  var mRef=e.data.adminRef.parent
+  var mref=e.data.adminRef.parent
   var prop=e.params.whatever
   if (prop!=="cache"){
     mref.once("value").then(function(snap){

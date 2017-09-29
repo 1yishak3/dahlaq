@@ -136,7 +136,7 @@ export class CardsPage {
           //   ref=res
           //   ref.onDisconnect().set(null)
           // })
-          var view=vm.fbs.getRef("/users/"+vm.uid+"/viewables")
+
           // view.onDisconnect().set(null).then((res)=>{
           //   console.log("nullified, ready for repopulation")
           // })
@@ -198,11 +198,19 @@ export class CardsPage {
           // }
             for(let i in vm.newList){
 
-              vm.fbs.getDatabase("/posts/"+vm.newList[i],true).then(function(res){
-                var post=new Post(vm.fbs,vm.navCtrl,vm.newList[i],true)
-                for(let i in res){
-                  post[i]=res[i]
-                }
+              vm.fbs.getDatabase("/posts/"+vm.newList[i],true).then(function(res:any){
+                console.log("post from base?",res)
+                var post = new Post(vm.fbs,vm.navCtrl,vm.newList[i],false,res)
+                // for(let i in res.content){
+                //   post.content[i]=res.content[i]
+                // }
+                // for(let i in res.poster){
+                //   post.poster[i]=res.poster[i]
+                // }
+                console.log("shit fuck",post)
+                // for(let i in res){
+                //    post[i]=res[i]
+                // }
                 vm.liste.push(post)
                 if(Number(i)===14||Number(i)===vm.newList.length-1){
                   vm.arrayStopped=Number(i)+1
@@ -370,7 +378,9 @@ export class CardsPage {
 
 
   }
-  ionViewWillLeave(){
+  ionViewDidLeave(){
     this.arrayStopped=1
+    // var view=this.fbs.getRef("/users/"+vm.uid+"/viewables")
+    // view.set("repopulate")
   }
 }

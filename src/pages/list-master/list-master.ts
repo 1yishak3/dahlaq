@@ -24,7 +24,7 @@ export class ListMasterPage {
   searching: any=false
   searchCtrl:FormControl
   searchTerm:string=""
-  ranks: Array<any>
+  ranks: Array<any>=[]
   viewList:Array<any>=[]
   people:Array<any>=[]
   startAt:number
@@ -71,7 +71,7 @@ export class ListMasterPage {
    * The view loaded, let's query our items for the list
 
    */
-  
+
   ionViewWillEnter(){
     // var lc=this.lc.create({
     //   content:"Loading the ranks..."
@@ -79,25 +79,34 @@ export class ListMasterPage {
     // lc.present()
     var vm=this
     vm.fam=[]
-    this.fbs.getDatabase("/fameList",false).then(function(res){
-      console.log("Got fameList...time to display", res)
-      for (let i=0;i<Object.keys(res).length;i++){
-        console.log("in for loop rank")
-        var key=Object.keys(res)[i]
-        vm.fam.push(res[key])
-      }
-      vm.ranks=vm.fam
-      if(vm.fam){
-        vm.getItems();
-      }else{
-        console.log("fam is undefined? Why??", vm.fam)
-      }
-      // lc.dismiss()
-    }).catch(function(err){
-      //to  be taken care of
-      // lc.dismiss()
-      console.log("check internet connection ranks, ",err)
+    this.fbs.getDatabase("/fameList/cache",true).then((cc)=>{
+        this.sg.get("/fameList/cache").then((c)=>{
+          if(c!=cc||this.ranks.length===0){
+            this.fbs.getDatabase("/fameList",true).then(function(res){
+              console.log("Got fameList...time to display", res)
+              for (let i=0;i<Object.keys(res).length;i++){
+                console.log("in for loop rank")
+                var key=Object.keys(res)[i]
+                if(isNaN(res[key])){
+                  vm.fam.push(res[key])
+                }
+              }
+              vm.ranks=vm.fam
+              if(vm.fam){
+                vm.getItems();
+              }else{
+                console.log("fam is undefined? Why??", vm.fam)
+              }
+              // lc.dismiss()
+            }).catch(function(err){
+              //to  be taken care of
+              // lc.dismiss()
+              console.log("check internet connection ranks, ",err)
+            })
+          }
+        })
     })
+
 
     this.searchCtrl.valueChanges.debounceTime(500).subscribe(search=>{
       console.log("I am detecting changes in search parameter and proceeding with getting items")
