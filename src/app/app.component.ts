@@ -26,6 +26,7 @@ import {Deploy} from '@ionic/cloud-angular'
 import {Storage} from '@ionic/storage'
 import {ImageLoaderConfig} from 'ionic-image-loader'
 import {Keyboard} from '@ionic-native/keyboard'
+declare var FCMPlugin:any
 
 @Component({
   /*template: `<ion-menu [content]="content">
@@ -78,6 +79,7 @@ export class MyApp {
       this.status=res
       if(res){
         this.rootPage=TabsPage
+        this.onNotification()
 
       }else{
         this.rootPage=WelcomePage
@@ -91,27 +93,69 @@ export class MyApp {
       statusBar.styleDefault();
       this.keyb=new Keyboard()
       this.keyb.disableScroll(true)
+        //this.onNotification()
     })
 
 
 
   }
+
+  async onNotification(){
+    try{
+      await this.platform.ready()
+
+      FCMPlugin.getToken((t)=>{
+
+        if(t){
+          console.log("token token",t)
+          this.fbs.setDatabase("/users/"+this.fbs.currentUser().uid+"/token",t,true).then(()=>{
+            console.log("token has been set")
+          })
+        }
+      })
+      FCMPlugin.onNotification((data)=>{
+        console.log("FCMMMMMM",data)
+        // var ac=this.ac.create({
+        //   title: 'Notifique',
+        //   message: "to see what's new.",
+        //   buttons: [
+        //     {
+        //       text: 'YIMECHACHU',
+        //       role: 'cancel',
+        //       handler: () => {
+        //         //console.log('Cancel clicked');
+        //       }
+        //     },
+        //   ]
+        // })
+        // ac.present()
+      },(e)=>{
+        console.log(e)
+      })
+    }catch(e){
+      console.log(e)
+    }
+  }
+
   ngOnInit(){
     var auth=this.fbs.getAuth()
     console.log("Doing on init")
     auth.onAuthStateChanged(user=>{
       if(user){
-        this.stg.remove("/users/"+user.uid+"/viewables")
+      
+        this.onNotification()
       }
-      if(this.status===undefined&&this.status===null){
+      if(this.status===undefined||this.status===null){
         if(user){
+          console.log("This is auth state changed")
+
           this.nav.setRoot(TabsPage)
           this.stg.set("log",true)
-          this.stg.set("uzer",this.fbs.currentUser())
+
         }else{
           this.nav.setRoot(WelcomePage)
           this.stg.set("log",false)
-          this.stg.set("uzer",this.fbs.currentUser())
+
         }
       }
     })
@@ -136,16 +180,23 @@ export class MyApp {
       this.update().then((res:any)=>{
           console.log("in the then")
           var ac=this.ac.create({
-            title: 'Dahlaq Be Like',
-            message: "We have an update! Restart your app to see what's new.",
+            title: 'Dahlaq be like,',
+            message: "We have an update! Restart your app now to see what's new!",
             buttons: [
               {
-                text: 'YIMECHACHU',
+                text: 'Yimechachu',
                 role: 'cancel',
                 handler: () => {
                   //console.log('Cancel clicked');
+                  this.reload()
                 }
-              },
+              },  {
+                  text: 'Behuala',
+                  role: 'cancel',
+                  handler: () => {
+                    //console.log('Cancel clicked');
+                  }
+                },
             ]
           })
           ac.present()
@@ -191,6 +242,9 @@ export class MyApp {
 
     })
 
+  }
+  reload(){
+    this.deploy.load()
   }
   // samp(){
   //   var vm=this

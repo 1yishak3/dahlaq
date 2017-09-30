@@ -420,31 +420,30 @@ exports.senseAuth = functions.database.ref("/users/{uid}/basic/username").onCrea
 })
 //exports.fillUp2 = functions.database.ref("/users/{uid}").onCreate(e => {})
 exports.fillUp = functions.database.ref("/users/{uid}/viewables").onWrite(e => {
-  if (e.data.val()===undefined||e.data.val()===null) {
+  if (e.data.val()==="repopulate/") {
     var prefRef = e.data.adminRef.parent.child("preferences")
     var viewRef = e.data.adminRef
     var uid=e.params.uid
     var actRef=e.data.adminRef.parent.parent.parent.child("posts")
     var postsRef = e.data.adminRef.parent.parent.parent.child("adminsLists/posts")
     const check=function(event, pid){
-      return new Promise(function(resolve,reject){
+
         var postRef= event.child(pid)
         postRef.child("reach").once('value').then(function(snap){
           var r=snap.val()
           postRef.child("poster/desiredReach").once('value').then(function(snap){
             var r2=snap.val()
             if(r>=r2){
-              resolve(true)
+              return true
             }else {
-              resolve(false)
+              return false
             }
-          })
+
         })
       })
 
     }
     const populate = function(psts, prfs,ev) {
-      return new Promise(function(resolve, reject) {
         console.log("in promise")
         var list = []
         var posts = psts
@@ -459,9 +458,8 @@ exports.fillUp = functions.database.ref("/users/{uid}/viewables").onWrite(e => {
 
           if(k!=="cache"){
 
-            check(ev,pid).then((res)=>{
+            var reached=check(ev,pid)
               console.log("in checkkkk")
-              var reached=res
               if(!reached){
                 if (prefs[uid]) {
                   if (rand>=prefs[uid]) {
@@ -479,7 +477,7 @@ exports.fillUp = functions.database.ref("/users/{uid}/viewables").onWrite(e => {
                 }
               }
 
-            })
+
           }
           if(list.length>=50){
             break
@@ -547,11 +545,11 @@ exports.fillUp = functions.database.ref("/users/{uid}/viewables").onWrite(e => {
           }
         }
         if (list) {
-          resolve(list)
+          return list
         } else {
-          reject("error")
+          return "error"
         }
-      })
+
     }
 
     if(!e.data.val()&&e.data.previous.val()){
@@ -559,7 +557,7 @@ exports.fillUp = functions.database.ref("/users/{uid}/viewables").onWrite(e => {
         var posts = snap.val()
         prefRef.once('value').then(function(snaps) {
           var prefs = snaps.val()
-          populate(posts, prefs,postsRef).then(function(list) {
+          var list=populate(posts, prefs,postsRef)
 
               // var liste=list
               // for (var k=0;k<liste.length;k++){
@@ -578,6 +576,7 @@ exports.fillUp = functions.database.ref("/users/{uid}/viewables").onWrite(e => {
               //     })
               //   })
               // }
+              console.log(list)
               var lob={}
               for (var i=0;i<list.length;i++){
                 lob[i]=list[i]
@@ -587,21 +586,19 @@ exports.fillUp = functions.database.ref("/users/{uid}/viewables").onWrite(e => {
               return viewRef.set(lob)
 
 
-          }).catch(function(res){
-            console.log("Yishak Error ",res)
-          })
         })
       })
     }
   }
 })
-exports.chooseUp = functions.database.ref("/users/{uid}/basic/online").onWrite(e => {
-  if (e.data.val().on){
-    var pplRef = e.data.adminRef.parent.parent.child("people")
-    var sgRef = e.data.adminRef.parent.parent.child("suggestedPeople")
-    var adminRef = e.data.adminRef.parent.parent.parent.parent.child("adminsLists/users")
-    var propRef = e.data.adminRef.parent.parent.child("properties")
-    var fameRef= e.data.adminRef.parent.parent.parent.parent.child("fameList")
+exports.chooseUp = functions.database.ref("/users/{uid}/suggestedPeople").onWrite(e => {
+  if (e.data.val()=="repopulate/"){
+    console.log("time to repopulate")
+    var pplRef = e.data.adminRef.parent.child("people")
+    var sgRef = e.data.adminRef.parent.child("suggestedPeople")
+    var adminRef = e.data.adminRef.parent.parent.parent.child("adminsLists/users")
+    var propRef = e.data.adminRef.parent.child("basic").child("properties")
+    var fameRef= e.data.adminRef.parent.parent.parent.child("fameList")
     // adminRef.once('value').then(function(snap){
     //   var uzs=snap.val()
     //   pplRef.once('value').then(function(snaps){
@@ -662,13 +659,14 @@ exports.chooseUp = functions.database.ref("/users/{uid}/basic/online").onWrite(e
     return fameRef.once('value').then(function(snap){
       var list=snap.val()
       var suggestList=pick2(uid,list)
-
+      console.log(suggestList)
       if(suggestList.length!==0){
         var lob={}
         for (var i=0;i<suggestList.length;i++){
           lob[i]=suggestList[i]
         }
         lob["cache"]=Date.now()
+        console.log(lob)
         return sgRef.set(lob)
       }else{
         return sgRef.set(0)
@@ -679,7 +677,7 @@ exports.chooseUp = functions.database.ref("/users/{uid}/basic/online").onWrite(e
 exports.messagess=functions.database.ref("/chats/{cid}/content/messages/{mid}").onWrite(e=>{
   var mref=e.data.adminRef.parent
   var prop=e.params.mid
-  if(mid!=="cache"){
+  if(prop!=="cache"){
     mref.once("value").then(function(snap){
       var messages=snap.val()
       messages["cache"]=Date.now();
@@ -690,7 +688,7 @@ exports.messagess=functions.database.ref("/chats/{cid}/content/messages/{mid}").
 exports.summariess=functions.database.ref("/chats/{cid}/summary/{sid}").onWrite(e=>{
   var mref=e.data.adminRef.parent
   var prop=e.params.sid
-  if(mid!=="cache"){
+  if(prop!=="cache"){
     mref.once("value").then(function(snap){
       var messages=snap.val()
       messages["cache"]=Date.now();
@@ -756,6 +754,7 @@ exports.readables=functions.database.ref("/chats/{cid}/content/messages/{mid}/re
           var key=Object.keys(arr)
           for(var i=0;i<key.length;i++){
             if(key[i]===mid){
+              console.log('found the message')
               console.log("here")
               return uRef.child(i).remove()
             }
@@ -876,18 +875,29 @@ exports.chatDelete=functions.database.ref("/chats/{cid}/deleted").onWrite(e =>{
   }
 })
 
-exports.sendPush1 = functions.database.ref('/chats/{cid}/content/messages/{message}').onCreate(event => {
+exports.sendPush1 = functions.database.ref('/chats/{cid}/content/messages/{message}').onCreate(e => {
   var message=e.data.val()
+  var req=''
+  var refff=e.data.adminRef.parent.once("value").then((r)=>{
+    var t=r.val()
+    if(Object.keys(t).length===1){
+      req=" request"
+    }else{
+      req=''
+    }
+  })
   var uid=message.resUid
   return e.data.adminRef.parent.parent.parent.parent.parent.child("users").child(uid).child("token").once('value')
   .then(function(res){
     var token=res.val()
     var payload = {
       notification: {
-          title: 'New from '+message.sender,
+          title: 'New message'+req+' from '+message.sender,
           body: message.content,
           sound: 'default',
-          badge: '1'
+          badge: '1',
+          icon: 'https://firebasestorage.googleapis.com/v0/b/dahlaq-c7e0f.appspot.com/o/defaults%2Fdahlaqapk.png?alt=media&token=93344e5d-a249-4f7e-b11d-55551d2ac833',
+          tag:'messageReport'
       }
     };
 

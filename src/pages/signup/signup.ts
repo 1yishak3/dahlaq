@@ -221,15 +221,15 @@ export class SignupPage {
               //   console.log("tell me the error", err)
               // })
 
-              vm.getPermissionAndToken().then(function(token){
-                vm.setDatabase("/users/"+vm.currentUser().uid+"/token",token,true).then(function(res){
-                  console.log("We have set the token")
-                }).catch(function(err){
-                  console.log("We have not set the token")
-                })
-              }).catch(function(err){
-                console.log("We couldn't get the token")
-              })
+              // vm.getPermissionAndToken().then(function(token){
+              //   vm.setDatabase("/users/"+vm.currentUser().uid+"/token",token,true).then(function(res){
+              //     console.log("We have set the token")
+              //   }).catch(function(err){
+              //     console.log("We have not set the token")
+              //   })
+              // }).catch(function(err){
+              //   console.log("We couldn't get the token")
+              // })
               vm.setDatabase("/ref/"+vm1.account.username,vm.currentUser().uid,true).then((res)=>{
                 vm1.navCtrl.push(FirstRunPage);
                 load1.dismiss()

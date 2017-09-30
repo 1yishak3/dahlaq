@@ -178,6 +178,7 @@ export class ListMasterPage {
   loadIt(data){
     var vm=this
     vm.people=[]
+    var news=[]
     for(let i in data){
       this.fbs.getDatabase("/users/"+data[i].uid+"/basic",false).then(function(res:any){
         var dat=data[i]
@@ -186,13 +187,18 @@ export class ListMasterPage {
         dat["username"]=res.username
         dat["rank"]=Number(res.rank)+1
         console.log("About to push ranks")
-        vm.people.push(dat)
-        console.log(vm.people)
+        news.push(dat)
+        //console.log(vm.people)
       }).catch(function(err){
         console.log("sadd...unable to bring basics of guy")
       })
       if(Number(i)===25||Number(i)===data.length-1){
       this.startAt=Number(i)
+      news.sort((a,b)=>{
+        
+        return a.rank-b.rank
+      })
+      vm.people=news
       break
     }
     }

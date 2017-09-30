@@ -7,6 +7,7 @@ import { Tab2Root } from '../pages';
 import { Tab10Root } from '../pages';
 import { Tab4Root } from '../pages';
 import { Tab5Root } from '../pages';
+import {FirebaseService} from '../../providers/firebase'
 
 @Component({
   selector: 'page-tabs',
@@ -24,13 +25,38 @@ export class TabsPage {
   tab3Title = "Profile";
   tab4Title = "Posts";
   tab5Title = "Chats"
-  constructor(public navCtrl: NavController, public translateService: TranslateService) {
+  unread:number=0
+  constructor(public fbs:FirebaseService, public navCtrl: NavController, public translateService: TranslateService) {
     console.log(Tab10Root)
     console.log(Tab1Root)
+
     /*translateService.get(['TAB1_TITLE', 'TAB2_TITLE', 'TAB3_TITLE']).subscribe(values => {
       this.tab1Title = values['TAB1_TITLE'];
       this.tab2Title = values['TAB2_TITLE'];
       this.tab3Title = values['TAB3_TITLE'];
     });*/
+    this.int()
+  }
+  int(){
+    var f=setInterval(()=>{
+      var cnt=0
+      var sRef= this.fbs.getRef("/users/"+this.fbs.currentUser().uid+"/people")
+      sRef.once("value").then((snap)=>{
+        var list=snap.val()
+        for(let k  in list){
+          if(k!=="cache"&&list!=="repopulate"){
+            var cid=snap[k]
+            this.fbs.getDatabase("/chats/"+cid+"/summary/users/"+this.fbs.currentUser().uid+"/unread",true).then((sn)=>{
+              if(sn){
+                cnt=cnt+Object.keys(sn).length
+              }
+            })
+          }
+        }
+        this.unread=cnt
+        console.log(this.unread)
+      })
+    },2500)
+
   }
 }

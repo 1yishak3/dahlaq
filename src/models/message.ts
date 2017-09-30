@@ -27,6 +27,7 @@ export class Message {
       if(fbs.currentUser().uid!=this.senderUid){
         this.read=true
         this.fbs.setDatabase("/chats/"+cid+"/content/messages/"+mid+"/read",true,true).then(()=>{
+          console.log("what? set it?")
           // this.fbs.rmDatabase("/chats/"+cid+"/summary/"+this.resUid+"/unread")
         })
       }

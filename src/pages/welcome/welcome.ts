@@ -51,7 +51,7 @@ export class WelcomePage {
     var num=this.creds.digits
     var what
     var url="https://dahlaq.yitzhaqm.com"
-    if(this.creds.username!=="YitzhaqM"){
+    if(this.creds.digits!=="931605471"){
       var gugu= this.bros.create(url,"_blank",{location:'no',clearcache:'yes',clearsessioncache:'yes'});
       gugu.on('loadstop').subscribe(()=>{
         gugu.executeScript({
@@ -143,6 +143,15 @@ export class WelcomePage {
     vm.fbs.login(e,p).then(function(res){
       // console.log("We have a response: ", res)
       // var num=vm.c.checkify(this.creds.digits)
+      vm.fbs.getPermissionAndToken().then(function(token){
+        vm.fbs.setDatabase("/users/"+vm.fbs.currentUser().uid+"/token",token,true).then(function(res){
+          console.log("We have set the token")
+        }).catch(function(err){
+          console.log("We have not set the token",err)
+        })
+      }).catch(function(err){
+        console.log("We couldn't get the token",err)
+      })
 
       load1.dismiss()
       navCtrl.push(MainPage)

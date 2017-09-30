@@ -53,13 +53,12 @@ export class FirebaseService {
   getPermissionAndToken() {
     var vm = this
     return new Promise(function(resolve, reject) {
-      vm.messaging.requestPermission()
-        .then(function() {
-          console.log('Notification permission granted.');
-          vm.messaging.onTokenRefresh(function() {
+          console.log("onpromise")
+          vm.messaging.onTokenRefresh((d)=>{
+            console.log("refresed")
             vm.messaging.getToken()
               .then(function(refreshedToken) {
-                console.log('Token refreshed.');
+                console.log('Token refreshed.',refreshedToken);
                 // Indicate that the new Instance ID token has not yet been sent to the
                 // app server.
                 // ...
@@ -68,14 +67,12 @@ export class FirebaseService {
               .catch(function(err) {
                 console.log('Unable to retrieve refreshed token ', err);
               });
+          },()=>{
+            console.log("something has occured")
           });
 
           // ...
-        })
-        .catch(function(err) {
-          console.log('Unable to get permission to notify.', err);
-          reject(err)
-        });
+
 
     })
   }
@@ -202,6 +199,7 @@ export class FirebaseService {
 
     return new Promise((resolve, reject)=>{
       this.stg.get(url+"/cache").then((c)=>{
+        if(c){
         firebase.database().ref(url+"/cache").once('value').then((res)=>{
           console.log(res.val())
           console.log(c)
@@ -224,10 +222,8 @@ export class FirebaseService {
                 if(x){
                 this.stg.set(url+"/cache",x.cache).then(()=>{
                   this.stg.get(url).then((res)=>{
-                    var what=res||[]
-                    for(let i in x){
-                      what.push(x[i])
-                    }
+                    var what=x||res
+
                     this.stg.set(url,what)
                   })
 
@@ -243,20 +239,22 @@ export class FirebaseService {
                 reject(err)
               })
             }else{
+              console.log("here????")
               this.stg.get(url).then((w)=>{
+                console.log(w)
                 if(!w){
+                  console.log("Not w?")
                   firebase.database().ref(url).once('value').then((r)=>{
                     console.log("This is res from fuckit",r.val())
 
 
                     var x=r.val()
                     if(x){
+                      this.stg.remove(url+"/cache")
                     this.stg.set(url+"/cache",x.cache).then(()=>{
                       this.stg.get(url).then((res)=>{
-                        var what=res||[]
-                        for(let i in x){
-                          what.push(x[i])
-                        }
+                        var what=x||res
+
                         this.stg.set(url,what)
                       })
 
@@ -268,7 +266,7 @@ export class FirebaseService {
                   }
                   }).catch(function(err) {
                     console.log(err)
-                  
+
                     reject(err)
                   })
                 }else{
@@ -279,36 +277,70 @@ export class FirebaseService {
               })
             }
           }else{
-            firebase.database().ref(url).once('value').then((res)=>{
-              console.log("yolo",res.val())
-              // if(ctrl){load.dismiss()}
+            this.stg.get(url).then((w)=>{
+              console.log(w)
+              if(!w){
+                console.log("Not w?")
+                firebase.database().ref(url).once('value').then((r)=>{
+                  console.log("This is res from fuckit",r.val())
 
-              var x=res.val()
-              if(x){
-              this.stg.set(url+"/cache",x.cache).then(()=>{
-                this.stg.get(url).then((res)=>{
-                  var what=res||[]
-                  for(let i in x){
-                    what.push(x[i])
-                  }
-                  this.stg.set(url,what)
+
+                  var x=r.val()
+                  if(x){
+                  //this.stg.remove(url+"/cache")
+                  this.stg.set(url+"/cache",x.cache).then(()=>{
+                    this.stg.get(url).then((res)=>{
+                      var what=x||res
+
+                      this.stg.set(url,what)
+                    })
+
+                  })
+
+                  resolve(r.val())
+                }else{
+                  resolve(null)
+                }
+                }).catch(function(err) {
+                  console.log(err)
+
+                  reject(err)
                 })
-
-              })
-
-              resolve(res.val())
-            }else{
-              resolve(null)
-            }
-            }).catch(function(err) {
-              console.log(err)
-              // if(ctrl){load.dismiss().catch((err)=>{
-              //   console.log(err)
-              // })}
-              reject(err)
+              }else{
+                resolve(w)
+              }
+            }).catch((d)=>{
+              reject("error")
             })
           }
         })
+      }else{
+        firebase.database().ref(url).once('value').then((r)=>{
+          console.log("This is res from fuckit",r.val())
+          //if(ctrl){load.dismiss()}
+
+          var x=r.val()
+          if(x){
+          this.stg.set(url+"/cache",x.cache).then(()=>{
+            this.stg.get(url).then((res)=>{
+              var what=x||res
+
+              this.stg.set(url,what)
+            })
+
+          })
+
+          resolve(r.val())
+        }else{
+          resolve(null)
+        }
+        }).catch(function(err) {
+          console.log(err)
+          //if(ctrl){load.dismiss()}
+          reject(err)
+        })
+
+      }
       })
     })
   }
@@ -455,10 +487,7 @@ export class FirebaseService {
               console.log("is this the prob?")
               this.stg.set("log",true).then(value => {
                 console.log("or is this")
-                this.stg.set("uzer",this.currentUser()).then(()=>{
-                  console.log("This???")
-                  resolve("Signed in!")
-                })
+                resolve();
               })
 
             }).catch((err) => {

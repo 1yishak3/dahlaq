@@ -123,7 +123,8 @@ export class CardsPage {
       vm.fbs.getDatabase("/users/"+vm.uid+"/viewables",true,true).then(function(snap){
         //console.log(snap)
         //console.log("I have the data...which means the prob is with your if")
-        if(snap){
+        if(snap&&!(typeof snap === 'string' || snap instanceof String)){
+          console.log(snap)
           vm.noPosts=false
 
           //console.log(vm.profile.viewables)
@@ -224,6 +225,8 @@ export class CardsPage {
               })
               if(Number(i)===14||Number(i)===vm.newList.length-1){
                 vm.viewables=vm.liste
+                var view=vm.fbs.getRef("/users/"+vm.uid+"/viewables")
+                view.set("repopulate/"+Date.now())
                 if(vm.firstTime){
                   // lc.dismiss()
                 }
@@ -302,6 +305,8 @@ export class CardsPage {
 
       }).catch(function(err){
         console.log("Error getting profile ",err)
+        var view=vm.fbs.getRef("/users/"+vm.uid+"/viewables")
+        view.set("repopulate/")
         if(vm.firstTime){
           // lc.dismiss()
         }
@@ -380,7 +385,5 @@ export class CardsPage {
   }
   ionViewDidLeave(){
     this.arrayStopped=1
-    // var view=this.fbs.getRef("/users/"+vm.uid+"/viewables")
-    // view.set("repopulate")
   }
 }
