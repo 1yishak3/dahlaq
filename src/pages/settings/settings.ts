@@ -8,9 +8,12 @@ import { TranslateService } from '@ngx-translate/core';
 import {FirebaseService } from '../../providers/firebase'
 import * as _ from 'lodash'
 import { Camera } from '../../providers/camera'
-import { PopoverPage } from '../popovers/propop'
+//import { PopoverPage } from '../popovers/propop'
 import { Network } from '@ionic-native/network'
 import { Ng2ImgToolsService} from 'ng2-img-tools'
+import {Storage} from '@ionic/storage'
+import {WelcomePage} from '../welcome/welcome'
+import {MenuPage} from '../menu/menu'
 /**
  * The Settings page is a simple form that syncs with a Settings provider
  * to enable the user to customize settings for the app.
@@ -35,7 +38,8 @@ export class SettingsPage {
   progress:number=0
   currentFile:string=""
   person:any
-  constructor(public ir:Ng2ImgToolsService,
+  constructor( public sg:Storage,
+    public ir:Ng2ImgToolsService,
     public lc:LoadingController,
     public nw:Network,
     public popCtrl:AlertController,
@@ -45,6 +49,7 @@ export class SettingsPage {
     public translate: TranslateService,
     public fbs:FirebaseService)
   {
+
     this.profile= navParams.get('user')
     this.profilec=(this.profile)
     this.props=Object.keys(this.profilec.properties)
@@ -55,6 +60,18 @@ export class SettingsPage {
     var conc=nw.onConnect().subscribe(()=>{
       vm.connected=true
     })
+  }
+  // logout(){
+  //   this.fbs.getAuth().signOut().then(()=>{
+  //     this.sg.set("log",false)
+  //     this.navCtrl.pop()
+  //     this.tabs.select(0)
+  //     this.navCtrl.setRoot(WelcomePage)
+  //     this.navCtrl.popToRoot()
+  //   })
+  // }
+  goAbout(){
+    this.navCtrl.push(MenuPage)
   }
   ionViewWillEnter(){
     // this.profile= this.navParams.get('user')
@@ -178,8 +195,8 @@ export class SettingsPage {
     var vm1=this.generateFileName
     if(!upload){
       var fp=this.processFile
-      this.camera.takePicture(1).then(function(data){
-        cam.getFile(data[0].fullpath).then(function(file){
+      this.camera.takePicture(1).then(function(data:any){
+        cam.getFile(data.fullpath).then(function(file){
           var pic = vm1(file)
           var url="/"+vm.currentUser().uid+"/images/"+pic
           fp(url,file)

@@ -32,9 +32,16 @@ page-item-create {
       }
     }
   }
-  .black{
-    text-align:center;
-    background:black;
-    color:white;
+  ion-alert{
+    &.black{
+      text-align:center;
+      background: black;
+      .alert-head {
+         background: map-get($colors, danger);
+         color: #fff;
+         margin-bottom: 10px;
+      }
+    }
   }
+
 }

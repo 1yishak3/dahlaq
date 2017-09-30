@@ -1,13 +1,13 @@
 import { Component, ViewChild,ElementRef,OnInit } from '@angular/core';
 import { Validators, FormBuilder, FormGroup } from '@angular/forms';
-import { Nav,Tabs,NavController, ViewController,AlertController,LoadingController,ToastController } from 'ionic-angular';
+import { Nav,Tabs,NavController, ViewController,AlertController,LoadingController,ToastController ,Content, Platform} from 'ionic-angular';
 import { Post } from '../../models/post'
 import { Camera } from '../../providers/camera';
 import { FirebaseService } from '../../providers/firebase'
 import { Network } from '@ionic-native/network'
 //import { PopoverPage } from '../popovers/propop'
 import {Ng2ImgToolsService} from 'ng2-img-tools'
-
+import {Keyboard} from '@ionic-native/keyboard'
 @Component({
   selector: 'page-item-create',
   templateUrl: 'item-create.html'
@@ -16,6 +16,7 @@ export class ItemCreatePage {
   @ViewChild('fileInput') fileInput:ElementRef;
   @ViewChild('fileInput1') fileInput1:any;
   @ViewChild('fileInput2') fileInput2:ElementRef;
+  @ViewChild(Content) content:Content
 //  app:App
   isReadyToPost: boolean;
   post:Post
@@ -37,7 +38,9 @@ export class ItemCreatePage {
   show:any=true
   max:any
   basic:any
-  constructor(public ir: Ng2ImgToolsService ,
+  constructor(public platform:Platform,
+    public keyb:Keyboard,
+    public ir: Ng2ImgToolsService ,
     public nw:Network,
     public toastCtrl:ToastController,
     public loadCtrl: LoadingController,
@@ -56,7 +59,11 @@ export class ItemCreatePage {
     this.uploading=false
     this.true=false
     var vm=this
-
+    this.keyb=new Keyboard()
+    platform.ready().then((a)=>{
+      console.log("here lies disableScroll")
+      this.keyb.disableScroll(true)
+    })
     var disc=nw.onDisconnect().subscribe(()=>{
       vm.connected=false
     })
@@ -72,33 +79,50 @@ export class ItemCreatePage {
 
   }
   ionViewWillEnter(){
-    var c=this.loadCtrl.create({
-      content:"Getting your limit..."
+    console.log("in after view init")
+    this.keyb.onKeyboardShow().subscribe((v)=>{
+      console.log("yes please")
+      this.content.resize()
+      console.log("Am I being resized?1")
     })
-    c.present()
+    this.keyb.onKeyboardHide().subscribe((v)=>{
+      this.content.resize()
+      console.log("Am I being resized?2")
+    })
+
     var vm=this
     this.fbs.getDatabase("/users/"+this.uid+"/reachLimit",true).then((max)=>{
 
       this.fbs.getDatabase("/users/"+this.uid+"/basic",true).then((res)=>{
         vm.max=max
         this.basic=res
-        c.dismiss()
+
       })
     }).catch((err)=>{
       console.log(err)
-      c.dismiss()
+
     })
 
   }
   // ionViewWillEnter(){
   //
   // }
+  ionViewDidEnter(){
+    this.platform.ready().then(() => {
+      this.keyb.disableScroll(true);
+    });
+  }
+
+  ngAfterViewInit(){
+
+  }
   showChoices(e,bool,num){
     this.bool=bool
     this.get=num
     if(bool===true){
       let pop = this.alertCtrl.create({
         title:"Choose Method",
+        cssClass:"black",
         buttons:[{
           text:"Open Camera",
           handler:dat=>{
@@ -221,13 +245,21 @@ export class ItemCreatePage {
           if(res===0){
             console.log("in here")
             vm.setDatabase(resu,{"0":vm1.postId},true).then(function(res){
-              vm1.tabs.select(0)
-              console.log("success setting viewables")
+              vm.setDatabase(resu+"/cache",Date.now(),true).then(()=>{
+                vm1.tabs.select(0)
+                console.log("success setting viewables")
+
+              })
+
             }).catch()
           }else{
             console.log("not in there")
             vm.setList(resu,vm1.postId).then(function(res){
-              vm1.tabs.select(0)
+              vm.setDatabase(resu+"/cache",Date.now(),true).then(()=>{
+                vm1.tabs.select(0)
+              
+
+              })
               console.log("Added to viewables.",res)
               console.log(res)
             }).catch(function(err){
@@ -284,29 +316,29 @@ export class ItemCreatePage {
   }
   generateFileName(typ){
     var type=typ.name
-    var name = this.fbs.currentUser().uid+"_"+Date.now()+"_"+type.substring(type.lastIndexOf("."),type.lastIndexOf(""))
+    var name = this.uid+"_"+Date.now()+"_"+type.substring(type.lastIndexOf("."),type.lastIndexOf(""))
     console.log(name)
     return name
   }
   getPicture(upload) {
     var cam=this.camera
     var vm = this.fbs
-    var vm1=this.generateFileName
     var vm2=this
     if(!upload){
       var fp=this.processFile
-      this.camera.takePicture(1).then(function(data){
-
-        cam.getFile(data[0].fullpath).then(function(file:any){
-          var pic = vm1(file)
-          vm2.currentFile=file.name
+      this.camera.takePicture(1).then((data:any)=>{
+        console.log(data,data.fullPath)
+        cam.getFile(data).then((file:any)=>{
+          console.log("this is the file, ",file)
+          var pic = this.generateFileName(data)
+          vm2.currentFile=data.name
           var url="/"+vm.currentUser().uid+"/images/"+pic
-          fp(url,file)
+          this.processFile(url,file)
         }).catch(function(err){
-
+          console.log("Error, ", err)
         })
       }).catch(function(err){
-
+        console.log("Error taking picture, ",err)
       })
     }else{
     //  console.log(this.fileInput)
@@ -334,13 +366,13 @@ export class ItemCreatePage {
     var vm2=this
     if(!upload){
       var fp=this.processFile
-      this.camera.takeVideo(1).then(function(data){
+      this.camera.takeVideo(1).then((data:any)=>{
 
-        cam.getFile(data[0].fullpath).then(function(file:any){
-          var pic = vm1(file)
-          vm2.currentFile=file.name
+        cam.getFile(data).then((file:any)=>{
+          var pic = this.generateFileName(data)
+          vm2.currentFile=data.name
           var url=vm.currentUser().uid+"/videos/"+pic
-          fp(url,file)
+          this.processFile(url,file)
         }).catch(function(err){
 
         })
@@ -364,8 +396,9 @@ export class ItemCreatePage {
     var file=e.target.files[0]
     var pic= this.generateFileName(file)
     vm.currentFile=file.name
-    if(file.type.match("image.*")){
+    if(file.type.substring(0,file.type.lastIndexOf('/'))=='image'){
       var k=[]
+      console.log(file)
       k.push(file)
       vm.ir.resize(k,450,450).subscribe(res=>{
         file=res
@@ -412,12 +445,18 @@ export class ItemCreatePage {
       })
     }else{
       var where=""
-      if(vm.get=1){
+      console.log("HEY NOT VIDEO")
+      console.log(vm.get)
+      if(vm.get===1){
         where="/images/"
-      }else if(vm.get=2){
+      }else if(vm.get===2){
         where="/videos/"
-      }else if(vm.get=3){
+      }else if(vm.get===3){
         where="/files/"
+      }
+      if(file.type.substring(0,file.type.lastIndexOf('/'))=='video'){
+        console.log("sensed a video")
+        where="/videos/"
       }
       var url=this.fbs.currentUser().uid+where+pic
       var pst = this.post
@@ -438,12 +477,17 @@ export class ItemCreatePage {
       task.then(function(snap){
         console.log(snap)
           vm.fbs.getStorage(url).then(function(res:any){
+            console.log()
             if(vm.get===1){
-              pst.content.imageUrl=res
+            //  pst.content.imageUrl=res
             }else if(vm.get===2){
               pst.content.videoUrl=res
             }else if(vm.get===3){
               pst.content.fileUrl=res
+            }
+            if(file.type.substring(0,file.type.lastIndexOf('/'))=='video'){
+              console.log("sensed a video")
+              pst.content.videoUrl=res
             }
             vm.complete=true
             vm.uploading=false
@@ -487,20 +531,21 @@ export class ItemCreatePage {
     var URL=t.snapshot.downloadUrl
   }
   processFile(url,fil) {
+    console.log("Processing...")
     this.uploading=true
     var vm = this.fbs
     var vm1=this
     var pst =  this.post
-    fil.file(function(file){
-      var task= this.fbs.setStorage(url,file)
-      task.on('state_changed',function(snap:any){
+      console.log("fileeee2",fil)
+      var task= this.fbs.setStorage(url,fil,true)
+      task.on('state_changed',(snap:any)=>{
         console.log(snap.bytesTransferred)
         console.log(snap.totalBytes)
 
         vm1.progress=(Number(snap.bytesTransferred)/Number(snap.totalBytes))*100
         console.log(vm1.progress)
         if(vm1.progress===100){
-          vm.getStorage(url).then(function(res:any){
+          vm.getStorage(url).then((res:any)=>{
             if(vm1.get===1){
               pst.content.imageUrl=res
             }else if(vm1.get===2){
@@ -515,7 +560,7 @@ export class ItemCreatePage {
         }
 
         console.log("this is your snapshot, ",snap)
-      },function(err){
+      },(err)=>{
           console.log("This is your error",err)
       })
       // this.fbs.setStorage(url,file).then(function(res:any){
@@ -544,9 +589,7 @@ export class ItemCreatePage {
       //   console.log("error uploading file",err)
       //   vm1.uploading=false
       // })
-    },function(err){
-      console.log(err)
-    })
+
   }
 
   getProfileImageStyle() {
@@ -562,12 +605,16 @@ export class ItemCreatePage {
     this.post = new Post(this.fbs,this.navCtrl)
     this.currentFile=null
     this.tabs.select(0)
+    this.complete=false
+    this.uploading=false
     //this.app.getRootNav().getActiveChildNav().select(1)
   //  getRootNav().getActiveChildNav().select(1)
   //  this.navCtrl.parent.select(0)
   }
   ionViewWillLeave(){
-
+    this.platform.ready().then(() => {
+      this.keyb.disableScroll(true);
+    });
   }
 
 

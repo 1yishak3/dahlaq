@@ -1,0 +1,10 @@
+{
+  "name": "dahlaq",
+  "s3bucket": "dahlaq",
+  "s3prefix": "www/",
+  "s3region": "us-east-1",
+  "ios_identifier": "",
+  "android_identifier": "",
+  "update": "resume",
+  "content_url": "https://s3.amazonaws.com/dahlaq/www/"
+}

@@ -1,9 +1,8 @@
 import { Component, ViewChild } from '@angular/core';
 import { NavController, Nav } from 'ionic-angular';
 
-//import { ContentPage } from '../content/content';
-import { LoginPage } from '../login/login';
-import { SignupPage } from '../signup/signup';
+
+import {InAppBrowser} from '@ionic-native/in-app-browser'
 
 
 @Component({
@@ -18,21 +17,23 @@ export class MenuPage {
 
   pages: Array<{ title: string, component: any }>;
 
-  constructor(public navCtrl: NavController) {
+  constructor(public navCtrl: NavController, public bros:InAppBrowser) {
     // used for an example of ngFor and navigation
-    this.pages = [
-      { title: 'Sign in', component: LoginPage },
-      { title: 'Signup', component: SignupPage }
-    ];
+
   }
 
-  ionViewDidLoad() {
-    console.log('Hello MenuPage Page');
-  }
+  // ionViewDidLoad() {
+  //   console.log('Hello MenuPage Page');
+  // }
+  //
+  // openPage(page) {
+  //   // Reset the content nav to have just this page
+  //   // we wouldn't want the back button to show in this scenario
+  //   this.nav.setRoot(page.component);
+  // }
+  goLegal(){
+    var url="https://licenses.yitzhaqm.com"
+    var br= this.bros.create(url,"_blank",{location:'no',clearcache:'yes',clearsessioncache:'yes'})
 
-  openPage(page) {
-    // Reset the content nav to have just this page
-    // we wouldn't want the back button to show in this scenario
-    this.nav.setRoot(page.component);
   }
 }

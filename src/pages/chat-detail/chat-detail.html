@@ -8,13 +8,16 @@
     <ion-row>
         <ion-col col-2>
         <ion-avatar style="position:absolute;bottom:5px;left:10px" start>
-          <img style="width:45px;height;45px;border-radius:100%;"[src]="pic">
+          <img style="width:45px;height;45px;border-radius:100%;"[src]="cpic">
 
         </ion-avatar>
       </ion-col>
       <ion-col>
         <div no-padding style="position:absolute;bottom:5px;left:10px" style="color:white">
           <h5>{{oUser}}</h5>
+          <div end *ngIf="online">
+            <ion-icon  style="font-size:10px" name="egg" color="secondary" *ngIf="online.on"></ion-icon>
+          </div>
           <div no-padding style="color:grey" *ngIf="online&&!online.on">
             Last seen {{online.time | momentjs}}
           </div>
@@ -25,9 +28,7 @@
 
 
 
-      <div end *ngIf="online">
-        <ion-icon  name="egg" color="secondary" *ngIf="online.on"></ion-icon>
-      </div>
+
       <!-- <ion-buttons end>
         <button ion-button icon-only><ion-icon *ngIf="connected" name=""></ion-icon><ion-icon *ngIf="!connected"name=""></ion-icon></button>
       </ion-buttons> -->
@@ -45,23 +46,29 @@
   <ion-fab bottom right>
     <button color="light"(click)="presentConfirm()" *ngIf="spoken" ion-fab mini><ion-icon name="trash"></ion-icon></button>
   </ion-fab>
-  <!-- [class.left]=" message.sender === oUser " -->
+  <!--  -->
 
   <div class="message-wrap">
+    <div class="message" [class.left]="true" [class.right]="false" *ngIf="typing">
+      <div class="msg-content">
+        <span class="triangle"></span>
+        ...
+      </div>
+    </div>
     <div
     class="message"
-
-    [class.right]="true"
+    [class.left]="message.sender === oUser"
+    [class.right]="message.sender === user"
     *ngFor="let message of messages">
     <div class="msg-detail">
-      <div class="msg-content">
+      <div style="user-select: auto !important" class="msg-content">
           <span class="triangle"></span>
-          <img *ngIf="message.picture!==''" style="width:inherit;height:350px" [src]="message.picture"/>
+          <img-loader *ngIf="message.picture!==''" style="width:inherit;height:350px" [src]="message.picture" useImg></img-loader>
           <p class="line-breaker" [innerHtml]="message.content|linky"></p>
           <ion-note style="color:grey;font-size:12px">
             {{message.time|momentjs}}&nbsp;&nbsp;&nbsp;
-            <ion-icon color="light" name="checkmark" *ngIf="message.sent&&!message.read"></ion-icon>
-            <ion-icon color="primary" name="checkmark" *ngIf="message.read"></ion-icon>
+            <ion-icon color="light" name="checkmark" *ngIf="message.sent&&!message.read&&message.sender === user"></ion-icon>
+            <ion-icon color="primary" name="checkmark" *ngIf="message.read&&message.sender === user"></ion-icon>
           </ion-note>
         </div>
       </div>
@@ -97,17 +104,15 @@
     <ion-grid style="background:#1a1a1a">
       <ion-row *ngIf="spoken" wrap>
         <ion-col style="position:relative"text-center col-1>
-          <ion-icon (click)="toggled = !toggled"
-          [(emojiPickerIf)]="toggled"
-          [emojiPickerDirection]="'bottom' || 'top' || 'left' || 'right'"
-          (emojiPickerSelect)="handleEmoji($event)" color="light" style="position:absolute;left:5px;bottom:10px;font-size:20px;" name="happy">
+          <ion-icon
+            (click)="handleEmoji($event)" color="light" style="position:absolute;left:5px;bottom:10px;font-size:20px;" name="happy">
           </ion-icon>
         </ion-col>
         <ion-col  style="position:relative" text-center col-1>
           <ion-icon  (click)="showChoices()" color="light" style="position:absolute;left:8px;bottom:10px;font-size:20px;" name="camera"></ion-icon>
         </ion-col>
         <ion-col style="position:relative" col-8>
-          <ion-textarea item-content #text id="textarea" block (keydown)="keydown($event)"(change)="subscribe()" [formControl]="messageCtrl" [(ngModel)]="message" autosize
+          <ion-textarea item-content #text id="textarea" block (keyup)="keydown($event)" [formControl]="messageCtrl" [(ngModel)]="message" autosize
           style="background:#1a1a1a;color:white;overflow:auto;max-height:100px;" placeholder="Message">
         </ion-textarea>
         </ion-col>
@@ -120,5 +125,5 @@
       <button ion-button color="light" block (click)="habeshaHi()" block>Send a #habeshaHI!</button>
       </div>
     </ion-grid>
-
+    <emoji-picker *ngIf="_isOpenEmojiPicker" [(ngModel)]="message"></emoji-picker>
   </ion-footer>

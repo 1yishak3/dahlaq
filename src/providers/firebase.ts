@@ -53,13 +53,12 @@ export class FirebaseService {
   getPermissionAndToken() {
     var vm = this
     return new Promise(function(resolve, reject) {
-      vm.messaging.requestPermission()
-        .then(function() {
-          console.log('Notification permission granted.');
-          vm.messaging.onTokenRefresh(function() {
+          console.log("onpromise")
+          vm.messaging.onTokenRefresh((d)=>{
+            console.log("refresed")
             vm.messaging.getToken()
               .then(function(refreshedToken) {
-                console.log('Token refreshed.');
+                console.log('Token refreshed.',refreshedToken);
                 // Indicate that the new Instance ID token has not yet been sent to the
                 // app server.
                 // ...
@@ -68,14 +67,12 @@ export class FirebaseService {
               .catch(function(err) {
                 console.log('Unable to retrieve refreshed token ', err);
               });
+          },()=>{
+            console.log("something has occured")
           });
 
           // ...
-        })
-        .catch(function(err) {
-          console.log('Unable to get permission to notify.', err);
-          reject(err)
-        });
+
 
     })
   }
@@ -148,16 +145,44 @@ export class FirebaseService {
     })
   }
   getLimited(url, num,by) {
-    return new Promise(function(resolve, reject) {
-      firebase.database().ref(url).orderByChild(by).limitToLast(num).on("child_added",(snapshot)=>{
-  // This callback will be triggered exactly two times, unless there are
-  // fewer than two dinosaurs stored in the Database. It will also get fired
-  // for every new, heavier dinosaur that gets added to the data set.
-      console.log(snapshot.key);
-      resolve(snapshot.val())
-    },(err)=>{
-      reject(err)
-    });
+    return new Promise((resolve, reject)=>{
+      this.stg.get('recentFiftiCache').then((snap)=>{
+        if(snap){
+          firebase.database().ref(url.substring(0,url.lastIndexOf("/"))+"/mCache").once("value",(snaperro)=>{
+            if(snap!==snaperro.val()){
+              firebase.database().ref(url).orderByChild(by).limitToLast(num).on("value",(snapshot)=>{
+                // This callback will be triggered exactly two times, unless there are
+                // fewer than two dinosaurs stored in the Database. It will also get fired
+                // for every new, heavier dinosaur that gets added to the data set.
+                console.log(snapshot.key);
+                resolve(snapshot.val())
+              },(err)=>{
+                reject(err)
+              });
+            }else{
+              this.stg.get('recentFifti').then((tin)=>{
+                resolve(tin)
+              })
+            }
+          }).catch((err)=>{
+            console.log("no connection maybe?")
+            this.stg.get('recentFifti').then((tin)=>{
+              resolve(tin)
+            })
+          })
+        }else{
+          firebase.database().ref(url).orderByChild(by).limitToLast(num).on("value",(snapshot)=>{
+            // This callback will be triggered exactly two times, unless there are
+            // fewer than two dinosaurs stored in the Database. It will also get fired
+            // for every new, heavier dinosaur that gets added to the data set.
+            console.log(snapshot.key);
+            resolve(snapshot.val())
+          },(err)=>{
+            reject(err)
+          });
+        }
+      })
+
 
     })
   }
@@ -174,51 +199,148 @@ export class FirebaseService {
 
     return new Promise((resolve, reject)=>{
       this.stg.get(url+"/cache").then((c)=>{
+        if(c){
         firebase.database().ref(url+"/cache").once('value').then((res)=>{
-          if(res!==c&&res){
+          console.log(res.val())
+          console.log(c)
+          if(res.val()){
+            if(res.val()!==c){
+              console.log("Jesus Lord save me",res.val(),c)
               if(ctrl){
                 var load= this.lc.create({
-                  content:"Getting stuff..."
+                  content:"Getting new stuff..."
                 })
                 load.present()
               }
 
-
-              firebase.database().ref(url).once('value').then((res)=>{
-                console.log(res.val())
+              console.log("How are you even here")
+              firebase.database().ref(url).once('value').then((r)=>{
+                console.log("This is res from fuckit",r.val())
                 if(ctrl){load.dismiss()}
-                var x=res.val()
+
+                var x=r.val()
+                if(x){
                 this.stg.set(url+"/cache",x.cache).then(()=>{
                   this.stg.get(url).then((res)=>{
-                    var what=res||[]
-                    for(let i in x){
-                      what.push(x[i])
-                    }
+                    var what=x||res
+
                     this.stg.set(url,what)
                   })
 
                 })
 
-                resolve(res.val())
+                resolve(r.val())
+              }else{
+                resolve(null)
+              }
               }).catch(function(err) {
                 console.log(err)
                 if(ctrl){load.dismiss()}
                 reject(err)
               })
+            }else{
+              console.log("here????")
+              this.stg.get(url).then((w)=>{
+                console.log(w)
+                if(!w){
+                  console.log("Not w?")
+                  firebase.database().ref(url).once('value').then((r)=>{
+                    console.log("This is res from fuckit",r.val())
 
+
+                    var x=r.val()
+                    if(x){
+                      this.stg.remove(url+"/cache")
+                    this.stg.set(url+"/cache",x.cache).then(()=>{
+                      this.stg.get(url).then((res)=>{
+                        var what=x||res
+
+                        this.stg.set(url,what)
+                      })
+
+                    })
+
+                    resolve(r.val())
+                  }else{
+                    resolve(null)
+                  }
+                  }).catch(function(err) {
+                    console.log(err)
+
+                    reject(err)
+                  })
+                }else{
+                  resolve(w)
+                }
+              }).catch((d)=>{
+                reject("error")
+              })
+            }
           }else{
-            this.stg.get(url).then((res)=>{
-              if(res){
-                resolve(res)
-              }else{
-                reject("Sorry, cache has null too.")
-              }
+            this.stg.get(url).then((w)=>{
+              console.log(w)
+              if(!w){
+                console.log("Not w?")
+                firebase.database().ref(url).once('value').then((r)=>{
+                  console.log("This is res from fuckit",r.val())
 
-            }).catch((err)=>{
-              reject(err)
+
+                  var x=r.val()
+                  if(x){
+                  //this.stg.remove(url+"/cache")
+                  this.stg.set(url+"/cache",x.cache).then(()=>{
+                    this.stg.get(url).then((res)=>{
+                      var what=x||res
+
+                      this.stg.set(url,what)
+                    })
+
+                  })
+
+                  resolve(r.val())
+                }else{
+                  resolve(null)
+                }
+                }).catch(function(err) {
+                  console.log(err)
+
+                  reject(err)
+                })
+              }else{
+                resolve(w)
+              }
+            }).catch((d)=>{
+              reject("error")
             })
           }
         })
+      }else{
+        firebase.database().ref(url).once('value').then((r)=>{
+          console.log("This is res from fuckit",r.val())
+          //if(ctrl){load.dismiss()}
+
+          var x=r.val()
+          if(x){
+          this.stg.set(url+"/cache",x.cache).then(()=>{
+            this.stg.get(url).then((res)=>{
+              var what=x||res
+
+              this.stg.set(url,what)
+            })
+
+          })
+
+          resolve(r.val())
+        }else{
+          resolve(null)
+        }
+        }).catch(function(err) {
+          console.log(err)
+          //if(ctrl){load.dismiss()}
+          reject(err)
+        })
+
+      }
       })
     })
   }
@@ -263,8 +385,13 @@ export class FirebaseService {
       })
     })
   }
-  setStorage(url, value) {
-    var uploadTask = firebase.storage().ref().child(url).put(value)
+  setStorage(url, value,cam?) {
+    var uploadTask
+    if(cam){
+      uploadTask = firebase.storage().ref().child(url).putString(value,'data_url')
+    }else{
+      uploadTask = firebase.storage().ref().child(url).put(value)
+    }
     return uploadTask
   }
   currentUser() {
@@ -278,17 +405,22 @@ export class FirebaseService {
 
     var cr;
     console.log(email + "---" + password)
-    return new Promise(function(resolve, reject) {
+    return new Promise((resolve, reject)=>{
       firebase.auth().setPersistence(firebase.auth.Auth.Persistence.LOCAL)
-        .then(function() {
+        .then(()=>{
       if (email === null) {
         reject("notEthiopian")
       }
-      firebase.auth().createUserWithEmailAndPassword(email, password).then(function(d) {
+      firebase.auth().createUserWithEmailAndPassword(email, password).then((d)=>{
         console.log("Account creation successful, proceeding with phone number verification,", d)
         var user = firebase.auth().currentUser
+        this.stg.set("log",true).then(value => {
+          this.stg.set("uzer",this.currentUser()).then(()=>{
+            resolve(email)
+          })
 
-        resolve(email)
+        })
+
 
       }).catch(function(err) {
         console.log("Account not created", err)
@@ -336,25 +468,33 @@ export class FirebaseService {
       })
     })
   }
-  login(creds, pass?: any, verify?: any) {
-    var num = this.user.checkify(creds.digits)
-    var email = this.user.emailify(num)
-    var password = pass
+  login(e,p) {
+
+    var email = e
+    var password = p
     var vm = this
-    return new Promise(function(resolve, reject) {
+    return new Promise((resolve, reject)=>{
       firebase.auth().setPersistence(firebase.auth.Auth.Persistence.LOCAL)
-        .then(function() {
+        .then(()=>{
 
           // Existing and future Auth states are now persisted in the current
           // session only. Closing the window would clear any existing state even
           // if a user forgets to sign out.
           // ...
           // New sign-in will be persisted with session persistence.
-          if (pass&&pass!=="") {
+          if (password&&password!=="") {
             firebase.auth().signInWithEmailAndPassword(email, password).then((res) => {
-              resolve("Signed In!")
+              console.log("is this the prob?")
+              this.stg.set("log",true).then(value => {
+                console.log("or is this")
+                resolve();
+              })
+
             }).catch((err) => {
-              reject(err)
+              this.stg.set("log",false).then(value => {
+                reject(err)
+              })
+
             })
           }else{
             reject("Password")

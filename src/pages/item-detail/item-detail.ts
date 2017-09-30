@@ -7,9 +7,10 @@ import { FirebaseService } from '../../providers/firebase'
 import { Post } from '../../models/post'
 import { Uzer } from '../../models/uzer'
 import { StreamingMedia } from '@ionic-native/streaming-media'
-import * as _ from 'lodash'
-import {ChatPage} from '../chat-detail/chat-detail'
+
+import { ChatPage } from '../chat-detail/chat-detail'
 import { Network } from '@ionic-native/network'
+import { SearchPage } from '../search/search'
 @Component({
   selector: 'page-item-detail',
   templateUrl: 'item-detail.html'
@@ -21,7 +22,7 @@ export class ItemDetailPage {
 //  isUser:boolean
   userPosts:Array<any>=[]
   arrayStopped=1
-  j:Number
+  j:number
   newList:Array<any>=[]
   props:any
   postz:any={}
@@ -33,7 +34,7 @@ export class ItemDetailPage {
   showEverything:boolean=false
 
   constructor(public mc:ModalController,public lc:LoadingController,public nw:Network,public sm:StreamingMedia,public fbs:FirebaseService,public navCtrl: NavController, public navParams: NavParams, public items: Items) {
-
+    console.log("does it get here?")
     var vm=this
     var disc=nw.onDisconnect().subscribe(()=>{
       vm.connected=false
@@ -52,19 +53,18 @@ export class ItemDetailPage {
 
   }
   getProfile(){
-    var l= this.lc.create({content:"Loading Profile..."})
-    l.present()
+
     return new Promise((resolve,reject)=>{
       this.fbs.getDatabase("/users/"+this.uid,false).then((res)=>{
           var f=new Uzer()
           for(let i in res){
             f[i]=res[i]
           }
-          l.dismiss()
+
           resolve(f)
         //console.log(this.profile)
       }).catch((err)=>{
-        l.dismiss()
+
         reject("ugh")
         console.log("Error is, ",err)
       })
@@ -72,6 +72,7 @@ export class ItemDetailPage {
 
   }
   ngOnInit(){
+    console.log("Something wrong here? init")
     // var vm=this
     // var cr=this.lc.create({
     //   content:"Loading profile..."
@@ -95,6 +96,7 @@ export class ItemDetailPage {
     // })
   }
   ionViewWillEnter(){
+    console.log("Something wrong here?")
     this.uid = this.navParams.get('person') || this.fbs.currentUser().uid;
     this.check=this.fbs.currentUser().uid===this.uid;
     // var vm=this
@@ -116,11 +118,10 @@ export class ItemDetailPage {
     //   cr.dismiss()
     // })
     this.getProfile().then((res)=>{
-      if(!_.isEqual(this.profile,res)){
+
         this.profile=res
-      }
     })
-    this.getNewstuff()
+  //  this.getNewstuff()
   }
   getNewstuff(){
     //this.ready=false
@@ -132,25 +133,27 @@ export class ItemDetailPage {
       vm.arrayStopped=1 //and then go with the below procedure
       vm.newList=[]
       console.log(vm.uid)
-      vm.fbs.getDatabase("/users/"+vm.uid+"/userPosts",true,null).then(function(snap){
+      vm.fbs.getDatabase("/users/"+vm.uid+"/userPosts",true).then(function(snap){
         console.log(snap)
 
         console.log("this is the snap from userPosts: ",snap)
         //console.log(vm.profile.userPosts)
       //  var gool=false
         for (let k in snap){
-          var item=snap[k]
-          if(vm.userPosts.length!==0&&snap[k]!==undefined&&snap[k]!==null){
-            if(vm.postz[item]===undefined){
+          if(k!="cache"){
+            var item=snap[k]
+            if(vm.userPosts.length!==0&&snap[k]!==undefined&&snap[k]!==null){
+              if(vm.postz[item]===undefined){
+                vm.newList.unshift(item)
+                vm.postz[item]=true
+              }
+              // if(item===vm.userPosts[0].postId){
+              //   gool=true
+              // }
+            }else if(vm.userPosts.length===0&&snap[k]!=undefined&&snap[k]!=null){
               vm.newList.unshift(item)
               vm.postz[item]=true
             }
-            // if(item===vm.userPosts[0].postId){
-            //   gool=true
-            // }
-          }else if(vm.userPosts.length===0&&snap[k]!=undefined&&snap[k]!=null){
-            vm.newList.unshift(item)
-            vm.postz[item]=true
           }
         }
         console.log("this is the new list:",vm.newList)
@@ -161,7 +164,7 @@ export class ItemDetailPage {
           console.log("in the if loop of userposts")
           for(let i in vm.newList){
             console.log("are you in the for loop?", vm.dud)
-            vm.fbs.getDatabase("/posts/"+vm.newList[i],true,vm.uid).then(function(res){
+            vm.fbs.getDatabase("/posts/"+vm.newList[i],true).then(function(res){
               var post=new Post(vm.fbs,vm.navCtrl,vm.newList[i],true)
               for(let i in res){
                 post[i]=res[i]
@@ -195,6 +198,9 @@ export class ItemDetailPage {
       })
     })
   }
+  seePosts(){
+    this.navCtrl.push(SearchPage,{profile:this.profile})
+  }
   playVideo(videoUrl){
     var options = {
     successCallback: function() {
@@ -217,7 +223,7 @@ export class ItemDetailPage {
       for(let i in vm.newList){
         var k =j+Number(i)
         console.log(i,k)
-        vm.fbs.getDatabase("/posts/"+vm.newList[k],false,vm.uid).then(function(res){
+        vm.fbs.getDatabase("/posts/"+vm.newList[k],false).then(function(res){
           var post = new Post(vm.fbs,vm.navCtrl,vm.newList[k],true)
           for(let i in res){
             post[i]=res[i]

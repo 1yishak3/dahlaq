@@ -1,5 +1,5 @@
-import { Component, ViewChild } from '@angular/core';
-import { Platform, Nav, Config,LoadingController } from 'ionic-angular';
+import { Component, ViewChild, OnInit} from '@angular/core';
+import { Platform, Nav, Config,AlertController } from 'ionic-angular';
 
 import { StatusBar } from '@ionic-native/status-bar';
 import { SplashScreen } from '@ionic-native/splash-screen';
@@ -17,12 +17,16 @@ import { SignupPage } from '../pages/signup/signup';
 import { TabsPage } from '../pages/tabs/tabs';
 import { TutorialPage } from '../pages/tutorial/tutorial';
 import { WelcomePage } from '../pages/welcome/welcome';
-
+import {ItemDetailPage} from '../pages/item-detail/item-detail'
 import { Settings } from '../providers/providers';
 
 import { TranslateService } from '@ngx-translate/core'
 import {FirebaseService} from '../providers/firebase'
 import {Deploy} from '@ionic/cloud-angular'
+import {Storage} from '@ionic/storage'
+import {ImageLoaderConfig} from 'ionic-image-loader'
+import {Keyboard} from '@ionic-native/keyboard'
+declare var FCMPlugin:any
 
 @Component({
   /*template: `<ion-menu [content]="content">
@@ -65,26 +69,97 @@ export class MyApp {
     { title: 'Settings', component: SettingsPage },
     { title: 'Search', component: SearchPage }
   ]
+  status:boolean
 
-  constructor(public lc:LoadingController,public deploy:Deploy,private translate: TranslateService, private platform: Platform,public fbs: FirebaseService, settings: Settings, private config: Config, private statusBar: StatusBar, private splashScreen: SplashScreen) {
+  constructor(public keyb:Keyboard,public ilc:ImageLoaderConfig,public stg:Storage,public ac:AlertController,public deploy:Deploy,private translate: TranslateService, private platform: Platform,public fbs: FirebaseService, settings: Settings, private config: Config, private statusBar: StatusBar, private splashScreen: SplashScreen) {
     this.initTranslate();
     this.user = this.fbs.currentUser()
-    console.log("this is you", this.user)
-    let loader = this.lc.create();
-    loader.present();
-    var auth=this.fbs.getAuth()
-    auth.onAuthStateChanged(user=>{
-      if(user){
-        loader.dismiss()
-        this.nav.setRoot(TabsPage)
+    console.log(ItemDetailPage)
+    this.stg.get("log").then((res)=>{
+      this.status=res
+      if(res){
+        this.rootPage=TabsPage
+        this.onNotification()
+
       }else{
-        loader.dismiss()
-        this.nav.setRoot(WelcomePage)
+        this.rootPage=WelcomePage
       }
     })
-    let fireBaseUser = this.fbs.currentUser();
-    console.log(fireBaseUser);
-    this.rootPage = fireBaseUser ? TabsPage : LoginPage;
+
+    platform.ready().then(()=>{
+
+      // Okay, so the platform is ready and our plugins are available.
+      // Here you can do any higher level native things you might need.
+      statusBar.styleDefault();
+      this.keyb=new Keyboard()
+      this.keyb.disableScroll(true)
+        //this.onNotification()
+    })
+
+
+
+  }
+
+  async onNotification(){
+    try{
+      await this.platform.ready()
+
+      FCMPlugin.getToken((t)=>{
+
+        if(t){
+          console.log("token token",t)
+          this.fbs.setDatabase("/users/"+this.fbs.currentUser().uid+"/token",t,true).then(()=>{
+            console.log("token has been set")
+          })
+        }
+      })
+      FCMPlugin.onNotification((data)=>{
+        console.log("FCMMMMMM",data)
+        // var ac=this.ac.create({
+        //   title: 'Notifique',
+        //   message: "to see what's new.",
+        //   buttons: [
+        //     {
+        //       text: 'YIMECHACHU',
+        //       role: 'cancel',
+        //       handler: () => {
+        //         //console.log('Cancel clicked');
+        //       }
+        //     },
+        //   ]
+        // })
+        // ac.present()
+      },(e)=>{
+        console.log(e)
+      })
+    }catch(e){
+      console.log(e)
+    }
+  }
+
+  ngOnInit(){
+    var auth=this.fbs.getAuth()
+    console.log("Doing on init")
+    auth.onAuthStateChanged(user=>{
+      if(user){
+      
+        this.onNotification()
+      }
+      if(this.status===undefined||this.status===null){
+        if(user){
+          console.log("This is auth state changed")
+
+          this.nav.setRoot(TabsPage)
+          this.stg.set("log",true)
+
+        }else{
+          this.nav.setRoot(WelcomePage)
+          this.stg.set("log",false)
+
+        }
+      }
+    })
+
     // this.user=fbs.currentUser()
     // if(this.user){
     //     this.rootPage=TabsPage
@@ -100,20 +175,76 @@ export class MyApp {
     //   }
     // });
     this.platform.ready().then(() => {
-      // this.deploy.check().then((snapshotAvailable: boolean) => {
-      //   if (snapshotAvailable) {
-      //     // When snapshotAvailable is true, you can apply the snapshot
-      //     this.deploy.download().then(() => {
-      //      return this.deploy.extract()
-      //     });
-      //   }
-      // });
+
+      this.ilc.enableSpinner(false)
+      this.update().then((res:any)=>{
+          console.log("in the then")
+          var ac=this.ac.create({
+            title: 'Dahlaq be like,',
+            message: "We have an update! Restart your app now to see what's new!",
+            buttons: [
+              {
+                text: 'Yimechachu',
+                role: 'cancel',
+                handler: () => {
+                  //console.log('Cancel clicked');
+                  this.reload()
+                }
+              },  {
+                  text: 'Behuala',
+                  role: 'cancel',
+                  handler: () => {
+                    //console.log('Cancel clicked');
+                  }
+                },
+            ]
+          })
+          ac.present()
+
+      })
+
       // Okay, so the platform is ready and our plugins are available.
       // Here you can do any higher level native things you might need.
       this.statusBar.styleDefault();
       this.splashScreen.hide();
     });
+  }
+  update(){
+    return new Promise((resolve,reject)=>{
+      this.deploy.check().then((snapshotAvailable: boolean) => {
+        if (snapshotAvailable) {
+          // When snapshotAvailable is true, you can apply the snapshot
+          this.deploy.download().then(() => {
+            this.deploy.getSnapshots().then((snapshots) => {
+              console.log('Snapshots', snapshots);
+              // snapshots will be an array of snapshot uuids
+              this.deploy.extract().then(()=>{
+                console.log("well, this works")
+                this.deploy.info().then((x) => {
+                  console.log('Current snapshot infos', x);
+                  for (let suuid of snapshots) {
+                    if (suuid !== x.deploy_uuid) {
+                      this.deploy.deleteSnapshot(suuid);
+                    }
+                  }
+                })
+                resolve("yuppieeee")
+              })
 
+
+            });
+
+
+          });
+
+        }
+      });
+
+    })
+
+  }
+  reload(){
+    this.deploy.load()
   }
   // samp(){
   //   var vm=this

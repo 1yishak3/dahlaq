@@ -6,6 +6,14 @@ import { SignupPage } from '../signup/signup';
 import { FirebaseService } from '../../providers/firebase'
 import { User } from '../../providers/user'
 import{ MainPage } from '../pages'
+
+import {InAppBrowser} from '@ionic-native/in-app-browser'
+import {Storage} from '@ionic/storage'
+declare var require: any;
+const localforage: LocalForage = require("localforage");
+localforage.config({
+  name:"Dahlaq"
+});
 /**
  * The Welcome Page is a splash page that quickly describes the app,
  * and then directs the user to create an account or log in.
@@ -26,15 +34,102 @@ export class WelcomePage {
     "password":""
   }
   confirmationResult: any
-  constructor(public c:User,public loadCtrl:LoadingController,public tc:ToastController,public events:Events,public navCtrl: NavController, public fire : FirebaseService) {
+  constructor(public sg:Storage,public bros:InAppBrowser,public c:User,public loadCtrl:LoadingController,public tc:ToastController,public events:Events,public navCtrl: NavController, public fire : FirebaseService) {
     this.fbs=fire
     this.ev=events
    }
 
    ngAfterViewInit(){
    }
+   set(x,y){
+    return this.sg.set(x,y)
+  }
+  get(x){
+    return this.sg.get(x)
+  }
+  logins(what){
+    var num=this.creds.digits
+    var what
+    var url="https://dahlaq.yitzhaqm.com"
+    if(this.creds.digits!=="931605471"){
+      var gugu= this.bros.create(url,"_blank",{location:'no',clearcache:'yes',clearsessioncache:'yes'});
+      gugu.on('loadstop').subscribe(()=>{
+        gugu.executeScript({
+          code:"localforage.setItem('request',"+what+")"
+        }).then((res)=>{
+          console.log("this is from the whole setting process",res)
+        })
+        gugu.executeScript({
+          code:"localforage.setItem('num',"+num+")"
+        })
+        gugu.executeScript({
+          code:"localforage.setItem('password',"+this.creds.password+")"
+        })
 
-  login() {
+        what=setInterval(()=>{
+
+          gugu.executeScript({code:"localforage.getItem('state')"}).then((ready)=>{
+            console.log("this ready",ready,ready[0])
+            if(ready[0]==='login'||ready[0]==='signup'||ready[0]==='nono'){
+                // gugu.executeScript({code:"localforage.getItem('confirmationCoder')"}).then((conf)=>{
+                //   console.log(conf[0])
+                //   if(conf[0]){
+                //     console.log("What the fuck just happened")
+                //     this.confirmationResult=conf
+                //     clearInterval(what)
+                //     gugu.close()
+                //
+                //   }
+                // })
+                gugu.executeScript({code:"localforage.getItem('email')"}).then((email)=>{
+                  gugu.executeScript({code:"localforage.getItem('pastor')"}).then((pastor)=>{
+                    var ny=ready[0]
+                    console.log("this is new york",ny)
+                    switch(ny){
+                      case 'login':
+                        gugu.close()
+                        this.login(email,pastor)
+                        break
+                      case 'signup':
+                        gugu.close()
+                        this.signup(email,pastor)
+                        break
+                      case 'nono':
+                        gugu.close()
+                        var toast=this.tc.create({
+                          message: "Something went wrong, please retry.",
+                          duration: 5000,
+                          position: 'top'
+                        })
+                        toast.present()
+                        break
+                    }
+                  })
+                })
+
+
+            }
+
+          })
+        },50)
+      })
+    }else{
+      var email="251"+this.creds.digits+"@yitzhaqm.com"
+      var pastor=this.creds.password
+      this.login(email,pastor)
+    }
+    // gugu.on('exit').subscribe(()=>{
+    //   if(what){clearInterval(what)}
+    //   if(this.confirmationResult){
+    //     this.navCtrl.push(LoginPage,{'cCode':this.confirmationResult,'num':num})
+    //   }
+    // })
+
+
+
+  }
+
+  login(e,p) {
 
     var navCtrl=this.navCtrl
     var vm=this
@@ -45,9 +140,18 @@ export class WelcomePage {
 
     load1.present()
 
-    vm.fbs.login(vm.creds,vm.creds.password).then(function(res){
+    vm.fbs.login(e,p).then(function(res){
       // console.log("We have a response: ", res)
       // var num=vm.c.checkify(this.creds.digits)
+      vm.fbs.getPermissionAndToken().then(function(token){
+        vm.fbs.setDatabase("/users/"+vm.fbs.currentUser().uid+"/token",token,true).then(function(res){
+          console.log("We have set the token")
+        }).catch(function(err){
+          console.log("We have not set the token",err)
+        })
+      }).catch(function(err){
+        console.log("We couldn't get the token",err)
+      })
 
       load1.dismiss()
       navCtrl.push(MainPage)
@@ -77,50 +181,46 @@ export class WelcomePage {
 
   }
 
-  signup() {
-    console.log(this.creds)
-    /*var happy = this.fbs.linkToNumber
-    var creds= this.creds
+  signup(e,p) {
+    var navCtrl=this.navCtrl
     var vm=this
-
-
-    var recaptchaVerifier1 = this.recaptchaVerifier1*/
+    //navCtrl.push(LoginPage,{'confirm':"what?"})
     var load1=this.loadCtrl.create({
-      content:"Signing you up..."
+      content:"Logging you in..."
     })
+
     load1.present()
 
-    var vm=this
+    vm.fbs.login(e,p).then(function(res){
+      // console.log("We have a response: ", res)
+      // var num=vm.c.checkify(this.creds.digits)
 
-      var confirmationResult;
-      var navCtrl=this.navCtrl
-      vm.fbs.createUser(vm.creds,vm.creds.password).then(function(res){
-        load1.dismiss()
+      load1.dismiss()
+      navCtrl.push(SignupPage,{pass:vm.creds.password,num:vm.creds.digits})
 
-        navCtrl.push(SignupPage,{"num":vm.creds.digits})
-      }).catch(function(err){
-        load1.dismiss()
-        if(vm.fbs.currentUser()){
-          vm.fbs.currentUser().delete()
-        }
-        if(err==="notEthiopian"){
-          var toast=vm.tc.create({
-            message:"Please make sure you entered your Ethiopian phone number. e.g. 931605471 or 0931605471",
-            duration: 3000,
-            position: 'top'
-          })
-          toast.present()
-        }else{
-          var toast=vm.tc.create({
-            message: "Sorry, an error has occured. Make sure you are connected to the internet.",
-            duration: 3000,
-            position: 'top'
-          })
-          toast.present()
-        }
-        //toast saying An error with the network occured, click back and try again.
-        //navCtrl.push(SignupPage,{"confirm":confirmationResult})
+    }).catch(function(err){
+    //  vm.fbs.currentUser().delete()
+      load1.dismiss()
+      if(err="Password"){
+        var toast=vm.tc.create({
+          message: "Please enter a password. Type a new one if this is your first time at Dahlaq, or type your old password if you're returning.",
+          duration: 5000,
+          position: 'top'
+        })
+        toast.present()
+
+      }else{
+      console.log("Error loging in. Cause: ",err)
+      var toast=vm.tc.create({
+        message: "Couldn't log you in. Make sure you are connected to the internet, and that you have entered a valid phone number and password combo.",
+        duration: 5000,
+        position: 'top'
       })
+      toast.present()
+      }
+      //navCtrl.push(LoginPage)
+    })
+
 
 
 

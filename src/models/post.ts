@@ -35,10 +35,19 @@ export class Post {
   disliked:boolean
   uid:any
 
-  constructor(public fbs:FirebaseService,public navCtrl:NavController,public pId?:string, public tr?:boolean){
+  constructor(public fbs:FirebaseService,public navCtrl:NavController,public pId?:string, public tr?:boolean,public paste?:any){
   //  console.log("this is this: ",fbs)
     this.uid=fbs.currentUser().uid
     this.postId=pId
+    console.log(paste)
+    if(paste){
+      for(let i in paste){
+      //  console.log(i)
+        this[i]=paste[i]
+      }
+      this.poster=paste.poster
+      console.log(this.poster,paste.poster)
+    }
   //  console.log("this is the uid: ",this.uid)
 
     // this.likes= (Object.keys(this.content.likes)).length
@@ -66,7 +75,7 @@ export class Post {
  // }
   bootstrap(){
     var vm=this
-  
+
     this.fbs.getDatabase("/posts/"+this.postId,false).then(function(res:any){
       //var pst:any= res
       vm.poster=res.poster
@@ -89,8 +98,13 @@ export class Post {
     })
     this.fbs.getDatabase("/posts/"+this.postId+"/content/reach",true).then(function(res){
       var reach = res
+      if(!reach){
+        reach={}
+      }
       if(reach===0){
         reach={}
+        reach[vm.uid]=Date.now()
+      }else{
         reach[vm.uid]=Date.now()
       }
       vm.fbs.setDatabase("/posts/"+vm.postId+"/content/reach",reach,true).then(function(res){

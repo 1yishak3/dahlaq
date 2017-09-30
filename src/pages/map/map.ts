@@ -25,6 +25,8 @@ export class MapPage {
   show:any=true
   firstTime:any=true
   history:any={}
+  totit:number=0
+  already:any={}
   constructor(public lc:LoadingController,
     public nw:Network,
     public navCtrl: NavController,
@@ -49,11 +51,11 @@ export class MapPage {
   refreshChats(){
     var vm=this
     return new Promise((resolve,reject)=>{
-      this.fbs.getDatabase("/users/"+this.fbs.currentUser().uid+"/people",false).then((res)=>{
+      this.fbs.getDatabase("/users/"+this.fbs.currentUser().uid+"/people",true).then((res)=>{
         if(Object.keys(res).length===Object.keys(vm.people).length){
           console.log("???????")
-          for(let i in this.people){
-            var cid=this.people[i].chatId
+          for(let j in this.people){
+            var cid=this.people[j].chatId
             console.log(cid)
             this.fbs.getDatabase("/chats/"+cid+"/summary",true).then((res:any)=>{
               var chat=res
@@ -64,23 +66,28 @@ export class MapPage {
                   if(chat.users[vm.uid].unread===0){
                     chat["unread"]=0
                   }else{
-                    chat["unread"]=Object.keys(chat.users[vm.uid].unread).length
+                    if(chat.users[vm.uid].unread){
+                      chat["unread"]=Object.keys(chat.users[vm.uid].unread).length
+                    }else{
+                      chat['unread']=0
+                    }
                   }
 
 
                 }
               }
 
-              this.people[i]=chat
-              
+              this.people[j]=chat
+              console.log("what ",this.people)
+
             })
           }
         }else{
-          console.log(Object.keys(res).length)
+          console.log("Dude, some how got inthe else new CHAT GET",Object.keys(res).length)
           console.log(Object.keys(vm.people).length)
           this.getNewChats()
         }
-        resolve()
+        resolve(this.people)
       })
     })
 
@@ -88,15 +95,16 @@ export class MapPage {
   }
 
   ionViewWillEnter() {
-    if(this.firstTime){
-      var ch=this.lc.create({
-        content:"Loading chats..."
-      })
-      ch.present()
-    }
-    this.refreshChats().then(()=>{
-      if(this.firstTime){  ch.dismiss()}
+    // if(this.firstTime){
+    //   var ch=this.lc.create({
+    //     content:"Loading chats..."
+    //   })
+    //   ch.present()
+    // }
+    this.refreshChats().then((d)=>{
+      // if(this.firstTime){  ch.dismiss()}
       this.firstTime=false
+      console.log("refreshList: ",d)
 
     })
     this.refreshList()
@@ -109,16 +117,16 @@ export class MapPage {
   getNewChats(){
     var vm=this
     this.uid=this.fbs.currentUser().uid
-    this.fbs.getDatabase("/users/"+this.uid,false).then((res:any)=>{
+    this.fbs.getDatabase("/users/"+this.uid+"/people",false).then((res:any)=>{
       // for(let i in res){
       //   vm.profile[i]=res[i]
       // }
 
-      vm.profile=res
-      for(let i in res.people){
-        if(!this.history[res.people[i]]){
-          this.history[res.people[i]]=true
-          this.fbs.getDatabase("/chats/"+res.people[i]+"/summary", false).then(function(res){
+
+      for(let i in res){
+        if(!this.history[res[i]]){
+          this.history[res[i]]=true
+          this.fbs.getDatabase("/chats/"+res[i]+"/summary", false).then(function(res){
             var chat:any=res
             var oUid=""
             for(let i in chat.users){
@@ -128,7 +136,13 @@ export class MapPage {
                 if(chat.users[vm.uid].unread===0){
                   chat["unread"]=0
                 }else{
-                  chat["unread"]=Object.keys(chat.users[vm.uid].unread).length
+                  if(chat.users[vm.uid].unread){
+                    chat["unread"]=Object.keys(chat.users[vm.uid].unread).length
+                    vm.totit=vm.totit+Object.keys(chat.users[vm.uid].unread).length
+                  }else{
+                    chat["unread"]=0
+                  }
+
                 }
 
 
@@ -144,9 +158,21 @@ export class MapPage {
         vm.people.sort(function(a,b){
           return Number(b.lastTime)-Number(a.lastTime)
         })
+        console.log(vm.people)
       }
       vm.sorted=true
-      vm.suggestedPeople=vm.profile.suggestedPeople
+      this.fbs.getDatabase("/users/"+this.uid+"/suggestedPeople",true).then((res:any)=>{
+        console.log('kjhgfd')
+        if(!(typeof res === 'string' || res instanceof String)){
+          for(let k in res){
+            if(k!=="cache"){
+              vm.suggestedPeople.push(res[k])
+            }
+          }
+          vm.refreshList()
+        }
+        this.fbs.setDatabase("/users/"+this.uid+"/suggestedPeople","repopulate/"+Date.now(),true)
+      })
     }).catch(function(err){
       console.log("Error getting profile, ",err)
     })
@@ -154,18 +180,20 @@ export class MapPage {
   refreshList(){
     //var prev=-1
     var vm=this
+    console.log("changedddd")
     if(this.suggestedPeople){
-      var key = Object.keys(this.suggestedPeople)
+      var key = this.suggestedPeople.length
       var temp=[]
       var check={}
       for(let i=0;i<5;i++){
-        console.log("this what it would have been,",check[0])
+        console.log("this what it would have been,",key)
         if(key.length>5){
-          var lucky=Math.floor(Math.random())*key.length
+          console.log("why is key > 5??",key)
+          var lucky=Math.floor(Math.random()*key.length)
           console.log(lucky)
           while(check[lucky]){
-            lucky=Math.floor(Math.random())*key.length
-            console.log("This is lucky ",lucky)
+            lucky=Math.floor(Math.random()*key.length)
+            console.log("This is ljsjucky ",lucky)
           }
           check[lucky]=true
           //prev=_.cloneDeep(lucky)
@@ -179,6 +207,7 @@ export class MapPage {
           }
         }else{
           if(i<key.length){
+            console.log("hello world",i)
             vm.fbs.getDatabase("/users/"+this.suggestedPeople[i]+"/basic",false).then((res)=>{
               temp.push(res)
             }).catch((err)=>{
@@ -186,6 +215,7 @@ export class MapPage {
             })
           }
           if(i===4){
+            console.log("this is temp",temp)
             vm.miniList=temp
           }
         }
@@ -194,7 +224,11 @@ export class MapPage {
 
   }
   unread(summary:any){
-    return Object.keys(summary.users[this.uid].unread).length
+    if(summary.users[this.uid].unread){
+      return Object.keys(summary.users[this.uid].unread).length
+    }else{
+      return 0
+    }
   }
   username(summary){
     return summary.users[summary.oUid].username

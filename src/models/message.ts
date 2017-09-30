@@ -1,3 +1,4 @@
+import {FirebaseService} from '../providers/firebase'
 export class Message {
   sender:string
   receiver:string
@@ -10,7 +11,7 @@ export class Message {
   sent:boolean
   senderUid:any
   resUid:any
-  constructor(private mc?: any) {
+  constructor(public fbs?:FirebaseService,private mc?: any,public cid?:any,public mid?:any) {
     if(mc){
       this.sender=mc.sender
       this.receiver=mc.receiver
@@ -22,6 +23,16 @@ export class Message {
       this.senderUid=mc.senderUid
       this.resUid=mc.resUid
     }
+    if(fbs){
+      if(fbs.currentUser().uid!=this.senderUid){
+        this.read=true
+        this.fbs.setDatabase("/chats/"+cid+"/content/messages/"+mid+"/read",true,true).then(()=>{
+          console.log("what? set it?")
+          // this.fbs.rmDatabase("/chats/"+cid+"/summary/"+this.resUid+"/unread")
+        })
+      }
+    }
+
     // Quick and dirty extend/assign fields to this model
   }
 

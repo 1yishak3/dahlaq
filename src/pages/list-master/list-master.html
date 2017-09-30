@@ -16,7 +16,7 @@
       </button>
     </ion-buttons>
     <!-- Please Put proper position  -->
-    <ion-searchbar *ngIf="search"  ([ngModel])="searchTerm" [formControl]="searchCtrl" (ionInput)="getItems()" placeholder="Username..."></ion-searchbar>
+    <ion-searchbar style="background:transparent;color:grey"*ngIf="search"  [(ngModel)]="searchTerm" [formControl]="searchCtrl" (ionInput)="getItems()" placeholder="Username..."></ion-searchbar>
   </ion-navbar>
 
     <!-- <div *ngIf="connected&&show" style="background:green;color:white;text-align:center">You are connected!</div>
@@ -25,7 +25,11 @@
 
 <ion-content style="background-color:black;">
     <div text-center style="color:rgb(50, 50, 50);text-align:center" *ngIf="people.length===0">Refer more people to join Dahlaq to see more ranks AND rank higher! #goEthiopia</div>
+
     <div text-center style="color:rgb(50, 50, 50);text-align:center" *ngIf="people.length<10 &&people.length!==0">Not many people around. Refer more people to join Dahlaq to see more ranks AND rank higher! P.S. Don't forget to give them your exact username. #goEthiopia</div>
+      <!-- <button ion-button block (click)="happy()">
+
+      </button> -->
   <div *ngIf="searching" class="spinner-container">
         <ion-spinner></ion-spinner>
     </div>
@@ -40,14 +44,14 @@
   <ion-list>
       <a ion-item no-lines *ngFor="let item of people;let i=index" (click)="openItem(item)">
           <ion-avatar item-start>
-            <img [src]="item.currentPic"/>
+            <img-loader [src]="item.currentPic" useImg></img-loader>
           </ion-avatar>
         <div style="color:white;">
           <h2>{{item.username}}</h2>
           <ion-note style="color:rgb(69, 69, 69)">{{item.bio}}</ion-note>
         </div>
         <!-- <div item-end icon-right><ion-icon color="light" name="star" >{{3*1/i}}</ion-icon></div> -->
-        <ion-badge color="light"item-end>#{{i+1}}</ion-badge>
+        <ion-badge color="light"item-end>{{item.rank}}</ion-badge>
       </a>
     <ion-infinite-scroll (ionInfinite)="pullToAddMore($event)">
       <ion-infinite-scroll-content

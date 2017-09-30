@@ -4,8 +4,10 @@ import { HttpModule, Http } from '@angular/http';
 import { IonicApp, IonicModule, IonicErrorHandler } from 'ionic-angular';
 import * as firebase from 'firebase'
 import {Deploy} from '@ionic/cloud-angular'
-
+import { ImageResizer, ImageResizerOptions } from '@ionic-native/image-resizer';
+import { Keyboard } from '@ionic-native/keyboard';
 //var dFire = firebase.initializeApp(environment.firebase)
+import { InAppBrowser } from '@ionic-native/in-app-browser'
 //import {ngSanitize} from 'angular-sanitize'
 import 'firebase/auth'
 import 'firebase/messaging'
@@ -19,12 +21,14 @@ import 'firebase/storage'
 //import ionicMaterial from '../../bower_components/ionic-material/dist/ionic.material'
 import { Storage, IonicStorageModule } from '@ionic/storage';
 import { Network } from '@ionic-native/network'
-import { Elastic } from 'angular2-elastic'
+//import { Elastic } from 'angular2-elastic'
 import { AutosizeModule } from 'ionic2-autosize'
 import { environment } from '../environments/environment'
-import { EmojiPickerModule } from '@ionic-tools/emoji-picker';
+//import { EmojiPickerModule } from '@ionic-tools/emoji-picker';
 import { MyApp } from './app.component';
 import { StreamingMedia } from '@ionic-native/streaming-media'
+import { EmojiPickerComponentModule } from '../assets/emoji-picker/emoji-picker.module'
+import {EmojiProvider} from '../providers/emoji'
 //import { ImageResizer } from '@ionic-native/image-resizer'
 import { Ng2ImgToolsModule } from 'ng2-img-tools'
 import { CardsPage } from '../pages/cards/cards';
@@ -42,7 +46,7 @@ import { TabsPage } from '../pages/tabs/tabs';
 import { TutorialPage } from '../pages/tutorial/tutorial';
 import { WelcomePage } from '../pages/welcome/welcome';
 import { PostPage } from '../pages/post/post'
-//import { PopoverPage } from '../pages/popovers/propop'
+import { PopoverPage } from '../pages/popovers/propop'
 import { Api } from '../providers/api';
 import { Items } from '../mocks/providers/items';
 import { Settings } from '../providers/settings';
@@ -50,6 +54,7 @@ import { User } from '../providers/user';
 import { FirebaseService } from '../providers/firebase'
 
 import { Camera } from '../providers/camera';
+import {Camera as Cam} from '@ionic-native/camera'
 
 import { SplashScreen } from '@ionic-native/splash-screen';
 import { StatusBar } from '@ionic-native/status-bar';
@@ -65,6 +70,7 @@ import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 //import { LueggModule } from 'angularjs-scroll-glue'
 import { CloudSettings, CloudModule } from '@ionic/cloud-angular';
 import { LinkyModule } from 'angular-linky'
+import { IonicImageLoader } from 'ionic-image-loader'
 
 const cloudSettings: CloudSettings = {
   'core': {
@@ -124,7 +130,9 @@ export function provideSettings(storage: Storage) {
     WelcomePage,
     PostPage,
     MomentjsPipe,
-    TruncatePipe
+    TruncatePipe,
+    PopoverPage
+
   //  PopoverPage
   ],
   imports: [
@@ -138,16 +146,32 @@ export function provideSettings(storage: Storage) {
         deps: [Http]
       }
     }),
-    IonicModule.forRoot(MyApp),
+    IonicModule.forRoot(MyApp, {
+        platforms : {
+          ios : {
+            // These options are available in ionic-angular@2.0.0-beta.2 and up.
+            scrollAssist: false,    // Valid options appear to be [true, false]
+            autoFocusAssist: false  // Valid options appear to be ['instant', 'delay', false]
+          },
+          android:{
+            scrollAssist: false,    // Valid options appear to be [true, false]
+            autoFocusAssist: false
+          }
+          // http://ionicframework.com/docs/v2/api/config/Config/)
+        }
+      }),
     IonicStorageModule.forRoot(),
-    Elastic,
+//    Elastic,
     AutosizeModule,
-    EmojiPickerModule.forRoot(),
+//    EmojiPickerModule.forRoot(),
     NoopAnimationsModule,
     Ng2ImgToolsModule,
 //    ngSanitize,
     LinkyModule,
-    CloudModule.forRoot(cloudSettings)
+    CloudModule.forRoot(cloudSettings),
+    IonicImageLoader.forRoot(),
+    EmojiPickerComponentModule
+
   //  LueggModule
   ],
   bootstrap: [IonicApp],
@@ -168,11 +192,17 @@ export function provideSettings(storage: Storage) {
     TutorialPage,
     WelcomePage,
     PostPage,
+    PopoverPage
   //  PopoverPage
   ],
   providers: [
     //ItemCreatePage,
-    //PopoverPage,
+    //PopoverPage
+    InAppBrowser,
+    Keyboard,
+    ImageResizer,
+    Cam,
+    EmojiProvider,
     File,
     Network,
     //ImageResizer,

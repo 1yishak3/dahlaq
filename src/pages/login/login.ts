@@ -44,17 +44,21 @@ export class LoginPage {
       this.loginErrorString = value;
     })
     this.fbs=fbss
-    this.cCode = this.nvp.get("confirm")
+    this.cCode = this.nvp.get("cCode")
     this.phone= this.nvp.get("num")
     var vm=this
+    this.nw=new Network
     var disc=nw.onDisconnect().subscribe(()=>{
       vm.connected=false
+      console.log("Not connected")
     })
     var conc=nw.onConnect().subscribe(()=>{
       vm.show=true
       vm.connected=true
+      console.log("connected")
       setTimeout(function(){
         vm.show=false
+        console.log("closing curtains")
       },5000)
     })
   }
@@ -71,11 +75,11 @@ export class LoginPage {
     this.once=this.once+1
     if (this.once<2){
       //this.navCtrl.push(MainPage);
-      this.cCode.verifyCheck(this.phone,this.account.code).then((res)=>{
+      this.cCode.confirm(this.account.code).then((res)=>{
         if(vm.fbss.currentUser().displayName===""){
           load.dismiss()
             let toast = this.toastCtrl.create({
-              message: "It looks like don't have an account with us yet, please signup on this page to enjoy Dahlaq",
+              message: "It looks like you don't have an account with us yet, please signup for an account to enjoy Dahlaq",
               duration: 3333,
               position: 'top'
             });
@@ -87,7 +91,7 @@ export class LoginPage {
           console.log("Login Successful")
           load.dismiss()
           let toast = this.toastCtrl.create({
-            message: "Welcome back! See what's new and catch up with friends.",
+            message: "Welcome back! See what's new and catch up with friends!",
             duration: 2017,
             position: 'top'
           });

@@ -16,21 +16,27 @@
 
 
 
-      <ion-list padding style="color:white;text-color:white">
+  <ion-list padding style="color:white;text-color:white">
 
-        <ion-item no-lines style="color:white">
-          <ion-label fixed>Username</ion-label>
-          <ion-input no-lines #name type="text" [(ngModel)]="account.username" name="name" placeholder="Pick a username"></ion-input>
-          <ion-note>{{available}}</ion-note>
-        </ion-item>
-        <ion-item no-lines style="color:white">
-          <ion-label fixed>Referred By</ion-label>
-          <ion-input no-lines type="text" name="referrer" [(ngModel)]="account.refer" placeholder="Only if you have one :)" ></ion-input>
-        </ion-item>
-      </ion-list>
-      <div padding>
-        <button ion-button (click)="doSignup()" color="light" block>{{ 'SIGNUP_BUTTON' | translate }}</button>
-      </div>
+    <ion-item no-lines style="color:white">
+      <ion-label fixed>Username</ion-label>
+      <ion-input no-lines #name type="text" [(ngModel)]="account.username" name="name" placeholder="Pick a username"></ion-input>
+      <ion-note>{{available}}</ion-note>
+    </ion-item>
+    <ion-item no-lines style="color:white">
+      <ion-label fixed>Referred By</ion-label>
+      <ion-input no-lines type="text" name="referrer" [(ngModel)]="account.refer" placeholder="Only if you have one :)" ></ion-input>
+    </ion-item>
+  </ion-list>
+  <div padding>
+    <button ion-button (click)="doSignup()" color="light" block>{{ 'SIGNUP_BUTTON' | translate }}</button>
+  </div>
+
+  <ion-footer text-center>
+    <ion-note style="text-align:center;color:grey">
+      Be sure to note down your password in case you have to log in again. Final reminder: {{pass}}
+    </ion-note>
+  </ion-footer>
 
 </ion-content>
 <!--
