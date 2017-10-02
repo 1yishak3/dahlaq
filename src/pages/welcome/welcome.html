@@ -14,7 +14,7 @@
     <ion-list>
       <ion-item style="color:white">
         <ion-label >+251</ion-label>
-        <ion-input type="text" [(ngModel)]="creds.digits" name="phone" placeholder="Your number"></ion-input>
+        <ion-input type="number" [(ngModel)]="creds.digits" name="phone" placeholder="Your number"></ion-input>
       </ion-item>
       <ion-item style="color:white">
         <ion-label >Your Password</ion-label>
@@ -23,7 +23,7 @@
 
     </ion-list>
 
-    <button ion-button color="secondary" block id="signup-button" (click)="signups()" class="signup">{{ 'SIGNUP' | translate }}</button>
-    <button ion-button color="light" block id="login-button" (click)="logins()" class="login">{{ 'LOGIN' | translate }}</button>
+    <button ion-button color="secondary" block id="signup-button" (click)='logins("signup")' class="signup">{{ 'SIGNUP' | translate }}</button>
+    <button ion-button color="light" block id="login-button" (click)='logins("login")' class="login">{{ 'LOGIN' | translate }}</button>
   </div>
 </ion-footer>

@@ -413,46 +413,61 @@ export class ChatPage implements AfterViewChecked{
     return name
   }
   processFile(url,fil) {
+    console.log("Processing...")
+    this.uploading=true
     var vm = this.fbs
-    //var pst =  this.profilec
     var vm1=this
-    fil.file(function(file){
-      vm.setStorage(url,file).then(function(res){
-        vm.getStorage(url).then(function(res){
-          console.log(res)
-          vm1.pictureUrl=res
-          vm1.complete=true
-          vm1.uploading=false
-        }).catch(function(err){
-          console.log("URL get error", err)
-        })
+      console.log("fileeee2",fil)
+      var task= this.fbs.setStorage(url,fil,true)
+      task.on('state_changed',(snap:any)=>{
+        console.log(snap.bytesTransferred)
+        console.log(snap.totalBytes)
+
+        vm1.progress=(Number(snap.bytesTransferred)/Number(snap.totalBytes))*100
+        console.log(vm1.progress)
+
+        console.log("this is your snapshot, ",snap)
+      },(err)=>{
+          console.log("This is your error",err)
       })
-    },function(err){
-      console.log(err)
-    })
+      task.then(()=>{
+
+          vm.getStorage(url).then((res:any)=>{
+
+            if(fil.substring(fil.indexOf(":")+1,fil.indexOf('/'))=='image'){
+              this.pictureUrl=res
+            }
+            vm1.complete=true
+            vm1.uploading=false
+
+        })
+
+      })
   }
   getPicture(upload) {
     //this.thisPage=false
     var cam=this.camera
     var vm = this.fbs
-    var vm1=this.generateFileName
+    var vm2=this
     if(!upload){
       var fp=this.processFile
-      this.camera.takePicture(1).then(function(data:any){
-        cam.getFile(data.fullpath).then(function(file){
-          var pic = vm1(file)
+      this.camera.takePicture(1).then((data:any)=>{
+        console.log(data,data.fullPath)
+        cam.getFile(data).then((file:any)=>{
+          console.log("this is the file, ",file)
+          var pic = this.generateFileName(data)
+          vm2.currentFile=data.name
           var url="/"+vm.currentUser().uid+"/images/"+pic
-          this.complete=false
-          this.uploading=true
-          fp(url,file)
+          this.processFile(url,file)
         }).catch(function(err){
-
+          console.log("Error, ", err)
         })
       }).catch(function(err){
-
+        console.log("Error taking picture, ",err)
       })
     }else{
-      this.fileInput.nativeElement.click();
+    //  console.log(this.fileInput)
+      this.fileInput.nativeElement.click()
     }
   }
   onChangeInput(e){

@@ -39,7 +39,7 @@ export class User {
     return "ran_"+time+num+"_pass"
   }
   checkify(num){
-    if ((num.length===10&&num[0]==='0'&&num[1]!=='0')||(num.length===9&&num[0]!==0)){
+    if ((num.length===10&&num[0]==='0'&&num[1]!=='0')||(num.length===9&&num[0]==='9')){
       if(num.length===10){
         return "+251"+num.substring(1,num.lastIndexOf(''))
       }
