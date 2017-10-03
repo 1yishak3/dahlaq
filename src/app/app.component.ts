@@ -177,31 +177,25 @@ export class MyApp {
     this.platform.ready().then(() => {
 
       this.ilc.enableSpinner(false)
-      // this.update().then((res:any)=>{
-      //     console.log("in the then")
-      //     var ac=this.ac.create({
-      //       title: 'Dahlaq be like,',
-      //       message: "We have an update! Restart your app now to see what's new!",
-      //       buttons: [
-      //         {
-      //           text: 'Yimechachu',
-      //           role: 'cancel',
-      //           handler: () => {
-      //             //console.log('Cancel clicked');
-      //             this.reload()
-      //           }
-      //         },  {
-      //             text: 'Behuala',
-      //             role: 'cancel',
-      //             handler: () => {
-      //               //console.log('Cancel clicked');
-      //             }
-      //           },
-      //       ]
-      //     })
-      //     ac.present()
-      //
-      // })
+      this.update().then((res:any)=>{
+          console.log("in the then")
+          var ac=this.ac.create({
+            title: 'Dahlaq be like,',
+            message: "We have an update! Your app will restart now.",
+            buttons: [
+              {
+                text: 'Yimechachu',
+                role: 'cancel',
+                handler: () => {
+                  //console.log('Cancel clicked');
+                  this.reload()
+                }
+              }
+            ]
+          })
+          ac.present()
+
+      })
 
       // Okay, so the platform is ready and our plugins are available.
       // Here you can do any higher level native things you might need.
