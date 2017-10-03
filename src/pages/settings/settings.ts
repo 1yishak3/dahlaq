@@ -37,6 +37,8 @@ export class SettingsPage {
   uploading=false
   progress:number=0
   currentFile:string=""
+  currentPic:any
+  profilePics:any=[]
   person:any
   constructor( public sg:Storage,
     public ir:Ng2ImgToolsService,
@@ -52,6 +54,7 @@ export class SettingsPage {
 
     this.profile= navParams.get('user')
     this.profilec=(this.profile)
+    this.currentPic=this.profilec.basic.currentPic
     this.props=Object.keys(this.profilec.properties)
     var vm=this
     var disc=nw.onDisconnect().subscribe(()=>{
@@ -143,18 +146,11 @@ export class SettingsPage {
       function(err){
           console.log("This is your error",err)
       })
-      task.then(function(snap){
+      task.then((snap)=>{
         console.log(snap)
-          vm.fbs.getStorage(url).then(function(res:any){
-            if(vm.profilec.properties.profilePics){
-              vm.profilec.properties.profilePics.push(res)
-              vm.profilec.basic.currentPic=res
-            }else{
-              vm.profilec.properties.profilePics=[]
-              vm.profilec.properties.profilePics.push(res)
-              vm.profilec.basic.currentPic=res
-
-            }
+          vm.fbs.getStorage(url).then((res:any)=>{
+            this.currentPic=res
+            this.profilePics.push(res)
             vm.complete=true
             vm.uploading=false
           })
@@ -168,25 +164,32 @@ export class SettingsPage {
   processFile(url,fil) {
     var vm = this.fbs
     var pst =  this.profilec
-    fil.file(function(file){
-      vm.setStorage(url,file).then(function(res){
-        vm.getStorage(url).then(function(res){
+    this.complete=false
+    this.uploading=true
+    if(pst.properties.profilePics){
+      for(let i in pst.properties.profilePics){
+        this.profilePics.push(pst.properties.profilePics[i])
+      }
+    }
+
+
+
+      vm.setStorage(url,fil,true).then((res)=>{
+        vm.getStorage(url).then((res)=>{
           console.log(res)
-          if(pst.properties.profilePics){
-            pst.properties.profilePics.push(res)
-            pst.basic.currentPic=res
-          }else{
-            pst.properties.profilePics=[]
-            pst.properties.profilePics.push(res)
-            pst.basic.currentPic=res
-          }
+
+            // pst.properties.profilePics.push(res)
+            // pst.basic.currentPic=res
+            this.currentPic=res
+            this.profilePics.push(res)
+            this.uploading=false
+            this.complete=true
+
         }).catch(function(err){
           console.log("URL get error", err)
         })
       })
-    },function(err){
-      console.log(err)
-    })
+
   }
   getPicture(upload) {
     this.thisPage=false
@@ -195,19 +198,20 @@ export class SettingsPage {
     var vm1=this.generateFileName
     if(!upload){
       var fp=this.processFile
-      this.camera.takePicture(1).then(function(data:any){
-        cam.getFile(data.fullpath).then(function(file){
-          var pic = vm1(file)
+      this.camera.takePicture(1).then((data:any)=>{
+        console.log("pic taken?")
+        cam.getFile(data).then((file)=>{
+          console.log("hello getfile")
+          var pic = this.generateFileName(data)
           var url="/"+vm.currentUser().uid+"/images/"+pic
-          fp(url,file)
+          this.processFile(url,file)
         }).catch(function(err){
-
+          console.log(err)
         })
       }).catch(function(err){
-
+        console.log(err)
       })
     }else{
-      console.log("This is file input,", this.fileInput)
       this.fileInput.nativeElement.click();
     }
   }
@@ -217,17 +221,20 @@ export class SettingsPage {
     })
     g.present()
 
+
+
     var prsn={}
     prsn["/users/"+this.fbs.currentUser().uid+"/basic"]=this.profilec.basic
     prsn["/users/"+this.fbs.currentUser().uid+"/properties"]=this.profilec.properties
 
-    this.fbs.setDatabase("/users/"+this.fbs.currentUser().uid+"/basic/currentPic",this.profilec.basic.currentPic,true).then((res)=>{
+    this.fbs.setDatabase("/users/"+this.fbs.currentUser().uid+"/basic/currentPic",this.currentPic,true).then((res)=>{
       this.fbs.setDatabase("/users/"+this.fbs.currentUser().uid+"/basic/bio",this.profilec.basic.bio,true).then((res)=>{
         this.fbs.setDatabase("/users/"+this.fbs.currentUser().uid+"/properties/sefer",this.profilec.properties.sefer,true).then((res)=>{
           this.fbs.setDatabase("/users/"+this.fbs.currentUser().uid+"/properties/fews",this.profilec.properties.fews,true).then((res)=>{
             this.fbs.setDatabase("/users/"+this.fbs.currentUser().uid+"/properties/relationshipStatus",this.profilec.properties.relationshipStatus,true).then((res)=>{
               this.fbs.setDatabase("/users/"+this.fbs.currentUser().uid+"/properties/interestedIn",this.profilec.properties.interestedIn,true).then((res)=>{
                 this.fbs.setDatabase("/users/"+this.fbs.currentUser().uid+"/properties/education",this.profilec.properties.education,true).then((res)=>{
+                  this.fbs.setDatabase("/users/"+this.fbs.currentUser().uid+"/properties/profilePics",this.profilePics,true)
                   console.log("profile successfully updated")
                   g.dismiss()
                   this.navCtrl.pop()

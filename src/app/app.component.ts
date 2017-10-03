@@ -142,10 +142,10 @@ export class MyApp {
     console.log("Doing on init")
     auth.onAuthStateChanged(user=>{
       if(user){
-      
+
         this.onNotification()
       }
-      if(this.status===undefined||this.status===null){
+      if(!this.status){
         if(user){
           console.log("This is auth state changed")
 
@@ -181,7 +181,7 @@ export class MyApp {
           console.log("in the then")
           var ac=this.ac.create({
             title: 'Dahlaq be like,',
-            message: "We have an update! Restart your app now to see what's new!",
+            message: "We have an update! Your app will restart now.",
             buttons: [
               {
                 text: 'Yimechachu',
@@ -190,13 +190,7 @@ export class MyApp {
                   //console.log('Cancel clicked');
                   this.reload()
                 }
-              },  {
-                  text: 'Behuala',
-                  role: 'cancel',
-                  handler: () => {
-                    //console.log('Cancel clicked');
-                  }
-                },
+              }
             ]
           })
           ac.present()

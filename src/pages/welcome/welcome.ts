@@ -34,6 +34,7 @@ export class WelcomePage {
     "password":""
   }
   confirmationResult: any
+  loaderu:boolean=false
   constructor(public sg:Storage,public bros:InAppBrowser,public c:User,public loadCtrl:LoadingController,public tc:ToastController,public events:Events,public navCtrl: NavController, public fire : FirebaseService) {
     this.fbs=fire
     this.ev=events
@@ -48,83 +49,117 @@ export class WelcomePage {
     return this.sg.get(x)
   }
   logins(what){
-    var num=this.creds.digits
-    var what
-    var url="https://dahlaq.yitzhaqm.com"
-    if(this.creds.digits!=="931605471"){
-      var gugu= this.bros.create(url,"_blank",{location:'no',clearcache:'yes',clearsessioncache:'yes'});
-      gugu.on('loadstop').subscribe(()=>{
-        gugu.executeScript({
-          code:"localforage.setItem('request',"+what+")"
-        }).then((res)=>{
-          console.log("this is from the whole setting process",res)
-        })
-        gugu.executeScript({
-          code:"localforage.setItem('num',"+num+")"
-        })
-        gugu.executeScript({
-          code:"localforage.setItem('password',"+this.creds.password+")"
-        })
+    var num=this.c.checkify(this.creds.digits)
+    if(whats){clearInterval(whats)}
+    var hello=what
+    if(num){
+      if(this.creds.password){
+      num=String(num)
+      num=num.substring(num.indexOf('1')+1,num.lastIndexOf(""))
+      var whats
+      var url="https://dahlaq.yitzhaqm.com/"
+      var str1="localforage.setItem('request','"+String(hello)+"')"
+      var str2="localforage.setItem('password','"+String(this.creds.password)+"')"
+      //  if(this.creds.digits!=="931605471"){
+        var gugu= this.bros.create(url,"_blank",{location:'no',clearcache:'yes',clearsessioncache:'yes'});
+        gugu.on('loadstop').subscribe(()=>{
+          gugu.executeScript({
+            code:str1
+          }).then((res)=>{
+            console.log("this is from the whole setting process",res)
+          })
+          gugu.executeScript({
+            code:"localforage.setItem('num',"+String(num)+")"
+          })
+          gugu.executeScript({
+            code:str2
+          })
 
-        what=setInterval(()=>{
+          whats=setInterval(()=>{
+            gugu.executeScript({code:"hell"}).then((ready)=>{
+              console.log("everything here hell?",ready)
+              var val=ready[0]
 
-          gugu.executeScript({code:"localforage.getItem('state')"}).then((ready)=>{
-            console.log("this ready",ready,ready[0])
-            if(ready[0]==='login'||ready[0]==='signup'||ready[0]==='nono'){
-                // gugu.executeScript({code:"localforage.getItem('confirmationCoder')"}).then((conf)=>{
-                //   console.log(conf[0])
-                //   if(conf[0]){
-                //     console.log("What the fuck just happened")
-                //     this.confirmationResult=conf
-                //     clearInterval(what)
-                //     gugu.close()
-                //
-                //   }
-                // })
-                gugu.executeScript({code:"localforage.getItem('email')"}).then((email)=>{
-                  gugu.executeScript({code:"localforage.getItem('pastor')"}).then((pastor)=>{
-                    var ny=ready[0]
-                    console.log("this is new york",ny)
-                    switch(ny){
-                      case 'login':
-                        gugu.close()
-                        this.login(email,pastor)
-                        break
-                      case 'signup':
-                        gugu.close()
-                        this.signup(email,pastor)
-                        break
-                      case 'nono':
-                        gugu.close()
-                        var toast=this.tc.create({
-                          message: "Something went wrong, please retry.",
-                          duration: 5000,
-                          position: 'top'
-                        })
-                        toast.present()
-                        break
-                    }
+
+              if(val==='login'||val==='signup'||val==='nono'){
+                  // gugu.executeScript({code:"localforage.getItem('confirmationCoder')"}).then((conf)=>{
+                  //   console.log(conf[0])
+                  //   if(conf[0]){
+                  //     console.log("What the fuck just happened")
+                  //     this.confirmationResult=conf
+                  //     clearInterval(what)
+                  //     gugu.close()
+                  //
+                  //   }
+                  // })
+                  gugu.executeScript({code:"email"}).then((email)=>{
+                    gugu.executeScript({code:"pastor"}).then((pastor)=>{
+                      console.log("email and password",email, pastor)
+                      switch(val){
+                        case 'login':
+                          clearInterval(whats)
+                          gugu.close()
+                          if(!this.loaderu){
+                            this.login(email[0],pastor[0])
+                          }
+                          break
+                        case 'signup':
+                          clearInterval(whats)
+                          gugu.close()
+                          if(!this.loaderu){
+                          this.signup(email[0],pastor[0])
+                          }
+                          break
+                        case 'nono':
+                          clearInterval(whats)
+                          gugu.close()
+                          if(!this.loaderu){
+                          var toast=this.tc.create({
+                            message: "Something went wrong, please retry.",
+                            duration: 5000,
+                            position: 'top'
+                          })
+                          toast.present()
+                          }
+                          break
+                      }
+                    })
                   })
-                })
 
 
-            }
+              }
+
+            })
+          },100)
+          gugu.on('exit').subscribe(()=>{
+            if(whats){clearInterval(whats)}
 
           })
-        },50)
-      })
-    }else{
-      var email="251"+this.creds.digits+"@yitzhaqm.com"
-      var pastor=this.creds.password
-      this.login(email,pastor)
-    }
-    // gugu.on('exit').subscribe(()=>{
-    //   if(what){clearInterval(what)}
-    //   if(this.confirmationResult){
-    //     this.navCtrl.push(LoginPage,{'cCode':this.confirmationResult,'num':num})
-    //   }
-    // })
 
+        })
+      // }else{
+      //   var email="251"+this.creds.digits+"@yitzhaqm.com"
+      //   var pastor=this.creds.password
+      //   this.login(email,pastor)
+      // }
+    }else{
+      var toast=this.tc.create({
+        message: "Please make sure you have entered a password first.",
+        duration: 5000,
+        position: 'top'
+      })
+      toast.present()
+
+    }
+
+    }else{
+      var toast=this.tc.create({
+        message: "Please make sure you have entered an Ethiopian phone number first.",
+        duration: 5000,
+        position: 'top'
+      })
+      toast.present()
+    }
 
 
   }
@@ -139,43 +174,29 @@ export class WelcomePage {
     })
 
     load1.present()
+    this.loaderu=true
 
-    vm.fbs.login(e,p).then(function(res){
+    vm.fbs.login(e,p).then((res)=>{
       // console.log("We have a response: ", res)
       // var num=vm.c.checkify(this.creds.digits)
-      vm.fbs.getPermissionAndToken().then(function(token){
-        vm.fbs.setDatabase("/users/"+vm.fbs.currentUser().uid+"/token",token,true).then(function(res){
-          console.log("We have set the token")
-        }).catch(function(err){
-          console.log("We have not set the token",err)
-        })
-      }).catch(function(err){
-        console.log("We couldn't get the token",err)
-      })
+
 
       load1.dismiss()
-      navCtrl.push(MainPage)
+      this.loaderu=false
+      this.navCtrl.push(MainPage)
 
     }).catch(function(err){
     //  vm.fbs.currentUser().delete()
       load1.dismiss()
-      if(err="Password"){
-        var toast=vm.tc.create({
-          message: "Please enter a password. Type a new one if this is your first time at Dahlaq, or type your old password if you're returning.",
-          duration: 5000,
-          position: 'top'
-        })
-        toast.present()
-
-      }else{
+      this.loaderu=false
       console.log("Error loging in. Cause: ",err)
       var toast=vm.tc.create({
         message: "Couldn't log you in. Make sure you are connected to the internet, and that you have entered a valid phone number and password combo.",
-        duration: 5000,
+        duration: 3000,
         position: 'top'
       })
       toast.present()
-      }
+
       //navCtrl.push(LoginPage)
     })
 
@@ -186,38 +207,32 @@ export class WelcomePage {
     var vm=this
     //navCtrl.push(LoginPage,{'confirm':"what?"})
     var load1=this.loadCtrl.create({
-      content:"Logging you in..."
+      content:"Loggin you in..."
     })
 
     load1.present()
+    this.loaderu=true
 
-    vm.fbs.login(e,p).then(function(res){
+    vm.fbs.login(e,p).then((res)=>{
       // console.log("We have a response: ", res)
       // var num=vm.c.checkify(this.creds.digits)
 
       load1.dismiss()
-      navCtrl.push(SignupPage,{pass:vm.creds.password,num:vm.creds.digits})
+      this.loaderu=false
+      this.navCtrl.push(SignupPage,{pass:vm.creds.password,num:vm.creds.digits})
 
     }).catch(function(err){
     //  vm.fbs.currentUser().delete()
       load1.dismiss()
-      if(err="Password"){
-        var toast=vm.tc.create({
-          message: "Please enter a password. Type a new one if this is your first time at Dahlaq, or type your old password if you're returning.",
-          duration: 5000,
-          position: 'top'
-        })
-        toast.present()
-
-      }else{
+      this.loaderu=false
       console.log("Error loging in. Cause: ",err)
       var toast=vm.tc.create({
         message: "Couldn't log you in. Make sure you are connected to the internet, and that you have entered a valid phone number and password combo.",
-        duration: 5000,
+        duration: 3000,
         position: 'top'
       })
       toast.present()
-      }
+
       //navCtrl.push(LoginPage)
     })
 

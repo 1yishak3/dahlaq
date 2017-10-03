@@ -34,10 +34,10 @@
   <div style="background:#1a1a1a;color:white" padding>
     <ion-row>
       <ion-col>
-        <a (click)=showChoices($event)>
-          <div>
-            <img *ngIf="!uploading" style="width:100%;height:100%" [src]="profilec.basic.currentPic"/>
-            <ion-spinner text-center style="top:15px" color="light" *ngIf="uploading"></ion-spinner>
+        <a *ngIf="!uploading" (click)=showChoices($event)>
+          <div text-center>
+            <img *ngIf="!uploading" style="border-radius:100%;height:150px;width:150px" [src]="currentPic"/>
+            <ion-spinner style="top:30px;" color="primary" *ngIf="uploading"></ion-spinner>
           </div>
         </a>
       </ion-col>

@@ -257,7 +257,7 @@ export class ItemCreatePage {
             vm.setList(resu,vm1.postId).then(function(res){
               vm.setDatabase(resu+"/cache",Date.now(),true).then(()=>{
                 vm1.tabs.select(0)
-              
+
 
               })
               console.log("Added to viewables.",res)
@@ -371,7 +371,7 @@ export class ItemCreatePage {
         cam.getFile(data).then((file:any)=>{
           var pic = this.generateFileName(data)
           vm2.currentFile=data.name
-          var url=vm.currentUser().uid+"/videos/"+pic
+          var url="/"+vm.currentUser().uid+"/videos/"+pic
           this.processFile(url,file)
         }).catch(function(err){
 
@@ -544,7 +544,13 @@ export class ItemCreatePage {
 
         vm1.progress=(Number(snap.bytesTransferred)/Number(snap.totalBytes))*100
         console.log(vm1.progress)
-        if(vm1.progress===100){
+
+        console.log("this is your snapshot, ",snap)
+      },(err)=>{
+          console.log("This is your error",err)
+      })
+      task.then(()=>{
+
           vm.getStorage(url).then((res:any)=>{
             if(vm1.get===1){
               pst.content.imageUrl=res
@@ -553,15 +559,17 @@ export class ItemCreatePage {
             }else if(vm1.get===3){
               pst.content.fileUrl=res
             }
+            if(fil.substring(fil.indexOf(":")+1,fil.indexOf('/'))=='video'){
+              console.log("sensed a video")
+              pst.content.videoUrl=res
+            }else if(fil.substring(fil.indexOf(":")+1,fil.indexOf('/'))=='image'){
+              pst.content.imageUrl=res
+            }
             vm1.complete=true
             vm1.uploading=false
-          })
-          console.log(vm1.complete,vm1.uploading)
-        }
 
-        console.log("this is your snapshot, ",snap)
-      },(err)=>{
-          console.log("This is your error",err)
+        })
+
       })
       // this.fbs.setStorage(url,file).then(function(res:any){
       //   vm1.progress=(res.bytesTransfered/res.totalBytes)

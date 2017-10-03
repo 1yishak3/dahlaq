@@ -485,13 +485,12 @@ export class FirebaseService {
           if (password&&password!=="") {
             firebase.auth().signInWithEmailAndPassword(email, password).then((res) => {
               console.log("is this the prob?")
-              this.stg.set("log",true).then(value => {
-                console.log("or is this")
-                resolve();
-              })
+              resolve()
 
             }).catch((err) => {
               this.stg.set("log",false).then(value => {
+                reject(err)
+              }).catch((err)=>{
                 reject(err)
               })
 

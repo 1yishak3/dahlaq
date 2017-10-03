@@ -76,8 +76,14 @@ export class Post {
   bootstrap(){
     var vm=this
 
-    this.fbs.getDatabase("/posts/"+this.postId,false).then(function(res:any){
+    this.fbs.getDatabase("/posts/"+this.postId,false).then((res:any)=>{
       //var pst:any= res
+      if(this.poster.uid){
+        this.fbs.getDatabase("/users/"+this.poster.uid+"/basic/currentPic",true).then((ress:any)=>{
+          this.poster.profilePic=ress
+        })
+      }
+
       vm.poster=res.poster
       vm.content=res.content
       if(res.content.likes!==undefined&&res.content.likes!==null){

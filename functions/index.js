@@ -420,7 +420,8 @@ exports.senseAuth = functions.database.ref("/users/{uid}/basic/username").onCrea
 })
 //exports.fillUp2 = functions.database.ref("/users/{uid}").onCreate(e => {})
 exports.fillUp = functions.database.ref("/users/{uid}/viewables").onWrite(e => {
-  if (e.data.val()==="repopulate/") {
+  var t=e.data.val()
+  if (typeof t=="string"||t instanceof String) {
     var prefRef = e.data.adminRef.parent.child("preferences")
     var viewRef = e.data.adminRef
     var uid=e.params.uid
@@ -592,7 +593,8 @@ exports.fillUp = functions.database.ref("/users/{uid}/viewables").onWrite(e => {
   }
 })
 exports.chooseUp = functions.database.ref("/users/{uid}/suggestedPeople").onWrite(e => {
-  if (e.data.val()=="repopulate/"){
+  var t=e.data.val()
+  if (typeof t=="string"||t instanceof String){
     console.log("time to repopulate")
     var pplRef = e.data.adminRef.parent.child("people")
     var sgRef = e.data.adminRef.parent.child("suggestedPeople")
@@ -868,8 +870,28 @@ exports.chatDelete=functions.database.ref("/chats/{cid}/deleted").onWrite(e =>{
         ref1=e.data.adminRef.parent.parent.parent.child("users").child(key[0])
         ref2=e.data.adminRef.parent.parent.parent.child("users").child(key[1])
       }
-      ref1.child("people").child(e.params.cid).remove().then(function(res){
-        return ref2.child("people").child(e.params.cid).remove()
+      ref1.child("people").once("value").then((dat)=>{
+        var us=dat.val()
+        if(us&& typeof us!=="string"&&!( us instanceof String )){
+          for(let i in us){
+            if(us[i]==e.params.cid){
+              us[i]=null
+              ref1.child("people").set(us).then(()=>{
+                ref2.child("people").once("value").then((snap)=>{
+                  var gu=snap.val()
+                  if(gu&& typeof gu!=="string"&&!( gu instanceof String )){
+                        for(let i in gu){
+                          if(gu[i]==e.params.cid){
+                            gu[i]=null
+                            return ref2.child("people").set(gu)
+                          }
+                        }
+                  }
+                })
+              })
+            }
+          }
+        }
       })
     })
   }

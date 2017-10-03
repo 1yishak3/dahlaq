@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='utf-8'?>
-<widget id="com.yitzhaqm.app1" version="1.0.2" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0">
+<widget id="com.yitzhaqm.app1" version="1.1.0" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0">
     <name>Dahlaq</name>
     <description>For Ethiopia</description>
     <author email="contact@yithzaqm.com" href="http://yitzhaqm.com/">YithzaqM</author>
@@ -78,6 +78,7 @@
         <splash height="960" src="resources/ios/splash/Default@2x~iphone.png" width="640" />
         <splash height="480" src="resources/ios/splash/Default~iphone.png" width="320" />
     </platform>
+    <engine name="android" spec="^6.2.3" />
     <plugin name="com-sarriaroman-photoviewer" spec="^1.1.10" />
     <plugin name="com.hutchind.cordova.plugins.streamingmedia" spec="~0.1.4" />
     <plugin name="com.moust.cordova.videoplayer" spec="https://github.com/moust/cordova-plugin-videoplayer.git" />
@@ -105,5 +106,4 @@
     <plugin name="phonegap-plugin-push" spec="^2.0.0">
         <variable name="SENDER_ID" value="500593695235" />
     </plugin>
-    <engine name="android" spec="~6.2.3" />
 </widget>
