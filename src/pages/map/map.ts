@@ -83,8 +83,7 @@ export class MapPage {
             })
           }
         }else{
-          console.log("Dude, some how got inthe else new CHAT GET",Object.keys(res).length)
-          console.log(Object.keys(vm.people).length)
+
           this.getNewChats()
         }
         resolve(this.people)
@@ -171,7 +170,7 @@ export class MapPage {
           }
           vm.refreshList()
         }
-        this.fbs.setDatabase("/users/"+this.uid+"/suggestedPeople","repopulate/"+Date.now(),true)
+      
       })
     }).catch(function(err){
       console.log("Error getting profile, ",err)

@@ -71,6 +71,9 @@ import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { CloudSettings, CloudModule } from '@ionic/cloud-angular';
 import { LinkyModule } from 'angular-linky'
 import { IonicImageLoader } from 'ionic-image-loader'
+import {Vibration} from '@ionic-native/vibration'
+import {FileChooser} from '@ionic-native/file-chooser'
+import {Device} from '@ionic-native/device'
 
 const cloudSettings: CloudSettings = {
   'core': {
@@ -84,7 +87,8 @@ const cloudSettings: CloudSettings = {
         'sound': true
       },
       'android': {
-        'iconColor': '#343434'
+        'iconColor': '#343434',
+        'sound': true
       }
     }
   }
@@ -198,6 +202,9 @@ export function provideSettings(storage: Storage) {
   providers: [
     //ItemCreatePage,
     //PopoverPage
+    Device,
+    FileChooser,
+    Vibration,
     InAppBrowser,
     Keyboard,
     ImageResizer,

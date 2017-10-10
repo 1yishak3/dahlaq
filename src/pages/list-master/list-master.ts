@@ -142,66 +142,84 @@ export class ListMasterPage {
       console.log("I have entered filter and get ranks")
       if(searchTerm!==""){
         console.log(vm.ranks)
-        // vm.ranks[0]["username"]="Mohammed"
-        // vm.ranks[1]["username"]="Minyelshewa"
+
         vm.viewList=vm.ranks.filter((person) => {
-            console.log("filter? Person", person)
-            var car=person.username.toLowerCase().indexOf(searchTerm.toLowerCase())
-            console.log(car,car>-1)
-            if(car>-1){
-              if(!vm.keeper[person.username]){
-                vm.keeper[person.username]=true
-                return car>-1
-              }else if(vm.keeper[person.username]){
-                return car<-1
-              }else{
-                return car>-1
-              }
+            console.log("filter? Person", person,"  jhgjg  ",person.username.toLowerCase().indexOf(searchTerm.toLowerCase()))
+            if(person.username.toLowerCase().indexOf(searchTerm.toLowerCase())!==-1){
+              return true
             }else{
-              if(vm.keeper[person.username]){
-                delete vm.keeper[person.username]
-              }
-              return car>-1
+              return false
             }
+            // console.log(car,car>-1)
+            // if(car>-1){
+            //   if(!vm.keeper[person.username]){
+            //     vm.keeper[person.username]=true
+            //     return car>-1
+            //   }else if(vm.keeper[person.username]){
+            //     return car<-1
+            //   }else{
+            //     return car>-1
+            //   }
+            // }else{
+            //   if(vm.keeper[person.username]){
+            //     delete vm.keeper[person.username]
+            //   }
+            //   return car>-1
+            // }
         });
         console.log("viewlist? ",vm.viewList)
-        vm.loadIt(vm.viewList)
+        vm.loadIt(vm.viewList).then(()=>{
+          resolve("done")
+        }).catch(()=>{
+          reject()
+        })
         resolve("done")
       }else{
         console.log(searchTerm)
         console.log("emptyyyy")
         vm.viewList=_.cloneDeep(vm.ranks)
-        vm.loadIt(vm.viewList)
+        vm.loadIt(vm.viewList).then(()=>{
+          resolve()
+        }).catch(()=>{
+          reject()
+        })
+
       }
     })
   }
   loadIt(data){
-    var vm=this
-    vm.people=[]
-    var news=[]
-    for(let i in data){
-      this.fbs.getDatabase("/users/"+data[i].uid+"/basic",false).then(function(res:any){
-        var dat=data[i]
-        dat["currentPic"]=res.currentPic
-        dat["bio"]=res.bio
-        dat["username"]=res.username
-        dat["rank"]=Number(res.rank)+1
-        console.log("About to push ranks")
-        news.push(dat)
-        //console.log(vm.people)
-      }).catch(function(err){
-        console.log("sadd...unable to bring basics of guy")
-      })
-      if(Number(i)===25||Number(i)===data.length-1){
-      this.startAt=Number(i)
-      news.sort((a,b)=>{
-        
-        return a.rank-b.rank
-      })
-      vm.people=news
-      break
-    }
-    }
+    return new Promise((resolve,reject)=>{
+      var vm=this
+      vm.people=[]
+      var news=[]
+      for(let i in data){
+        this.fbs.getDatabase("/users/"+data[i].uid+"/basic",false).then(function(res:any){
+          var dat=data[i]
+          dat["currentPic"]=res.currentPic
+          dat["bio"]=res.bio
+          dat["username"]=res.username
+          dat["rank"]=Number(res.rank)+1
+          console.log("About to push ranks")
+          news.push(dat)
+          //console.log(vm.people)
+        }).catch(function(err){
+          console.log("sadd...unable to bring basics of guy")
+          reject()
+        })
+        if(Number(i)===25||Number(i)===data.length-1){
+          this.startAt=Number(i)
+          news.sort((a,b)=>{
+
+            return a.rank-b.rank
+          })
+          vm.people=news
+          resolve()
+          break
+
+        }
+      }
+    })
+
   }
   pullToAddMore(e){
     var vm=this

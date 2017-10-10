@@ -8,6 +8,7 @@ import { Items } from '../../providers/providers';
 import {FirebaseService} from '../../providers/firebase'
 import {Post} from '../../models/post'
 import {StreamingMedia} from '@ionic-native/streaming-media'
+import {Storage} from "@ionic/storage"
 @Component({
   selector: 'page-search',
   templateUrl: 'search.html'
@@ -21,7 +22,7 @@ export class SearchPage {
   listP:any={}
   posts:any
   initP:any=[]
-  constructor(public fbs:FirebaseService,public sm:StreamingMedia,public navCtrl: NavController, public navParams: NavParams, public items: Items) {
+  constructor(public sg:Storage,public fbs:FirebaseService,public sm:StreamingMedia,public navCtrl: NavController, public navParams: NavParams, public items: Items) {
     this.profile=navParams.get('profile')
     console.log(this.profile)
     this.postList=[]
@@ -32,12 +33,25 @@ export class SearchPage {
     this.getFiftin()
   }
   ionViewWillEnter(){
-    this.fbs.getDatabase("/users/"+this.profile.basic.uid+"/userPosts",true,true).then((list:any)=>{
-      if(list.cache!==this.postList.cache){
-        this.postList=list
+    var g=this.fbs.getRef("/users/"+this.profile.basic.uid+"/userPosts")
+    var bool=true
+    g.once('value').then((list:any)=>{
+      var v=list.val()
+
+      if(v!==this.postList){
+        this.sg.set("ups",v)
+        bool=false
+        this.postList=v
         this.getFiftin()
       }
+    }).catch((err)=>{
+      this.sg.get("ups").then((val)=>{
+        if(val){
+          this.postList=val
+        }
+      })
     })
+
   }
   getFiftin(){
     var init=this.number||0
@@ -49,7 +63,7 @@ export class SearchPage {
       if(pid&&i!="cache"&&isNaN(pid)){
         this.fbs.getDatabase("/posts/"+pid,true).then((post:any)=>{
 
-          if(post){
+          if(post&& typeof post!="string"){
             //console.log(this.listP[post.postId])
             if(!this.listP[post.postId]){
               console.log("post",post)
@@ -70,7 +84,7 @@ export class SearchPage {
         console.log("i-init",this.initP)
         this.initP.sort(function(a,b){
 
-          return a.time>b.time
+          return a.time-b.time
         })
         console.log("this",this.initP)
         this.posts=this.initP

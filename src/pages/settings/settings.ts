@@ -14,6 +14,9 @@ import { Ng2ImgToolsService} from 'ng2-img-tools'
 import {Storage} from '@ionic/storage'
 import {WelcomePage} from '../welcome/welcome'
 import {MenuPage} from '../menu/menu'
+import {Device} from '@ionic-native/device'
+import {File} from '@ionic-native/file'
+import {FileChooser} from '@ionic-native/file-chooser'
 /**
  * The Settings page is a simple form that syncs with a Settings provider
  * to enable the user to customize settings for the app.
@@ -40,7 +43,10 @@ export class SettingsPage {
   currentPic:any
   profilePics:any=[]
   person:any
-  constructor( public sg:Storage,
+  constructor( public fc:FileChooser,
+    public fl:File,
+    public dv:Device,
+    public sg:Storage,
     public ir:Ng2ImgToolsService,
     public lc:LoadingController,
     public nw:Network,
@@ -212,7 +218,24 @@ export class SettingsPage {
         console.log(err)
       })
     }else{
-      this.fileInput.nativeElement.click();
+      if(this.dv.platform.toLowerCase()==="android"){
+        if(this.dv.version.substring(0,1)=='4'){
+          this.fc.open().then((filePath)=>{
+
+            var pathe="file://"+filePath.substring(7,filePath.lastIndexOf("/"))
+            var subs=filePath.substring(filePath.lastIndexOf("/")+1,filePath.lastIndexOf(""))
+            this.fl.readAsDataURL(pathe,subs).then((file)=>{
+              var url="/"+vm.currentUser().uid+"/images/"+subs
+              this.currentFile=subs
+              this.processFile(url,file)
+            })
+          })
+        }else{
+          this.fileInput.nativeElement.click()
+        }
+      }else{
+        this.fileInput.nativeElement.click()
+      }
     }
   }
   saveAndGoToProfile(){

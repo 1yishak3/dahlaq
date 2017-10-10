@@ -225,8 +225,7 @@ export class CardsPage {
               })
               if(Number(i)===14||Number(i)===vm.newList.length-1){
                 vm.viewables=vm.liste
-                var view=vm.fbs.getRef("/users/"+vm.uid+"/viewables")
-                view.set("repopulate/"+Date.now())
+              
                 if(vm.firstTime){
                   // lc.dismiss()
                 }
@@ -305,8 +304,7 @@ export class CardsPage {
 
       }).catch(function(err){
         console.log("Error getting profile ",err)
-        var view=vm.fbs.getRef("/users/"+vm.uid+"/viewables")
-        view.set("repopulate/")
+
         if(vm.firstTime){
           // lc.dismiss()
         }

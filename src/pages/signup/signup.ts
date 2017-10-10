@@ -66,10 +66,12 @@ export class SignupPage {
   checkU(str){
     var vm=this
     var truth1=false;
-
+    var f
     var truth3=false;
-    return new Promise(function(resolve,reject){
-      vm.fbs.getDatabase("/ref",true).then(function(res){
+    return new Promise((resolve,reject)=>{
+      var ref=vm.fbs.getRef("/ref")
+      if(str){
+      ref.once('value').then((res)=>{
         vm.ref=res
         if(vm.ref){
           if(!vm.ref[str]){
@@ -78,72 +80,75 @@ export class SignupPage {
         }else{
           truth1=true
         }
-        if(str.length>4&&str.indexOf(" ")===-1&&str.length<23){
-          truth3=true
+        if(typeof str==='string'||str instanceof String){
+          if(str.length>4&&str.indexOf(' ')===-1&&str.length<23){
+            truth3=true
+          }
         }
-        var f=(truth3&&truth1)
-        if(f){
-          resolve (f)
-        }else{
-          reject(f)
-        }
+        f=(truth3&&truth1)
+        resolve(f)
+      }).catch(()=>{
+        reject(f)
       })
+      }else{
+        reject(null)
+      }
     })
 
   }
   ionViewWillEnter(){
-    var vm=this
+
 
   }
   ngAfterViewInit(){
-    var vm=this
-    console.log("name=> ",this.name)
-    this.fbs.getDatabase("/ref", true).then(function(res){
-      vm.ref=res
-      vm.available="Checking..."
-      var keyup = Observable.fromEvent(vm.name._elementRef.nativeElement, 'keydown');
-      keyup.subscribe(function(data){
-
-        clearTimeout(timer)
-
-
-        var timer=setTimeout(function(){
-          if(vm.ref){
-            if(!vm.ref[vm.account.username]){
-              if(vm.account.username.length>4){
-                if(vm.account.username.indexOf(" ")===-1){
-                  if(vm.account.username.length<23){
-                    vm.available="Username is valid"
-                  }else{
-                    vm.available="Username must contain less than 23 characters"
-                  }
-                }else{
-                  vm.available="Username can't contain spaces"
-                }
-              }else{
-                vm.available="Username must contain 4 characters or more"
-              }
-            }else{
-              vm.available="Username already taken"
-            }
-          }else{
-            if(vm.account.username.length>4){
-              if(vm.account.username.indexOf(" ")===-1){
-                if(vm.account.username.length<23){
-                  vm.available="Username is valid"
-                }else{
-                  vm.available="Username must contain less than 23 characters"
-                }
-              }else{
-                vm.available="Username can't contain spaces"
-              }
-            }else{
-              vm.available="Username must contain 4 characters or more"
-            }
-          }
-        })
-      })
-  })
+  //   var vm=this
+  //   console.log("name=> ",this.name)
+  //   this.fbs.getDatabase("/ref", true).then(function(res){
+  //     vm.ref=res
+  //     vm.available="Checking..."
+  //     var keyup = Observable.fromEvent(vm.name._elementRef.nativeElement, 'keydown');
+  //     keyup.subscribe(function(data){
+  //
+  //       clearTimeout(timer)
+  //
+  //
+  //       var timer=setTimeout(function(){
+  //         if(vm.ref){
+  //           if(!vm.ref[vm.account.username]){
+  //             if(vm.account.username.length>4){
+  //               if(vm.account.username.indexOf(" ")===-1){
+  //                 if(vm.account.username.length<23){
+  //                   vm.available="Username is valid"
+  //                 }else{
+  //                   vm.available="Username must contain less than 23 characters"
+  //                 }
+  //               }else{
+  //                 vm.available="Username can't contain spaces"
+  //               }
+  //             }else{
+  //               vm.available="Username must contain 4 characters or more"
+  //             }
+  //           }else{
+  //             vm.available="Username already taken"
+  //           }
+  //         }else{
+  //           if(vm.account.username.length>4){
+  //             if(vm.account.username.indexOf(" ")===-1){
+  //               if(vm.account.username.length<23){
+  //                 vm.available="Username is valid"
+  //               }else{
+  //                 vm.available="Username must contain less than 23 characters"
+  //               }
+  //             }else{
+  //               vm.available="Username can't contain spaces"
+  //             }
+  //           }else{
+  //             vm.available="Username must contain 4 characters or more"
+  //           }
+  //         }
+  //       })
+  //     })
+  // })
   }
   doSignup() {
     var load1=this.loadCtrl.create({
@@ -154,16 +159,17 @@ export class SignupPage {
 
 
 
-        this.once=this.once+1
-        var vm=this.fbs
-        var vm1=this
+    this.once=this.once+1
+    var vm=this.fbs
+    var vm1=this
 
 
-        // Attempt to login in through our User service
-        console.log(this.confirmationResult)
-        if (this.once<2){
-          console.log("I got here...then something happened")
-          this.checkU(this.account.username).then((sth)=>{
+    // Attempt to login in through our User service
+    if(this.account.username!==""){
+      if (this.once<2){
+        console.log("I got here...then something happened")
+        this.checkU(this.account.username).then((sth)=>{
+          if(sth){
             load1.dismiss()
             load1=this.loadCtrl.create({content:"Creating your account..."})
             load1.present()
@@ -202,34 +208,7 @@ export class SignupPage {
             prsn["likes"]=this.person.likes
             prsn["reports"]=this.person.reports
 
-            this.fbs.setDatabase("/users/"+vm.currentUser().uid,prsn,true).then(function(res){
-              // var update={}
-              // update["/users/"+vm.currentUser().uid+"/viewables"]=null
-              // update["/users/"+vm.currentUser().uid+"/suggestedPeople"]=null
-              // update["/users/"+vm.currentUser().uid+"/properties/profilePics"]=null
-              // update["/users/"+vm.currentUser().uid+"/properties/refers"]=null
-              // update["/users/"+vm.currentUser().uid+"/connections"]=null
-              // update["/users/"+vm.currentUser().uid+"/userPosts"]=null
-              // update["/users/"+vm.currentUser().uid+"/people"]=null
-              // update["/users/"+vm.currentUser().uid+"/preferences"]=null
-              // update["/users/"+vm.currentUser().uid+"/dislikes"]=null
-              // update["/users/"+vm.currentUser().uid+"/likes"]=null
-              // update["/users/"+vm.currentUser().uid+"/reports"]=null
-              // vm.setDatabase("/dummbase",update,false).then(function(res){
-              //   console.log("successfully set nulls", res)
-              // }).catch(function(err){
-              //   console.log("tell me the error", err)
-              // })
-
-              // vm.getPermissionAndToken().then(function(token){
-              //   vm.setDatabase("/users/"+vm.currentUser().uid+"/token",token,true).then(function(res){
-              //     console.log("We have set the token")
-              //   }).catch(function(err){
-              //     console.log("We have not set the token")
-              //   })
-              // }).catch(function(err){
-              //   console.log("We couldn't get the token")
-              // })
+            this.fbs.setDatabase("/users/"+vm.currentUser().uid,prsn,true).then((res)=>{
               vm.setDatabase("/ref/"+vm1.account.username,vm.currentUser().uid,true).then((res)=>{
                 vm1.navCtrl.push(FirstRunPage);
                 load1.dismiss()
@@ -247,25 +226,40 @@ export class SignupPage {
             }).catch(function(err){
               console.log("Sorry, couldn't add you to the list", err)
             })
-
-          }).catch( (err) => {
+          }else{
             load1.dismiss()
-            //this.navCtrl.push(MainPage); // TODO: Remove this when you add your signup endpoint
 
-            // Unable to sign up
-            console.log("I'm not in: ",err)
+
+
             let toast = this.toastCtrl.create({
-              message: "Your entries are invalid. "+this.available+".",
+              message: "Please enter a username with 5 letters or more and without spaces.",//+this.available+".",
               duration: 3000,
               position: 'top'
             });
             toast.present();
 
-          });
-        }else{
-        load1.dismiss()
+          }
 
+        }).catch( (err) => {
+          load1.dismiss()
+
+
+          // Unable to sign up
+          console.log("I'm not in: ",err)
+          let toast = this.toastCtrl.create({
+            message: "Your entries are invalid.",//+this.available+".",
+            duration: 3000,
+            position: 'top'
+          });
+          toast.present();
+
+        });
+      }else{
+        if(load1){
+          load1.dismiss()
+        }
       }
+    }
 
   }
 }

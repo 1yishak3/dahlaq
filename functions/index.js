@@ -124,7 +124,7 @@ exports.like = functions.database.ref("/posts/{pid}/content/likes/{lid}").onWrit
     if(poster){
       var postRef = prefRef.child(poster)
       return postRef.transaction(current => {
-        var t = (current || 0.5) - 0.007
+        var t = (current || 0.5) + 0.007
         if (t < 0) {
           return 0
         } else if (t > 1) {
@@ -146,7 +146,7 @@ exports.dislike = functions.database.ref("/posts/{pid}/content/dislikes/{did}").
     if(poster){
       var postRef = prefRef.child(poster)
       return postRef.transaction(current => {
-        var t = (current || 0.5) + 0.007
+        var t = (current || 0.5) - 0.007
         if (t < 0) {
           return 0
         } else if (t > 1) {
@@ -168,7 +168,7 @@ exports.report = functions.database.ref("/posts/{pid}/content/reports/{rid}").on
     if(poster){
       var postRef = prefRef.child(poster)
       return postRef.transaction(current => {
-        var t = (current || 0.5) + 0.07
+        var t = (current || 0.5) - 0.07
         if (t < 0) {
           return 0
         } else if (t > 1) {
@@ -389,27 +389,37 @@ exports.senseAuth = functions.database.ref("/users/{uid}/basic/username").onCrea
   e.data.adminRef.parent.parent.parent.parent.child("fameList").once('value').then(function(snap) {
     var list = {}
     var index;
+    var temp=[]
     if (snap.val()) {
       list = snap.val()
-      index=Object.keys(list).length
-      list[index] = {
+      for(let y in list){
+        var g=list[y]
+        if(typeof g !=='string'&& !(g instanceof String)&&y!="cache"){
+          temp.push(g)
+        }
+      }
+
+      temp.push( {
         "uid": uid,
         "fame": 0,
         "username":name
 
-      }
-      index=Object.keys(list).length
+      })
+      index=temp.length
     } else {
-      list = {
-        0: {
+      temp.push({
           "uid": uid,
           "fame": 0,
           "username":name
 
         }
-      }
-      index=Object.keys(list).length
+      )
+      index=1
     }
+    for(let i in temp){
+      list[i]=temp[i]
+    }
+    list["cache"]=Date.now()
     e.data.adminRef.parent.parent.child("basic/rank").set(index).then(function(res){
       return e.data.adminRef.parent.parent.parent.parent.child("fameList").set(list)
     }).catch(function(err){
@@ -419,178 +429,276 @@ exports.senseAuth = functions.database.ref("/users/{uid}/basic/username").onCrea
   })
 })
 //exports.fillUp2 = functions.database.ref("/users/{uid}").onCreate(e => {})
-exports.fillUp = functions.database.ref("/users/{uid}/viewables").onWrite(e => {
-  var t=e.data.val()
-  if (typeof t=="string"||t instanceof String) {
-    var prefRef = e.data.adminRef.parent.child("preferences")
-    var viewRef = e.data.adminRef
-    var uid=e.params.uid
-    var actRef=e.data.adminRef.parent.parent.parent.child("posts")
-    var postsRef = e.data.adminRef.parent.parent.parent.child("adminsLists/posts")
-    const check=function(event, pid){
+// exports.fillUp = functions.database.ref("/users/{uid}/viewables").onWrite(e => {
+//   var t=e.data.val()
+//   console.log("this is t before popoulation",t)
+//   if (typeof t=="string"||t instanceof String) {
+//     var prefRef = e.data.adminRef.parent.child("preferences")
+//     var viewRef = e.data.adminRef
+//     var uid=e.params.uid
+//     var actRef=e.data.adminRef.parent.parent.parent.child("posts")
+//     var postsRef = e.data.adminRef.parent.parent.parent.child("adminsLists/posts")
+//     const check=function(event, pid){
+//
+//         var postRef= event.child(pid)
+//         postRef.child("reach").once('value').then(function(snap){
+//           var r=snap.val()
+//           postRef.child("poster/desiredReach").once('value').then(function(snap){
+//             var r2=snap.val()
+//             console.log(r>r2)
+//             if(r>=r2){
+//               return true
+//             }else {
+//               return false
+//             }
+//
+//         })
+//       })
+//
+//     }
+//     const populate = function(psts, prfs,ev) {
+//         console.log("in promise")
+//         var list = []
+//         var posts = psts
+//         var prefs = prfs
+//         var key = Object.keys(posts)
+//         var newPrefs={}
+//         for (var i = key.length - 1; i >= 0; i--) {
+//           var rand = Math.random()
+//           var k = key[i]
+//           var uid = posts[k].uid
+//           var pid=posts[k].pid
+//
+//           if(k!=="cache"){
+//
+//             var reached=check(ev,pid)
+//               console.log("in checkkkk")
+//               if(!reached){
+//                 if (prefs[uid]) {
+//                   if (rand>=prefs[uid]) {
+//
+//                     list.push(posts[k].pid)
+//                     newPrefs[pid]=true
+//                   }
+//                 } else {
+//
+//                   if (rand >= 0.5 &&!newPrefs[pid]) {
+//                     newPrefs[pid]=true
+//                     list.push(posts[k].pid)
+//                   }
+//
+//                 }
+//               }
+//
+//
+//           }
+//           if(list.length>=50){
+//             break
+//           }
+//
+//
+//         }
+//         // var j =0
+//         // while(j<5&&list.length<30){
+//         //   for (var i = key.length - 1; i >= 0; i--) {
+//         //     var rand = Math.random()
+//         //     var k = key[i]
+//         //     var uid = posts[k].uid
+//         //     if (prefs[uid]) {
+//         //       if (prefs[uid] <= rand&&!newPrefs[pid]) {
+//         //         list.push(posts[k].pid)
+//         //         newPrefs[pid]=true
+//         //       } else {
+//         //         continue
+//         //       }
+//         //     } else {
+//         //       prefs[uid] = 0.5
+//         //       if (rand >= 0.5&&!newPrefs[pid]) {
+//         //         list.push(posts[k].pid)
+//         //         newPrefs[pid]=true
+//         //       } else {
+//         //         continue
+//         //       }
+//         //
+//         //     }
+//         //     if(list.length>=50){
+//         //       break
+//         //     }
+//         //   }
+//         //   j++
+//         // }
+//         if(list.length<50){
+//           console.log("in less than 50")
+//           for (var i = key.length - 1; i >= 0; i--) {
+//
+//             //var rand = Math.random()
+//             var k = key[i]
+//             if(k!=="cache"){
+//               var uid = posts[k].uid
+//               if (prefs[uid]) {
+//                 if (!newPrefs[pid]) {
+//                   list.push(posts[k].pid)
+//                   newPrefs[pid]=true
+//                 } else {
+//                   continue
+//                 }
+//               } else {
+//                 if (!newPrefs[pid]) {
+//                   list.push(posts[k].pid)
+//                   newPrefs[pid]=true
+//                 } else {
+//                   continue
+//                 }
+//
+//               }
+//               if(list.length>=50){
+//                 break
+//               }
+//             }
+//           }
+//         }
+//         console.log("This is list",list)
+//         if (list) {
+//           return list
+//         } else {
+//           return "error"
+//         }
+//
+//     }
+//     return postsRef.once('value').then(function(snap) {
+//         var posts = snap.val()
+//         prefRef.once('value').then(function(snaps) {
+//           var prefs = snaps.val()
+//           var list=populate(posts, prefs,postsRef)
+//
+//               // var liste=list
+//               // for (var k=0;k<liste.length;k++){
+//               //   var pid=liste[k]
+//               //   var pRef=actRef.child(pid).child("content/reach")
+//               //   pRef.once('value').then(function(snap){
+//               //     var reach=snap.val()
+//               //     if(reach===0){
+//               //       reach={}
+//               //       reach[uid]=Date.now()
+//               //     }else{
+//               //       reach[uid]=Date.now()
+//               //     }
+//               //     pRef.set(reach).then(function(res){
+//               //       console.log("reach updated")
+//               //     })
+//               //   })
+//               // }
+//               console.log(list)
+//               var lob={}
+//               for (var i=0;i<list.length;i++){
+//                 lob[i]=list[i]
+//               }
+//               lob["cache"]=Date.now()
+//
+//               return viewRef.set(lob)
+//
+//
+//         })
+//       })
+//
+//   }
+// })
+exports.fillCreate=functions.database.ref("/users/{uid}/viewables").onCreate((e)=>{
+  //populate from available posts that haven't reached their reach limit.
+  var pRef=e.data.adminRef.parent.parent.parent.child("adminsLists").child("posts")
+  var vRef=e.data.adminRef
+  var first={}
+  pRef.once('value').then((snap)=>{
+    var posts=snap.val()
+    var real=[]
+    for(let i in posts){
+      real.push(posts[i])
+    }
+    real.sort((a,b)=>{
+      return Number(a.pid.substring(a.pid.lastIndexOf("_")+1,a.pid.lastIndexOf("")))-Number(b.pid.substring(b.pid.lastIndexOf("_")+1,b.pid.lastIndexOf("")))
+    })
+    for(var i=0;i<real.length && i<=30;i++){
+      first[i]=real[i]
+    }
+    first["cache"]=Date.now()
+    return vRef.set(first)
+  })
 
-        var postRef= event.child(pid)
-        postRef.child("reach").once('value').then(function(snap){
-          var r=snap.val()
-          postRef.child("poster/desiredReach").once('value').then(function(snap){
-            var r2=snap.val()
-            if(r>=r2){
-              return true
-            }else {
-              return false
+})
+exports.fillUp= functions.database.ref("/posts/{pid}/poster/uid").onCreate((e)=>{
+  var uid=e.data.val()
+  var pid=e.params.pid
+  var usersRef=e.data.adminRef.parent.parent.parent.parent.child("users")
+  var pRef=e.data.adminRef.parent
+  usersRef.once('value').then((snap)=>{
+    var users=snap.val()
+    var userz=[]
+    if(users){
+      for(let i in users){
+        userz.push(users[i])
+      }
+      userz.sort((a,b)=>{
+        if(a.viewables && b.viewables){
+          return Object.keys(a.viewables)-Object.keys(b.viewables)
+        }else if(!a.viewables&&b.viewables){
+          return -1
+        }else if(a.viewables&&!b.viewables){
+          return 1
+        } else{
+          return -1
+        }
+      })
+      console.log("sorted users: ",users)
+      pRef.child('desiredReach').once((snap2)=>{
+        var rich=snap2.val()
+        var trk=0
+
+        for(let i in userz){
+          if(trk<rich){
+            var uzr=uz[i]
+            var vbls=uzr.viewables||[]
+            var fresh=[]
+            var ln=Object.keys(vbls).length
+            for(let i in vbls){
+              fresh.push(vbls[i])
+
             }
+            var prefs=uzr.preferences
+            if(prefs[uid]){
+              if(prefs[uid]>0.2){
+                fresh.push(pid)
+                if(ln>=30){
+                  fresh.shift()
+                }
 
+                trk++
+              }
+            }else{
+              prefs[uid]=0.5
+              fresh.push(pid)
+              if(ln>=30){
+                fresh.shift()
+              }
+              trk++
+            }
+            var obj={}
+            for(let i in fresh){
+              obj[i]=fresh[i]
+            }
+            obj["cache"]=Date.now()
+            usersRef.child(uzr.basic.uid).child("viewables").set(obj)
+          }else{
+            break;
+          }
+
+        }
+        return e.data.adminRef.parent.parent.parent.parent.child("thirteen").transaction((current)=>{
+          return (current||0) +1
         })
       })
-
     }
-    const populate = function(psts, prfs,ev) {
-        console.log("in promise")
-        var list = []
-        var posts = psts
-        var prefs = prfs
-        var key = Object.keys(posts)
-        var newPrefs={}
-        for (var i = key.length - 1; i >= 0; i--) {
-          var rand = Math.random()
-          var k = key[i]
-          var uid = posts[k].uid
-          var pid=posts[k].pid
+  })
 
-          if(k!=="cache"){
-
-            var reached=check(ev,pid)
-              console.log("in checkkkk")
-              if(!reached){
-                if (prefs[uid]) {
-                  if (rand>=prefs[uid]) {
-
-                    list.push(posts[k].pid)
-                    newPrefs[pid]=true
-                  }
-                } else {
-
-                  if (rand >= 0.5 &&!newPrefs[pid]) {
-                    newPrefs[pid]=true
-                    list.push(posts[k].pid)
-                  }
-
-                }
-              }
-
-
-          }
-          if(list.length>=50){
-            break
-          }
-
-
-        }
-        // var j =0
-        // while(j<5&&list.length<30){
-        //   for (var i = key.length - 1; i >= 0; i--) {
-        //     var rand = Math.random()
-        //     var k = key[i]
-        //     var uid = posts[k].uid
-        //     if (prefs[uid]) {
-        //       if (prefs[uid] <= rand&&!newPrefs[pid]) {
-        //         list.push(posts[k].pid)
-        //         newPrefs[pid]=true
-        //       } else {
-        //         continue
-        //       }
-        //     } else {
-        //       prefs[uid] = 0.5
-        //       if (rand >= 0.5&&!newPrefs[pid]) {
-        //         list.push(posts[k].pid)
-        //         newPrefs[pid]=true
-        //       } else {
-        //         continue
-        //       }
-        //
-        //     }
-        //     if(list.length>=50){
-        //       break
-        //     }
-        //   }
-        //   j++
-        // }
-        if(list.length<50){
-          console.log("in less than 50")
-          for (var i = key.length - 1; i >= 0; i--) {
-
-            //var rand = Math.random()
-            var k = key[i]
-            if(k!=="cache"){
-              var uid = posts[k].uid
-              if (prefs[uid]) {
-                if (!newPrefs[pid]) {
-                  list.push(posts[k].pid)
-                  newPrefs[pid]=true
-                } else {
-                  continue
-                }
-              } else {
-                if (!newPrefs[pid]) {
-                  list.push(posts[k].pid)
-                  newPrefs[pid]=true
-                } else {
-                  continue
-                }
-
-              }
-              if(list.length>=50){
-                break
-              }
-            }
-          }
-        }
-        if (list) {
-          return list
-        } else {
-          return "error"
-        }
-
-    }
-
-    if(!e.data.val()&&e.data.previous.val()){
-      return postsRef.once('value').then(function(snap) {
-        var posts = snap.val()
-        prefRef.once('value').then(function(snaps) {
-          var prefs = snaps.val()
-          var list=populate(posts, prefs,postsRef)
-
-              // var liste=list
-              // for (var k=0;k<liste.length;k++){
-              //   var pid=liste[k]
-              //   var pRef=actRef.child(pid).child("content/reach")
-              //   pRef.once('value').then(function(snap){
-              //     var reach=snap.val()
-              //     if(reach===0){
-              //       reach={}
-              //       reach[uid]=Date.now()
-              //     }else{
-              //       reach[uid]=Date.now()
-              //     }
-              //     pRef.set(reach).then(function(res){
-              //       console.log("reach updated")
-              //     })
-              //   })
-              // }
-              console.log(list)
-              var lob={}
-              for (var i=0;i<list.length;i++){
-                lob[i]=list[i]
-              }
-              lob["cache"]=Date.now()
-
-              return viewRef.set(lob)
-
-
-        })
-      })
-    }
-  }
 })
 exports.chooseUp = functions.database.ref("/users/{uid}/suggestedPeople").onWrite(e => {
   var t=e.data.val()
@@ -637,6 +745,7 @@ exports.chooseUp = functions.database.ref("/users/{uid}/suggestedPeople").onWrit
       if(scrd){
         var num=Number(scrd)
       }
+      console.log("num num",num)
       if(num){
         var l=num-10
         var m=num+10
@@ -654,12 +763,14 @@ exports.chooseUp = functions.database.ref("/users/{uid}/suggestedPeople").onWrit
 
         }
       }
+      console.log(uids)
       return uids
 
     }
     var uid=e.params.uid
     return fameRef.once('value').then(function(snap){
       var list=snap.val()
+      console.log(list)
       var suggestList=pick2(uid,list)
       console.log(suggestList)
       if(suggestList.length!==0){
@@ -745,6 +856,7 @@ exports.propss=functions.database.ref("/users/{uid}/properties/{whatever}").onWr
 
 exports.readables=functions.database.ref("/chats/{cid}/content/messages/{mid}/read").onWrite(e=>{
   if(e.data.previous.exists()){
+    console.log(e.data.val())
     var mid=e.params.mid
     if(e.data.val()===true){
       var mRef=e.data.adminRef.parent
@@ -756,7 +868,7 @@ exports.readables=functions.database.ref("/chats/{cid}/content/messages/{mid}/re
           var key=Object.keys(arr)
           for(var i=0;i<key.length;i++){
             if(key[i]===mid){
-              console.log('found the message')
+              console.log('found the message',mid)
               console.log("here")
               return uRef.child(i).remove()
             }
@@ -781,10 +893,37 @@ exports.chats= functions.database.ref("/chats/{chatId}").onCreate(e =>{
     })
   })
 })
+exports.reorder=functions.database.ref("/users/{uid}/basics/rank").onCreate(e=>{
+  var fRef=e.data.adminRef.parent.parent.parent.parent.child("fameList")
+  var users=e.data.adminRef.parent.parent.parent
+  var fameList=[]
+  users.once("value").then(snap=>{
+    var users=snap.val()
+
+    for(let k in users){
+      var user=users[k]
+      fameList.push({'username':user.basic.username,'fame':user.fame,'uid':user.basic.uid})
+    }
+    fameList.sort((a,b)=>{
+      if(a.fame<b.fame){
+        return -1
+      }else if(a.fame>b.fame){
+        return 1
+      }else{
+        return 0
+      }
+    })
+    if(fameList.length!==0){
+      return fRef.set(fameList)
+    }
+  })
+
+})
 exports.reachs= functions.database.ref("/posts/{pid}/content/reach").onWrite(e =>{
   var reach = e.data.adminRef.parent.parent.child("reach")
   var nowe=e.data.val()
   var then=e.data.previous.val()
+  console.log("reachs",nowe, then)
   return reach.transaction(current=>{
     if(Object.keys(nowe).length!==Object.keys(then).length){
       return (current||0)+1
@@ -883,6 +1022,7 @@ exports.chatDelete=functions.database.ref("/chats/{cid}/deleted").onWrite(e =>{
                         for(let i in gu){
                           if(gu[i]==e.params.cid){
                             gu[i]=null
+                            gu["cache"]=Date.now()
                             return ref2.child("people").set(gu)
                           }
                         }
@@ -918,7 +1058,8 @@ exports.sendPush1 = functions.database.ref('/chats/{cid}/content/messages/{messa
           body: message.content,
           sound: 'default',
           badge: '1',
-          icon: 'https://firebasestorage.googleapis.com/v0/b/dahlaq-c7e0f.appspot.com/o/defaults%2Fdahlaqapk.png?alt=media&token=93344e5d-a249-4f7e-b11d-55551d2ac833',
+          icon: 'icon',
+          icon_color:'#666666',
           tag:'messageReport'
       }
     };
@@ -927,73 +1068,74 @@ exports.sendPush1 = functions.database.ref('/chats/{cid}/content/messages/{messa
 
   })
 });
-exports.sendPush = functions.database.ref('/chats/{cid}').onCreate(e => {
-    // let projectStateChanged = false;
-    // let projectCreated = false;
-    // let projectData = event.data.val();
-    // if (!event.data.previous.exists()) {
-    //     projectCreated = true;
-    // }
-    // if (!projectCreated && event.data.changed()) {
-    //     projectStateChanged = true;
-    // }
-    // let msg = 'You have a new chat request.';
-		// if (projectCreated) {
-		// 	msg = `The following new project was added to the projec`;
-		// }
-    // return loadUsers().then(users => {
-    //     let tokens = [];
-    //     for (let user of users) {
-    //         tokens.push(user.pushToken);
-    //     }
-    //     let payload = {
-    //         notification: {
-    //             title: 'Firebase Notification',
-    //             body: msg,
-    //             sound: 'default',
-    //             badge: '1'
-    //         }
-    //     };
-    //     return admin.messaging().sendToDevice(tokens, payload);
-    // });
-
-    var users=e.data.val().summary.users
-    var uid=""
-    var cra=""
-    if(users){
-      for(var i=0;i<Object.keys(users).length;i++){
-        var key=Object.keys(users)[i]
-        if(users[key].creator===false){
-          uid=users[key].uid
-          if(i===0){
-            cra=users[1].username
-          }else{
-            cra=users[0].username
-          }
-        }
-      }
-      return e.data.adminRef.parent.parent.child("users").child(uid).child("token").once('value')
-      .then(function(snap){
-        var token=snap.val()
-        var payload = {
-          notification: {
-              title: 'New Chat Request',
-              body: 'You got a #habeshaHi from '+ cra+"! Tap to reply.",
-              sound: 'default',
-              badge: '1'
-          }
-        };
-
-        return admin.messaging().sendToDevice(token,payload)
-      })
-    }
-});
+// exports.sendPush = functions.database.ref('/chats/{cid}').onCreate(e => {
+//     // let projectStateChanged = false;
+//     // let projectCreated = false;
+//     // let projectData = event.data.val();
+//     // if (!event.data.previous.exists()) {
+//     //     projectCreated = true;
+//     // }
+//     // if (!projectCreated && event.data.changed()) {
+//     //     projectStateChanged = true;
+//     // }
+//     // let msg = 'You have a new chat request.';
+// 		// if (projectCreated) {
+// 		// 	msg = `The following new project was added to the projec`;
+// 		// }
+//     // return loadUsers().then(users => {
+//     //     let tokens = [];
+//     //     for (let user of users) {
+//     //         tokens.push(user.pushToken);
+//     //     }
+//     //     let payload = {
+//     //         notification: {
+//     //             title: 'Firebase Notification',
+//     //             body: msg,
+//     //             sound: 'default',
+//     //             badge: '1'
+//     //         }
+//     //     };
+//     //     return admin.messaging().sendToDevice(tokens, payload);
+//     // });
+//
+//     var users=e.data.val().summary.users
+//     var uid=""
+//     var cra=""
+//     if(users){
+//       for(var i=0;i<Object.keys(users).length;i++){
+//         var key=Object.keys(users)[i]
+//         if(users[key].creator===false){
+//           uid=users[key].uid
+//           if(i===0){
+//             cra=users[1].username
+//           }else{
+//             cra=users[0].username
+//           }
+//         }
+//       }
+//       return e.data.adminRef.parent.parent.child("users").child(uid).child("token").once('value')
+//       .then(function(snap){
+//         var token=snap.val()
+//         var payload = {
+//           notification: {
+//               title: 'New Chat Request',
+//               body: 'You got a #habeshaHi from '+ cra+"! Tap to reply.",
+//               sound: 'default',
+//               badge: '1'
+//           }
+//         };
+//
+//         return admin.messaging().sendToDevice(token,payload)
+//       })
+//     }
+// });
 exports.sent=functions.database.ref("/chats/{cid}/content/messages/{mid}").onWrite(e =>{
   if(!e.data.previous.exists()){
     return e.data.adminRef.child("sent").set(true)
   }
 
 })
+
 // exports.checkValidityOfUser=functions.auth.user().onCreate(ev=>{
 //   var uid = ev.data.uid
 //   var digit=ev.data.phoneNumber||ev.data.providerData.phoneNumber
@@ -1032,7 +1174,7 @@ exports.proPic2=functions.database.ref("/users/{uid}/basic/currentPic").onWrite(
 })
 
 ////Newly added SYNC IMMEDIATELY
-exports.digitVerify=functions.database.ref("/users/{uid}/properties/digits").onWrite(e=>{
+exports.digitVerify=functions.database.ref("/users/{uid}/properties/digits/{dg}").onWrite(e=>{
   // admin.auth().getUser(e.params.uid).then((res)=>{
   //   var num=res.phoneNumber
   //   if(num){
@@ -1042,7 +1184,7 @@ exports.digitVerify=functions.database.ref("/users/{uid}/properties/digits").onW
   //   }
   // })
   const checkify=function(num){
-    if ((num.length===10&&num[0]==='0'&&num[1]!=='0')||(num.length===9&&num[0]!==0)){
+    if ((num.length===10&&num[0]==='0'&&num[1]!=='0')||(num.length===9&&num[0]==='9')){
       if(num.length===10){
         return "+251"+num.substring(1,num.lastIndexOf(''))
       }
@@ -1054,11 +1196,13 @@ exports.digitVerify=functions.database.ref("/users/{uid}/properties/digits").onW
       return null
     }
   }
-  var numbe=e.data.val()
+  var numbe=e.params.dg
   var numb=numbe.substring(3,numbe.lastIndexOf(""))
   var num=checkify(numb)
   if(num){
     return e.data.adminRef.set(num)
+  }else{
+
   }
 
 })

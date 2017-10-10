@@ -1,3 +1,37 @@
+To be done:
+
+Chat needs to update automatically...which means you would have to make its own get Ref function where ever.
+The information just needs to be updated. Like the sent symbol and the read symbol.
+Maybe a function inside each message to check if there is a change.
+
+I still can't see posts. Maybe try a different approach than the "repopulate"
+thing. Cause that IS NOT working out.The "unread" is really important and it should update automatically.
+
+Search how to possible make the notification make sounds and light and what not. And make it appear even if the app
+is turned on. (Pretty sure some website has your answer)
+
+Scroll to top at the sending of a message.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 ----------
 Tonight:
 //Create the about page and all other distro static pages//this might be better if done letter, because all installed aps can be updated with it very easily.

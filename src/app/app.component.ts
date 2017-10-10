@@ -19,7 +19,7 @@ import { TutorialPage } from '../pages/tutorial/tutorial';
 import { WelcomePage } from '../pages/welcome/welcome';
 import {ItemDetailPage} from '../pages/item-detail/item-detail'
 import { Settings } from '../providers/providers';
-
+import {Vibration} from '@ionic-native/vibration'
 import { TranslateService } from '@ngx-translate/core'
 import {FirebaseService} from '../providers/firebase'
 import {Deploy} from '@ionic/cloud-angular'
@@ -27,6 +27,7 @@ import {Storage} from '@ionic/storage'
 import {ImageLoaderConfig} from 'ionic-image-loader'
 import {Keyboard} from '@ionic-native/keyboard'
 declare var FCMPlugin:any
+
 
 @Component({
   /*template: `<ion-menu [content]="content">
@@ -71,7 +72,7 @@ export class MyApp {
   ]
   status:boolean
 
-  constructor(public keyb:Keyboard,public ilc:ImageLoaderConfig,public stg:Storage,public ac:AlertController,public deploy:Deploy,private translate: TranslateService, private platform: Platform,public fbs: FirebaseService, settings: Settings, private config: Config, private statusBar: StatusBar, private splashScreen: SplashScreen) {
+  constructor(public vb:Vibration,public keyb:Keyboard,public ilc:ImageLoaderConfig,public stg:Storage,public ac:AlertController,public deploy:Deploy,private translate: TranslateService, private platform: Platform,public fbs: FirebaseService, settings: Settings, private config: Config, private statusBar: StatusBar, private splashScreen: SplashScreen) {
     this.initTranslate();
     this.user = this.fbs.currentUser()
     console.log(ItemDetailPage)
@@ -114,6 +115,7 @@ export class MyApp {
         }
       })
       FCMPlugin.onNotification((data)=>{
+        this.vb.vibrate([2000,1000,2000,1000,2000])
         console.log("FCMMMMMM",data)
         // var ac=this.ac.create({
         //   title: 'Notifique',
