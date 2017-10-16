@@ -24,16 +24,30 @@ export class Message {
       this.resUid=mc.resUid
     }
     if(fbs){
+
       if(fbs.currentUser().uid!=this.senderUid){
         this.read=true
         this.fbs.setDatabase("/chats/"+cid+"/content/messages/"+mid+"/read",true,true).then(()=>{
-          console.log("what? set it?")
-          // this.fbs.rmDatabase("/chats/"+cid+"/summary/"+this.resUid+"/unread")
+
         })
       }
+      var updater=this.fbs.getRef("/chats/"+this.cid+"/content/messages/"+this.mid)
+      updater.on('value',snp=>{
+        var m=snp.val()
+        this.read=m.read
+        this.sent=m.sent
+      })
     }
 
     // Quick and dirty extend/assign fields to this model
+  }
+  update(){
+      var updater=this.fbs.getRef("/chats/"+this.cid+"/content/messages/"+this.mid)
+      updater.on('value').then(snp=>{
+        var m=snp.val()
+        this.read=m.read
+        this.sent=m.sent
+      })
   }
 
 }

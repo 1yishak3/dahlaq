@@ -15,8 +15,8 @@
       <ion-col>
         <div no-padding style="position:absolute;bottom:5px;left:10px" style="color:white">
           <h5>{{oUser}}</h5>
-          <div end *ngIf="online">
-            <ion-icon  style="font-size:10px" name="egg" color="secondary" *ngIf="online.on"></ion-icon>
+          <div end style="color:grey" *ngIf="online&&online.on">
+            Online
           </div>
           <div no-padding style="color:grey" *ngIf="online&&!online.on">
             Last seen {{online.time | momentjs}}

@@ -33,7 +33,7 @@
             <h2>
               {{ profile?.basic.username }}
               <ion-badge color="light">
-                #{{profile?.basic.rank +1 }}
+                #{{profile?.basic.rank}}
               </ion-badge>
             </h2>
           </ion-col>
@@ -74,7 +74,7 @@
         <ion-label style="color:rgb(155, 158, 148)">Education</ion-label>
         <div item-content [innerText]="profile?.properties.education"></div>
       </ion-item>
-      <button color="dark" ion-item no-lines (click)="seePosts()" block>See Posts</button>
+      <button text-center color="dark" ion-item no-lines (click)="seePosts()" block>See Posts</button>
     </ion-list>
 
 </ion-content>

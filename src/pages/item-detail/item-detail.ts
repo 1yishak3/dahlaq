@@ -256,11 +256,14 @@ export class ItemDetailPage {
     this.fbs.getDatabase("/users/"+this.fbs.currentUser().uid+"/people",true).then((res)=>{
       var chat=""
       console.log("in 1")
+      console.log("res  ",res)
       if(res){
         for(let i in res){
-          if(res[i].indexOf(vm.uid)!==-1){
-            chat=res[i]
-            break
+          if(i!="cache"){
+            if(res[i].indexOf(vm.uid)!==-1){
+              chat=res[i]
+              break
+            }
           }
         }
       }

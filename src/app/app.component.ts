@@ -19,14 +19,16 @@ import { TutorialPage } from '../pages/tutorial/tutorial';
 import { WelcomePage } from '../pages/welcome/welcome';
 import {ItemDetailPage} from '../pages/item-detail/item-detail'
 import { Settings } from '../providers/providers';
-
+import {Vibration} from '@ionic-native/vibration'
 import { TranslateService } from '@ngx-translate/core'
 import {FirebaseService} from '../providers/firebase'
 import {Deploy} from '@ionic/cloud-angular'
 import {Storage} from '@ionic/storage'
 import {ImageLoaderConfig} from 'ionic-image-loader'
 import {Keyboard} from '@ionic-native/keyboard'
+import {Badge} from '@ionic-native/badge'
 declare var FCMPlugin:any
+
 
 @Component({
   /*template: `<ion-menu [content]="content">
@@ -71,7 +73,7 @@ export class MyApp {
   ]
   status:boolean
 
-  constructor(public keyb:Keyboard,public ilc:ImageLoaderConfig,public stg:Storage,public ac:AlertController,public deploy:Deploy,private translate: TranslateService, private platform: Platform,public fbs: FirebaseService, settings: Settings, private config: Config, private statusBar: StatusBar, private splashScreen: SplashScreen) {
+  constructor(public badge:Badge,public vb:Vibration,public keyb:Keyboard,public ilc:ImageLoaderConfig,public stg:Storage,public ac:AlertController,public deploy:Deploy,private translate: TranslateService, private platform: Platform,public fbs: FirebaseService, settings: Settings, private config: Config, private statusBar: StatusBar, private splashScreen: SplashScreen) {
     this.initTranslate();
     this.user = this.fbs.currentUser()
     console.log(ItemDetailPage)
@@ -114,6 +116,18 @@ export class MyApp {
         }
       })
       FCMPlugin.onNotification((data)=>{
+        if(data.wasTapped){
+          this.requestPermission().then(()=>{
+            this.clearBadges()
+          })
+
+        }else{
+          this.requestPermission().then(()=>{
+            this.increaseBadges("1")
+          })
+
+        }
+        this.vb.vibrate([2000,1000,2000,1000,2000])
         console.log("FCMMMMMM",data)
         // var ac=this.ac.create({
         //   title: 'Notifique',
@@ -136,6 +150,65 @@ export class MyApp {
       console.log(e)
     }
   }
+
+  async requestPermission() {
+    try {
+      let hasPermission = await this.badge.hasPermission();
+      console.log(hasPermission);
+      if (!hasPermission) {
+        let permission = await this.badge.registerPermission();
+        console.log(permission);
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  }
+  async setBadges(badgeNumber: number) {
+    try {
+      let badges = await this.badge.set(badgeNumber);
+      console.log(badges);
+    } catch (e) {
+      console.error(e);
+    }
+  }
+  async getBadges() {
+    try {
+      let badgeAmount = await this.badge.get();
+      console.log(badgeAmount);
+    }
+    catch (e) {
+      console.error(e);
+    }
+  }
+  async increaseBadges(badgeNumber: string) {
+    try {
+      let badge = await this.badge.increase(Number(badgeNumber));
+      console.log(badge);
+    } catch (e) {
+      console.error(e);
+    }
+  }
+  async decreaseBadges(badgeNumber: string) {
+    try {
+      let badge = await this.badge.decrease(Number(badgeNumber));
+      console.log(badge);
+    } catch (e) {
+      console.error(e);
+    }
+  }
+  async clearBadges(){
+    try {
+      let badge = await this.badge.clear();
+      console.log(badge);
+    }
+    catch(e){
+      console.error(e);
+    }
+  }
+
+
+
+
 
   ngOnInit(){
     var auth=this.fbs.getAuth()

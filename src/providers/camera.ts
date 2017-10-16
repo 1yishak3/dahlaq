@@ -6,14 +6,25 @@ import {MediaCapture,MediaFile,CaptureError,CaptureImageOptions,CaptureVideoOpti
 import { File,FileEntry } from '@ionic-native/file'
 //import {ImageResizer} from '@ionic-native/image-resizer'
 import { Ng2ImgToolsService } from 'ng2-img-tools'
-import { Camera as Cam} from '@ionic-native/camera'
+import { Camera as Cam, CameraOptions} from '@ionic-native/camera'
 import { ImageResizer, ImageResizerOptions } from '@ionic-native/image-resizer';
 @Injectable()
 export class Camera{
+  options:CameraOptions
 
   constructor(public imageResizer:ImageResizer,public c:Cam,public ir:Ng2ImgToolsService,public plt:Platform,public fl: File,public mc:MediaCapture){
-
+    this.options={
+      destinationType:this.c.DestinationType.DATA_URL,
+      encodingType:this.c.EncodingType.JPEG,
+      sourceType: this.c.PictureSourceType.PHOTOLIBRARY,
+      allowEdit:true
+    }
   }
+  // bringPhoto(){
+  //   return new Promise((resolve,reject)=>{
+  //     this.c.getPicture(this.options).then()
+  //   })
+  // }
   takePicture(limit){
     console.log("Do you even get here? Camera")
     var options:CaptureImageOptions={limit:limit}

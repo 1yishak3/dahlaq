@@ -76,23 +76,25 @@ export class FirebaseService {
 
     })
   }
-  snap(uid) {
+  snap() {
+    if(this.currentUser()){
     var vm = this
     var consRef = this.getRef("/users/" + this.currentUser().uid + "/connections")
-    var onRef = this.getRef("/users/" + uid + "/basic/online")
+    var onRef = this.getRef("/users/" + this.currentUser().uid+ "/basic/online")
     var conRef = this.getRef("/.info/connected")
     conRef.on('value', function(snap) {
       if (snap.val()) {
-        console.log("Do you see me??", uid)
-        vm.setDatabase("/users/" + uid + "/basic/online", { "on": true, "time": firebase.database.ServerValue.TIMESTAMP }, true).then(function(res) {
 
-        })
-      }
-      var con = consRef.push()
-      con.set(true)
-      con.onDisconnect().remove()
-      onRef.onDisconnect().set({ "on": false, "time": firebase.database.ServerValue.TIMESTAMP })
-    })
+        vm.setDatabase("/users/" + this.currentUser().uid + "/basic/online", { "on": true, "time": firebase.database.ServerValue.TIMESTAMP }, true).then(function(res) {
+
+          })
+        }
+        var con = consRef.push()
+        con.set(true)
+        con.onDisconnect().remove()
+        onRef.onDisconnect().set({ "on": false, "time": firebase.database.ServerValue.TIMESTAMP })
+      })
+    }
   }
   connected() {
     return new Promise(function(resolve, reject) {

@@ -27,36 +27,18 @@ export class TabsPage {
   tab5Title = "Chats"
   unread:number=0
   constructor(public fbs:FirebaseService, public navCtrl: NavController, public translateService: TranslateService) {
-    console.log(Tab10Root)
-    console.log(Tab1Root)
-
-    /*translateService.get(['TAB1_TITLE', 'TAB2_TITLE', 'TAB3_TITLE']).subscribe(values => {
-      this.tab1Title = values['TAB1_TITLE'];
-      this.tab2Title = values['TAB2_TITLE'];
-      this.tab3Title = values['TAB3_TITLE'];
-    });*/
-    this.int()
-  }
-  int(){
-    var f=setInterval(()=>{
-      var cnt=0
-      var sRef= this.fbs.getRef("/users/"+this.fbs.currentUser().uid+"/people")
-      sRef.once("value").then((snap)=>{
-        var list=snap.val()
-        for(let k  in list){
-          if(k!=="cache"&&list!=="repopulate"){
-            var cid=snap[k]
-            this.fbs.getDatabase("/chats/"+cid+"/summary/users/"+this.fbs.currentUser().uid+"/unread",true).then((sn)=>{
-              if(sn){
-                cnt=cnt+Object.keys(sn).length
-              }
-            })
+    this.fbs.getAuth().onAuthStateChanged((e)=>{
+      if(e){
+        var sRef= this.fbs.getRef("/users/"+this.fbs.currentUser().uid+"/unread")
+        console.log(sRef)
+        sRef.on('value',(snap)=>{
+          var snaps=snap.val()
+          if(typeof snaps=='number'){
+            this.unread=snaps
           }
-        }
-        this.unread=cnt
-        console.log(this.unread)
-      })
-    },2500)
-
+        })
+      }
+    })
   }
+
 }

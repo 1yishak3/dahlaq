@@ -32,6 +32,8 @@ export class CardsPage {
   firstTime:boolean=true
   noPosts:boolean=false
   show:any=true
+  secondTime:boolean=false
+  onAuth:boolean=false
   constructor(public platform:Platform,public sg:Storage,public lc:LoadingController, public nw:Network,public sm:StreamingMedia,public navCtrl: NavController, public events : Events ,public fbs:FirebaseService) {
     var urd;
    this.sg.get("uzer").then((res)=>{
@@ -42,8 +44,14 @@ export class CardsPage {
      console.log(this.uid)
      this.firstTime=true
      console.log("this is uiddddd",this.uid)
-     fbs.snap(this.uid)
+
+
+
+
+
+
    })
+
 
 
    var vm=this
@@ -65,6 +73,24 @@ export class CardsPage {
     //
     //
     // })
+    if(this.fbs.currentUser()){
+      this.constructs()
+    }else{
+      this.fbs.getAuth().onAuthStateChanged(e=>{
+        console.log("in auth",e)
+        if(e){
+
+          this.onAuth=true
+          this.uid=this.fbs.currentUser().uid
+          this.constructs()
+          this.secondTime=true
+          this.fbs.snap()
+        }
+      })
+    }
+
+  }
+  constructs(){
     this.content.scrollToTop(10)
     if (this.viewables.length>=50){
       for(let i=0;i<14;i++){
@@ -94,12 +120,12 @@ export class CardsPage {
         console.log("An error has come up", err)
       })
     }
-
   }
   handleEmoji(event){
 
   }
   getNewstuff(){
+    console.log("JOHN CENAAA")
     //this.ready=false
     //decide when users should see the loading thing
     //I also need to go to createUser in firebase and adjust so it throws an error when number is invalid.
@@ -202,16 +228,7 @@ export class CardsPage {
               vm.fbs.getDatabase("/posts/"+vm.newList[i],true).then(function(res:any){
                 console.log("post from base?",res)
                 var post = new Post(vm.fbs,vm.navCtrl,vm.newList[i],false,res)
-                // for(let i in res.content){
-                //   post.content[i]=res.content[i]
-                // }
-                // for(let i in res.poster){
-                //   post.poster[i]=res.poster[i]
-                // }
-                console.log("shit fuck",post)
-                // for(let i in res){
-                //    post[i]=res[i]
-                // }
+
                 vm.liste.push(post)
                 if(Number(i)===14||Number(i)===vm.newList.length-1){
                   vm.arrayStopped=Number(i)+1
@@ -225,8 +242,8 @@ export class CardsPage {
               })
               if(Number(i)===14||Number(i)===vm.newList.length-1){
                 vm.viewables=vm.liste
-                var view=vm.fbs.getRef("/users/"+vm.uid+"/viewables")
-                view.set("repopulate/"+Date.now())
+                vm.arrayStopped=Number(i)+1
+
                 if(vm.firstTime){
                   // lc.dismiss()
                 }
@@ -305,8 +322,7 @@ export class CardsPage {
 
       }).catch(function(err){
         console.log("Error getting profile ",err)
-        var view=vm.fbs.getRef("/users/"+vm.uid+"/viewables")
-        view.set("repopulate/")
+
         if(vm.firstTime){
           // lc.dismiss()
         }
@@ -329,25 +345,30 @@ export class CardsPage {
     this.sm.playVideo(videoUrl, options);
   }
   pullToAddMore(e){
+    console.log("Is pull to add more causing a significant problem?")
     var vm=this
-    var j=vm.arrayStopped
+    var j=vm.arrayStopped+1
+    var init=this.viewables.length
     if(j<vm.newList.length){
-      for(let i in vm.newList){
-        var k =Number(i)+j
-        if(vm.newList[k]!==undefined){
-          vm.fbs.getDatabase("/posts/"+vm.newList[k],false,true).then(function(res){
-            var post = new Post(vm.fbs,vm.navCtrl,vm.newList[k],true)
-            for(let i in res){
-              post[i]=res[i]
+      for(var i=j;i<this.newList.length;i++){
+
+        if(vm.newList[i]!==undefined){
+          vm.fbs.getDatabase("/posts/"+vm.newList[i],true).then((res)=>{
+            if(res){
+              var post = new Post(vm.fbs,vm.navCtrl,vm.newList[i],false,res)
+              for(let i in res){
+                post[i]=res[i]
+              }
+              vm.viewables.push(post)
+              console.log(post)
             }
-            vm.viewables.push(post)
-            console.log(post)
+
             //vm.array=vm.array+1
           }).catch(function(err){
             console.log("couldn't get post,",err)
           })
-          if(Number(i)===14||Number(i)===vm.newList.length-1){
-            vm.arrayStopped=k+1
+          if(Number(i)>=vm.newList.length-1||vm.viewables.length-init>=15){
+            vm.arrayStopped=i+1
             e.complete()
             break
           }

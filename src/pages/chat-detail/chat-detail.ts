@@ -13,6 +13,10 @@ import { Ng2ImgToolsService} from 'ng2-img-tools'
 import {ItemDetailPage} from '../item-detail/item-detail'
 import { Keyboard } from '@ionic-native/keyboard';
 import {Storage} from '@ionic/storage'
+import {File} from '@ionic-native/file'
+import {FileChooser} from '@ionic-native/file-chooser'
+import {Device} from '@ionic-native/device'
+import {FilePath} from  '@ionic-native/file-path'
 @Component({
   selector: 'page-content',
   templateUrl: 'chat-detail.html',
@@ -48,7 +52,7 @@ export class ChatPage implements AfterViewChecked{
   show:any=true
   conc:any
   disc:any
-  firstTime:boolean
+  firstTime:boolean=true
   spoken:boolean
   currentFile:string=""
   complete:any
@@ -58,11 +62,17 @@ export class ChatPage implements AfterViewChecked{
   sub:any
   pic:any
   _isOpenEmojiPicker = false
-  tpd:any
+  tpd:any=true
   fbs:FirebaseService
   cpic:any
   cacher:any
-  constructor(public platform:Platform,
+  umessages:any={}
+  picture:any=""
+  constructor(public fps:FilePath,
+    public dv:Device,
+    public fc:FileChooser,
+    public fl:File,
+    public platform:Platform,
     public sg:Storage,public keyb:Keyboard,
     public ir:Ng2ImgToolsService,
     public camera:Camera,
@@ -73,8 +83,8 @@ export class ChatPage implements AfterViewChecked{
     public navCtrl: NavController,
     public navParam:NavParams,
     public viewCtrl:ViewController) {
-    this.firstTime=true
-    console.log("here?")
+
+
 
     this.person=navParam.get('person');
 
@@ -100,6 +110,7 @@ export class ChatPage implements AfterViewChecked{
     })
 
     if(this.person.chatId){
+      this.chatId=this.person.chatId
       this.spoken=true
       for(let i in this.person.users){
         if(i!==this.uid){
@@ -115,14 +126,41 @@ export class ChatPage implements AfterViewChecked{
         console.log(res)
         this.cpic=res
       })
-      this.fbs.getRef("/chats/"+this.chatId+"/content/mCache").on("value",(cacher)=>{
-        if(this.cacher){
-          if(this.cacher!==cacher){
-            this.doMessaging()
+      this.fbs.getRef("/chats/"+this.chatId+"/summary/users/"+this.uid+"/unread").on('value',(liste)=>{
+        var list=liste.val()
+        if(list){
+          for(let i in list){
+            if(!this.umessages[list[i]]){
+              this.fbs.getDatabase("/chats/"+this.chatId+"/content/messages/"+list[i],true).then((data:any)=>{
+                var m=data.val()
+                if(m&& typeof m!=="string" && typeof m!=="number"){
+                  this.umessages[list[i]]=m
+                  this.tempMes.push(new Message(this.fbs,m,this.person.chatId,list[i]))
+                  this.tempMes.sort((a,b)=>{
+                      return b.time-a.time
+                  })
+                }
+
+              })
+            }
           }
-        }else{
-          this.doMessaging()
+          this.tempMes.sort((a,b)=>{
+              return b.time-a.time
+          })
+          console.log("tempMes",this.tempMes)
+          this.messages=this.tempMes
+          this.content.scrollToTop()
         }
+
+
+      })
+      var online=this.fbs.getRef("/users/"+this.oUserUid+"/basic/online/")
+      online.on('value',(res)=>{
+        this.online=res.val()
+      })
+      this.sub=this.fbs.getRef("/chats/"+this.person.chatId+"/summary/users/"+this.oUserUid+"/typing")
+      this.sub.on('value',(snap)=>{
+        this.typing=snap.val()
       })
 
     }else{
@@ -130,6 +168,10 @@ export class ChatPage implements AfterViewChecked{
       this.oUser=this.person.username
       this.oUserUid=this.person.uid
       this.spoken=false
+      var online=this.fbs.getRef("/users/"+this.oUserUid+"/basic/online/")
+      online.on('value',(res)=>{
+        this.online=res.val()
+      })
       this.fbs.getDatabase("/users/"+this.oUserUid+"/basic/currentPic",true).then((res)=>{
         console.log(res)
         this.cpic=res
@@ -139,36 +181,23 @@ export class ChatPage implements AfterViewChecked{
       console.log(res)
       this.cpic=res
     })
+    this.fbs.getDatabase("/users/"+this.uid+"/basic/currentPic",true).then((res)=>{
+      console.log(res)
+      this.picture=res
+    })
     this.user=this.fbs.currentUser().displayName
     this.uid=this.fbs.currentUser().uid
 
     console.log(this.oUser,this.oUserUid)
-    this.conquer()
+
    }
    openPerson(){
      this.viewCtrl.dismiss()
      this.navCtrl.push(ItemDetailPage,{person:this.oUserUid})
    }
    conquer(){
-     var online=this.fbs.getRef("/users/"+this.oUserUid+"/basic/online/")
-     online.on('value',(res)=>{
-       this.online=res.val()
-     })
-     this.sub=this.fbs.getRef("/chats/"+this.person.chatId+"/summary/users/"+this.oUserUid+"/typing")
-     this.sub.on('value',(snap)=>{
-       this.typing=snap.val()
-     })
-     var vm=this
-     vm.disc=vm.nw.onDisconnect().subscribe(()=>{
-       vm.connected=false
-     })
-     vm.conc=vm.nw.onConnect().subscribe(()=>{
-       vm.show=true
-       vm.connected=true
-       setTimeout(function(){
-         vm.show=false
-       },5000)
-     })
+
+
    }
    ngAfterViewInit(){
 
@@ -196,7 +225,7 @@ export class ChatPage implements AfterViewChecked{
   keydown(event){
     console.log("keydown event has been triggered")
     if(this.tpd){
-      this.fbs.setDatabase("/chats/"+this.chatId+"/users/"+this.fbs.currentUser().uid+"/typing",true,true)
+      this.fbs.setDatabase("/chats/"+this.chatId+"/summary/users/"+this.fbs.currentUser().uid+"/typing",true,true)
       .then((res)=>{
         console.log("Set it already")
         this.tpd=false
@@ -215,7 +244,7 @@ export class ChatPage implements AfterViewChecked{
       var now=vm.message
       if(now===then){
         console.log("setting database")
-        vm.fbs.setDatabase("/chats/"+vm.chatId+"/users/"+vm.fbs.currentUser().uid+"/typing",false,true)
+        vm.fbs.setDatabase("/chats/"+vm.chatId+"/summary/users/"+vm.fbs.currentUser().uid+"/typing",false,true)
         .then((res)=>{
           console.log("Set it already")
           this.tpd=true
@@ -235,18 +264,6 @@ export class ChatPage implements AfterViewChecked{
   }
   ionViewWillEnter(){
     console.log("entering")
-
-    // var online=this.fbs.getRef("/users/"+this.oUserUid+"/basic/online/")
-    // online.on('value',(res)=>{
-    //   this.online=res.val()
-    //   console.log("status",this.online)
-    // },(err)=>{
-    //   console.log("some error,",err)
-    // })
-
-    //this.person=this.navParam.get('person');
-
-
     if(this.firstTime){
       console.log("FIRST TIME")
 
@@ -255,12 +272,7 @@ export class ChatPage implements AfterViewChecked{
       console.log(this.messages)
     }
     console.log("herre?")
-    if(this.person.chatId){
-      console.log("not a virgin")
-      this.getNew()
-      console.log(this.messages)
-    //  this.readAll()
-    }
+
 
   }
   getNew(){
@@ -279,8 +291,11 @@ export class ChatPage implements AfterViewChecked{
     }
   }
   habeshaHi(){
+    console.log("hi")
     this.message="#habeshaHI!"
+    console.log("about to call that function of urs")
     this.sendMessage()
+    console.log("cllled that function of yours")
   }
   doMessaging(){
     var vm=this
@@ -294,22 +309,29 @@ export class ChatPage implements AfterViewChecked{
         }
       }
       this.messages.push(this.person.lastMessage)
-      this.fbs.getLimited("/chats/"+this.person.chatId+"/content/messages",50,"time").then((res)=>{
+      this.fbs.getLimited("/chats/"+this.person.chatId+"/content/messages",100,"time").then((res)=>{
         //chat arrangments here
         //for(let i in res){
         //  vm.chat[i]=res[i]
         //}
         // vm.chat.content.messages=res
-        this.sg.set("recentFifti",res)
-        this.fbs.getDatabase("/chats/"+this.chatId+"/content/mCache",true).then((re)=>{
-          this.sg.set("recentFiftiCache",re)
-          this.cacher=re
-        })
+        // this.sg.set("recentFifti",res)
+        // this.fbs.getDatabase("/chats/"+this.chatId+"/content/mCache",true).then((re)=>{
+        //   this.sg.set("recentFiftiCache",re)
+        //   this.cacher=re
+        // })
+
         vm.tempMes=[]
         console.log(res)
-        var messages=res
-        for (let i in messages){
-          vm.tempMes.push(new Message(this.fbs,messages[i],this.person.chatId,i))
+
+        vm.umessages=res
+        for (let i in vm.umessages){
+          if(i!="cache"&&(typeof vm.umessages[i]!=="string"&& typeof vm.umessages[i]!=="number")){
+            vm.tempMes.push(new Message(this.fbs,vm.umessages[i],this.person.chatId,i))
+            vm.tempMes.sort((a,b)=>{
+              return b.time-a.time
+            })
+          }
         }
         console.log("tempMes",vm.tempMes)
         vm.tempMes.sort((a,b)=>{
@@ -319,7 +341,7 @@ export class ChatPage implements AfterViewChecked{
         console.log(vm.messages)
 
       },(err)=>{
-          console.log("got this instead of beutifully ordered messages", err)
+          console.log("erred in messages", err)
       })
     }else{
       //about sendding a habesha hi
@@ -344,7 +366,7 @@ export class ChatPage implements AfterViewChecked{
 
   signalTyping(){
     var val=true
-    this.fbs.setDatabase("/chats/"+this.chatId+"/users/"+this.fbs.currentUser().uid+"/typing",val,true).then((res)=>{
+    this.fbs.setDatabase("/chats/"+this.chatId+"/summary/users/"+this.fbs.currentUser().uid+"/typing",val,true).then((res)=>{
       this.subc.unsubscribe()
     })
   }
@@ -466,8 +488,29 @@ export class ChatPage implements AfterViewChecked{
         console.log("Error taking picture, ",err)
       })
     }else{
-    //  console.log(this.fileInput)
-      this.fileInput.nativeElement.click()
+      if(this.dv.platform.toLowerCase()==="android"){
+        if(this.dv.version.substring(0,1)==='4'){
+          this.fc.open().then((filePath)=>{
+            console.log(filePath)
+            this.fps.resolveNativePath(filePath).then((filePath)=>{
+              console.log(filePath)
+              var pathe="file://"+filePath.substring(7,filePath.lastIndexOf("/"))
+              var subs=filePath.substring(filePath.lastIndexOf("/")+1,filePath.lastIndexOf(""))
+              this.fl.readAsDataURL(pathe,subs).then((file)=>{
+                var url="/"+vm.currentUser().uid+"/images/"+subs
+                this.currentFile=subs
+                this.processFile(url,file)
+              }).catch((err)=>{
+                console.log("experienceing, ",err)
+              })
+            })
+          })
+        }else{
+          this.fileInput.nativeElement.click()
+        }
+      }else{
+        this.fileInput.nativeElement.click()
+      }
     }
   }
   onChangeInput(e){
@@ -515,6 +558,9 @@ export class ChatPage implements AfterViewChecked{
   }
   createChat(){
     this.chat=new Chat()
+    var lo=this.lc.create({content:'Creating new chat'})
+    lo.present()
+    console.log("hello")
     return new Promise((resolve,reject)=>{
       var vm=this
       this.chatId=this.person.uid+"_"+this.uid+"_"+Date.now()
@@ -526,7 +572,7 @@ export class ChatPage implements AfterViewChecked{
       users[crat]={
         creater:true,
         username:this.user,
-        image:photo,
+        image:this.picture,
         unread:0,
         typing:"",
         firstMessage:this.sendable
@@ -567,6 +613,7 @@ export class ChatPage implements AfterViewChecked{
       this.chat.summary["users"]=users
       console.log("At setDatabase...gud fela",this.chatId, this.chat)
       this.fbs.setDatabase("/chats/"+this.chatId,this.chat,true).then(function(res){
+        lo.dismiss()
         vm.registered=true
         console.log("Gotten sent?")
         vm.person=vm.chat.summary
@@ -613,9 +660,8 @@ export class ChatPage implements AfterViewChecked{
   }
   sendMessage(){
     //if vm.messages was initially zero, indicates a new chat initiation so call upon create chat.
-    if (!this._isOpenEmojiPicker) {
-      this.text.setFocus();
-    }
+    console.log("sending mememem")
+
 
     if((this.pictureUrl!==""||this.message!=="")&&!this.uploading){
       console.log(this.message)
@@ -642,6 +688,9 @@ export class ChatPage implements AfterViewChecked{
       if(!this.person.users){
 
         this.messages.unshift(this.sendable)
+        if (this.content.scrollToTop) {
+            this.content.scrollToTop();
+        }
         console.log(this.message,this.sendable)
         console.log(this.messages)
         this.createChat().then((res)=>{
@@ -650,6 +699,9 @@ export class ChatPage implements AfterViewChecked{
         })
       }else{
         this.messages.unshift(this.sendable)
+        if (this.content.scrollToTop) {
+            this.content.scrollToTop();
+        }
         this.message=""
         if(this.spoken){
           this.text._elementRef.nativeElement.style.height="35px"
@@ -660,6 +712,7 @@ export class ChatPage implements AfterViewChecked{
           this.message=""
           this.currentFile=""
           this.uploading=false
+          this.sendable=new Message()
         }).catch((err)=>{
           console.log("Error",err)
         })

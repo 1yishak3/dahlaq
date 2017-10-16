@@ -88,8 +88,8 @@
       </div-->
       <ion-item style="color:white;background:clear" no-lines>
           <ion-label>Maximum Reach</ion-label>
-          <ion-range [(ngModel)]="reach" [max]="max" pin="true" color="primary">
-            <ion-label range-left>0</ion-label>
+          <ion-range [(ngModel)]="reach" [min]=0 [max]="max" pin="true" color="primary">
+            <ion-label range-left>1</ion-label>
             <ion-label range-right>{{max}}</ion-label>
           </ion-range>
         <!--ion-item>
@@ -100,5 +100,7 @@
   </div>
 </ion-content>
 <ion-footer>
-  <button ion-button color="light" block (click)="submitPost()">POST</button>
+  <div padding>
+    <button ion-button color="light" block (click)="submitPost()">POST</button>
+  </div>
 </ion-footer>
