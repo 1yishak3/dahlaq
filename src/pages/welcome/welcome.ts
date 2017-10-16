@@ -98,16 +98,25 @@ export class WelcomePage {
                       switch(val){
                         case 'login':
                           clearInterval(whats)
-                          gugu.close()
                           if(!this.loaderu){
-                            this.login(email[0],pastor[0])
+                            this.login(email[0],pastor[0]).then(()=>{
+                              gugu.close()
+                            }).catch(()=>{
+                              gugu.close()
+                            })
                           }
+
+
                           break
                         case 'signup':
                           clearInterval(whats)
                           gugu.close()
                           if(!this.loaderu){
-                          this.signup(email[0],pastor[0])
+                          this.signup(email[0],pastor[0]).then(()=>{
+                            gugu.close()
+                          }).catch(()=>{
+                            gugu.close()
+                          })
                           }
                           break
                         case 'nono':
@@ -165,77 +174,74 @@ export class WelcomePage {
   }
 
   login(e,p) {
-
-    var navCtrl=this.navCtrl
-    var vm=this
-    //navCtrl.push(LoginPage,{'confirm':"what?"})
-    var load1=this.loadCtrl.create({
-      content:"Logging you in..."
-    })
-
-    load1.present()
-    this.loaderu=true
-
-    vm.fbs.login(e,p).then((res)=>{
-      // console.log("We have a response: ", res)
-      // var num=vm.c.checkify(this.creds.digits)
-
-
-      load1.dismiss()
-      this.loaderu=false
-      this.navCtrl.push(MainPage)
-
-    }).catch(function(err){
-    //  vm.fbs.currentUser().delete()
-      load1.dismiss()
-      this.loaderu=false
-      console.log("Error loging in. Cause: ",err)
-      var toast=vm.tc.create({
-        message: "Couldn't log you in. Make sure you are connected to the internet, and that you have entered a valid phone number and password combo.",
-        duration: 3000,
-        position: 'top'
+    return new Promise((resolve,reject)=>{
+      var navCtrl=this.navCtrl
+      var vm=this
+      //navCtrl.push(LoginPage,{'confirm':"what?"})
+      var load1=this.loadCtrl.create({
+        content:"Logging you in..."
       })
-      toast.present()
 
-      //navCtrl.push(LoginPage)
+      load1.present()
+      this.loaderu=true
+
+      vm.fbs.login(e,p).then((res)=>{
+        load1.dismiss()
+        this.loaderu=false
+        this.navCtrl.push(MainPage)
+        resolve()
+
+      }).catch(function(err){
+      //  vm.fbs.currentUser().delete()
+        load1.dismiss()
+        this.loaderu=false
+        console.log("Error loging in. Cause: ",err)
+        var toast=vm.tc.create({
+          message: "Couldn't log you in. Make sure you are connected to the internet, and that you have entered a valid phone number and password combo.",
+          duration: 3000,
+          position: 'top'
+        })
+        toast.present()
+        reject()
+      })
     })
-
   }
 
   signup(e,p) {
-    var navCtrl=this.navCtrl
-    var vm=this
-    //navCtrl.push(LoginPage,{'confirm':"what?"})
-    var load1=this.loadCtrl.create({
-      content:"Loggin you in..."
-    })
-
-    load1.present()
-    this.loaderu=true
-
-    vm.fbs.login(e,p).then((res)=>{
-      // console.log("We have a response: ", res)
-      // var num=vm.c.checkify(this.creds.digits)
-
-      load1.dismiss()
-      this.loaderu=false
-      this.navCtrl.push(SignupPage,{pass:vm.creds.password,num:vm.creds.digits})
-
-    }).catch(function(err){
-    //  vm.fbs.currentUser().delete()
-      load1.dismiss()
-      this.loaderu=false
-      console.log("Error loging in. Cause: ",err)
-      var toast=vm.tc.create({
-        message: "Couldn't log you in. Make sure you are connected to the internet, and that you have entered a valid phone number and password combo.",
-        duration: 3000,
-        position: 'top'
+    return new Promise((resolve,reject)=>{
+      var navCtrl=this.navCtrl
+      var vm=this
+      //navCtrl.push(LoginPage,{'confirm':"what?"})
+      var load1=this.loadCtrl.create({
+        content:"Loggin you in..."
       })
-      toast.present()
 
-      //navCtrl.push(LoginPage)
+      load1.present()
+      this.loaderu=true
+
+      vm.fbs.login(e,p).then((res)=>{
+
+        load1.dismiss()
+        this.loaderu=false
+        this.navCtrl.push(SignupPage,{pass:vm.creds.password,num:vm.creds.digits})
+        resolve()
+
+      }).catch((err)=>{
+      //  vm.fbs.currentUser().delete()
+        load1.dismiss()
+        this.loaderu=false
+        console.log("Error loging in. Cause: ",err)
+        var toast=vm.tc.create({
+          message: "Couldn't log you in. Make sure you are connected to the internet, and that you have entered a valid phone number and password combo.",
+          duration: 5000,
+          position: 'top'
+        })
+        toast.present()
+        reject()
+      })
+
+
     })
-
 
 
 

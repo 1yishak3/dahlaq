@@ -242,134 +242,204 @@ exports.senseStats = functions.database.ref("/users/{uid}/stats").onWrite(e => {
     var l=data.likes
     var d=data.dislikes
     var r=data.reports
-    var fame=((rs*(l-d))-(u*(1+r)))/(rs*(1+r))
-    //,var fame = (data.reaches * (data.likes - data.dislikes) - (unreacted * (1 + data.reports))) / (data.reaches * (1 + data.reports))
+    var fame = (rs+l-d)/(1+u+r)
+    //var fame = (data.reaches + data.likes - data.dislikes) / (unreacted+data.reports+1)
     return fame
   }
   var newFame = recalcFame(data)
 
   return e.data.adminRef.parent.child("fame").set(newFame)
 })
-
-//REORDER THE ADMINSLIST
-exports.senseFame = functions.database.ref("/users/{uid}/fame").onWrite(e => {
-  //reorder the adminsList users list accordingly
-
-  const reachLimit = function(fame) {
-    var limit = Math.ceil(fame * 100)
-    if(limit<10){
-      return 10
-    }else{
-      return limit
-    }
-  }
-
-  const efficient = function(ls, uid, tell, fame, rf,nm) {
-    if(ls){
-      var nums = Object.keys(ls)
-      var uids = []
-      var fames = []
-      var unames=[]
-      var key = ""
-      for (var i = 0; i < nums.length; i++) {
-
-        if (ls[nums[i]].uid === uid) {
-          key1 = nums[i]
-          uids.push(ls[nums[i]].uid)
-          fames.push(fame)
-          unames.push(ls[nums[i]].username)
-        } else {
-          uids.push(ls[nums[i]].uid)
-          fames.push(ls[nums[i]].fame)
-          unames.push(ls[nums[i]].username)
-        }
+// exports.makeUse=functions.database.ref("/chats/{cid}/summary/users/{uid}/unread")
+exports.famous= functions.database.ref("/users/{uid}/fame").onWrite(e=>{
+  var reachLimit = function(fame) {
+      var limit = Math.ceil(fame * 100)
+      if(limit<10){
+        return 10
+      }else{
+        return limit
       }
-
-      var key= uids.indexOf(uid)
-      if (tell === -1) {
-        var i = Number(key) + 1
-        while (fames[i] > fames[key] && i < fames.length) {
-          i++
+  }
+  var fame=e.data.val()
+  var uid=e.params.uid
+  var fRef=e.data.adminRef.parent.parent.parent.child("fameList")
+  fRef.once('value').then(snap=>{
+    var val=snap.val()
+    var list=[]
+    for(let i in val){
+      if(i!=="cache"){
+        if(val[i].uid===uid){
+          val[i].fame=fame
         }
-        var newPos = i - 1
-        var j = key + 1
-        while (j <= newPos) {
-          uids[j - 1] = uids[j]
-          fames[j - 1] = fames[j]
-          unames[j-1]=unames[j]
-          j++
-        }
-        fames[newPos] = fame
-        uids[newPos] = uid
-        unames[newPos]=nm
-        rf.set(newPos+1)
-        var newSet = []
-        for (var l = 0; l < uids.length; l++) {
-          newSet.push({"uid": uids[l], "fame": fames[l],"username":unames[l]})
-        }
-        return newSet
-      } else if (tell === 1) {
-        var i =Number(key) - 1
-        while (fames[i] < fames[key] && i >= 0) {
-          i--
-        }
-        var newPos = i + 1
-        var j = key - 1
-        while (j >= newPos) {
-          uids[j + 1] = uids[j]
-          fames[j + 1] = fames[j]
-          unames[j+1]=unames[j]
-          j--
-        }
-        fames[newPos] =fame
-        uids[newPos] = uid
-        unames[newPos]=nm
-        var newSet = []
-        for (var l = 0; l < uids.length; l++) {
-          newSet.push({"uid": uids[l], "fame": fames[l],"username":unames[l]})
-        }
-        return newSet
-      } else {
-        return null
+        list.push(val[i])
       }
     }
-
-
-  }
-  var fame = e.data.val()
-  var rankRef=e.data.adminRef.parent.child("basic/rank")
-  var nameRef=e.data.adminRef.parent.child("basic/username")
-  var limit = reachLimit(fame)
-  var tell;
-  if (e.data.val() < e.data.previous.val()) {
-    tell = -1
-  } else if (e.data.val() > e.data.previous.val()) {
-    tell = 1
-  } else {
-    tell = 0
-  }
-  var uid = e.params.uid
-
-  var usersRef = e.data.adminRef.parent.parent.parent.child("adminsLists/users")
-  var fameRef = e.data.adminRef.parent.parent.parent.child("fameList")
-  e.data.adminRef.parent.child("reachLimit").set(limit).then(function(res){
-    return fameRef.transaction(current => {
-      nameRef.once("value").then(snap=>{
-        var name=snap.val()
-        var newList = efficient(current, uid, tell, fame,rankRef,name)
-        console.log("this is the new list",newList)
-        if(newList){
-          return newList
-        }else{
-          return current
-        }
-      })
-
+    list.sort((a,b)=>{
+      return b.fame-a.fame
     })
-  }).catch(function(w){
-    console.log("loglog",w)
+    return fRef.set(list)
+
   })
 })
+exports.listS=functions.database.ref("/fameList").onWrite(e=>{
+  var val=e.data.val()
+  console.log(val)
+  if(val){
+    for(let i in val){
+      e.data.adminRef.parent.child("users").child(val[i].uid).child("/basic/rank").set(Number(i)+1)
+    }
+    val["cache"]=Date.now()
+    return e.data.adminRef.set(val)
+  }
+})
+exports.promise=functions.database.ref("/posts/{pid}/content/reports").onWrite(e=>{
+  var val=e.data.val()
+  if(typeof val!="number"&&val){
+    var count= Object.keys(val).length
+    if(count>=50){
+      return e.data.adminRef.parent.parent.set(null)
+    }
+  }
+})
+exports.recaller=functions.database.ref("/posts/{pid}/content/likes").onWrite(e=>{
+  var b=e.data.val()
+  if(typeof b!="number"&&b){
+    return e.data.adminRef.parent.parent.child("likes").set(Object.keys(v).length)
+  }
+})
+
+exports.recaller2=functions.database.ref("/posts/{pid}/content/dislikes").onWrite(e=>{
+  var b=e.data.val()
+  console.log("From changes")
+  if(typeof b!="number"&&b){
+    return e.data.adminRef.parent.parent.child("dislikes").set(Object.keys(v).length)
+  }
+})
+exports.recaller3=functions.database.ref("/posts/{pid}/content/reports").onWrite(e=>{
+  var b=e.data.val()
+  if(typeof b!="number"&&b){
+    return e.data.adminRef.parent.parent.child("reports").set(Object.keys(v).length)
+  }
+})
+//REORDER THE ADMINSLIST
+// exports.senseFame = functions.database.ref("/users/{uid}/fame").onWrite(e => {
+//   //reorder the adminsList users list accordingly
+//
+//   const reachLimit = function(fame) {
+//     var limit = Math.ceil(fame * 100)
+//     if(limit<10){
+//       return 10
+//     }else{
+//       return limit
+//     }
+//   }
+//
+//   const efficient = function(ls, uid, tell, fame, rf,nm) {
+//     if(ls){
+//       var nums = Object.keys(ls)
+//       var uids = []
+//       var fames = []
+//       var unames=[]
+//       var key = ""
+//       for (var i = 0; i < nums.length; i++) {
+//
+//         if (ls[nums[i]].uid === uid) {
+//           key1 = nums[i]
+//           uids.push(ls[nums[i]].uid)
+//           fames.push(fame)
+//           unames.push(ls[nums[i]].username)
+//         } else {
+//           uids.push(ls[nums[i]].uid)
+//           fames.push(ls[nums[i]].fame)
+//           unames.push(ls[nums[i]].username)
+//         }
+//       }
+//
+//       var key= uids.indexOf(uid)
+//       if (tell === -1) {
+//         var i = Number(key) + 1
+//         while (fames[i] > fames[key] && i < fames.length) {
+//           i++
+//         }
+//         var newPos = i - 1
+//         var j = key + 1
+//         while (j <= newPos) {
+//           uids[j - 1] = uids[j]
+//           fames[j - 1] = fames[j]
+//           unames[j-1]=unames[j]
+//           j++
+//         }
+//         fames[newPos] = fame
+//         uids[newPos] = uid
+//         unames[newPos]=nm
+//         rf.set(newPos+1)
+//         var newSet = []
+//         for (var l = 0; l < uids.length; l++) {
+//           newSet.push({"uid": uids[l], "fame": fames[l],"username":unames[l]})
+//         }
+//         return newSet
+//       } else if (tell === 1) {
+//         var i =Number(key) - 1
+//         while (fames[i] < fames[key] && i >= 0) {
+//           i--
+//         }
+//         var newPos = i + 1
+//         var j = key - 1
+//         while (j >= newPos) {
+//           uids[j + 1] = uids[j]
+//           fames[j + 1] = fames[j]
+//           unames[j+1]=unames[j]
+//           j--
+//         }
+//         fames[newPos] =fame
+//         uids[newPos] = uid
+//         unames[newPos]=nm
+//         var newSet = []
+//         for (var l = 0; l < uids.length; l++) {
+//           newSet.push({"uid": uids[l], "fame": fames[l],"username":unames[l]})
+//         }
+//         return newSet
+//       } else {
+//         return null
+//       }
+//     }
+//
+//
+//   }
+//   var fame = e.data.val()
+//   var rankRef=e.data.adminRef.parent.child("basic/rank")
+//   var nameRef=e.data.adminRef.parent.child("basic/username")
+//   var limit = reachLimit(fame)
+//   var tell;
+//   if (e.data.val() < e.data.previous.val()) {
+//     tell = -1
+//   } else if (e.data.val() > e.data.previous.val()) {
+//     tell = 1
+//   } else {
+//     tell = 0
+//   }
+//   var uid = e.params.uid
+//
+//   var usersRef = e.data.adminRef.parent.parent.parent.child("adminsLists/users")
+//   var fameRef = e.data.adminRef.parent.parent.parent.child("fameList")
+//   e.data.adminRef.parent.child("reachLimit").set(limit).then(function(res){
+//     return fameRef.transaction(current => {
+//       nameRef.once("value").then(snap=>{
+//         var name=snap.val()
+//         var newList = efficient(current, uid, tell, fame,rankRef,name)
+//         console.log("this is the new list",newList)
+//         if(newList){
+//           return newList
+//         }else{
+//           return current
+//         }
+//       })
+//
+//     })
+//   }).catch(function(w){
+//     console.log("loglog",w)
+//   })
+// })
 // exports.senseNewPost = functions.database.ref("/posts/{pid}/poster/desiredReach").onCreate(e => {
 //   if (e.data.exists()) {
 //     e.data.adminRef.parent.child("uid").once('value').then(function(snap){
@@ -603,9 +673,44 @@ exports.senseAuth = functions.database.ref("/users/{uid}/basic/username").onCrea
 //
 //   }
 // })
+exports.unread= functions.database.ref("/chats/{cid}/summary/users/{uid}/unread").onWrite(e=>{
+  var unow=e.data.val()
+  var uzen=e.data.previous.val()
+  var uid= e.params.uid
+  if(typeof unow!='number'){
+    if(typeof uzen!='number'){
+      var lnow=Object.keys(unow).length
+      var lzen=Object.keys(uzen).length
+      return e.data.adminRef.parent.parent.parent.parent.parent.parent.child("users").child(uid).child("unread").transaction((current)=>{
+        return (current||0)-lzen+lnow
+      })
+    }else{
+      var lnow=Object.keys(unow).length
+      return e.data.adminRef.parent.parent.parent.parent.parent.parent.child("users").child(uid).child("unread").transaction((current)=>{
+        return (current||0)+lnow
+      })
+
+    }
+  }else{
+    if(typeof uzen!='number'){
+
+      var lzen=Object.keys(uzen).length
+      return e.data.adminRef.parent.parent.parent.parent.parent.parent.child("users").child(uid).child("unread").transaction((current)=>{
+        return (current||0)-lzen
+      })
+    }else{
+      var lnow=Object.keys(unow).length
+      return e.data.adminRef.parent.parent.parent.parent.parent.parent.child("users").child(uid).child("unread").transaction((current)=>{
+        return (current||0)
+      })
+
+    }
+
+  }
+})
 exports.fillCreate=functions.database.ref("/users/{uid}/viewables").onCreate((e)=>{
   //populate from available posts that haven't reached their reach limit.
-  var pRef=e.data.adminRef.parent.parent.parent.child("adminsLists").child("posts")
+  var pRef=e.data.adminRef.parent.parent.parent.child("posts")
   var vRef=e.data.adminRef
   var first={}
   pRef.once('value').then((snap)=>{
@@ -615,10 +720,13 @@ exports.fillCreate=functions.database.ref("/users/{uid}/viewables").onCreate((e)
       real.push(posts[i])
     }
     real.sort((a,b)=>{
-      return Number(a.pid.substring(a.pid.lastIndexOf("_")+1,a.pid.lastIndexOf("")))-Number(b.pid.substring(b.pid.lastIndexOf("_")+1,b.pid.lastIndexOf("")))
+      return Number(a.postId.substring(a.postId.lastIndexOf("_")+1,a.postId.lastIndexOf("")))-Number(b.postId.substring(b.postId.lastIndexOf("_")+1,b.postId.lastIndexOf("")))
     })
     for(var i=0;i<real.length && i<=30;i++){
-      first[i]=real[i]
+      var pst=real[i]
+      if(pst.poster.desiredReach>pst.reach){
+        first[i]=pst.postId
+      }
     }
     first["cache"]=Date.now()
     return vRef.set(first)
@@ -692,7 +800,7 @@ exports.fillUp= functions.database.ref("/posts/{pid}/poster/uid").onCreate((e)=>
           }
 
         }
-        return e.data.adminRef.parent.parent.parent.parent.child("thirteen").transaction((current)=>{
+        return e.data.adminRef.parent.parent.parent.parent.child("totalPostCount").transaction((current)=>{
           return (current||0) +1
         })
       })
@@ -700,89 +808,121 @@ exports.fillUp= functions.database.ref("/posts/{pid}/poster/uid").onCreate((e)=>
   })
 
 })
-exports.chooseUp = functions.database.ref("/users/{uid}/suggestedPeople").onWrite(e => {
-  var t=e.data.val()
-  if (typeof t=="string"||t instanceof String){
-    console.log("time to repopulate")
-    var pplRef = e.data.adminRef.parent.child("people")
-    var sgRef = e.data.adminRef.parent.child("suggestedPeople")
-    var adminRef = e.data.adminRef.parent.parent.parent.child("adminsLists/users")
-    var propRef = e.data.adminRef.parent.child("basic").child("properties")
-    var fameRef= e.data.adminRef.parent.parent.parent.child("fameList")
-    // adminRef.once('value').then(function(snap){
-    //   var uzs=snap.val()
-    //   pplRef.once('value').then(function(snaps){
-    //      var frns=snaps.val()
-    //
-    //      propRef.once('value').then(function(sn){
-    //         var props=sn.val()
-    //         sgRef.once('value').then(function(sg){
-    //           var pps=sg.val()
-    //           var suggestions=pick(uz,uzs,frns,pps)
-    //
-    //           return sgRef.set(suggestions)
-    //         })
-    //      })
-    //
-    //   })
-    // })
-    const pick2=function(uid,list){
-      var k = Object.keys(list)
-      var scrd;
-      var uids=[]
-      var num;
-      for(var i=0;i<k.length;i++){
-        var key=k[i]
-        if(key!=="cache"){
-          if(list[key].uid===uid){
-            scrd=key
-            break
-          }
-        }else{
-          break
+// exports.chooseUp = functions.database.ref("/users/{uid}/suggestedPeople").onWrite(e => {
+//   var t=e.data.val()
+//   console.log("time to repopulate")
+//   var pplRef = e.data.adminRef.parent.child("people")
+//   var sgRef = e.data.adminRef.parent.child("suggestedPeople")
+//   var adminRef = e.data.adminRef.parent.parent.parent.child("adminsLists/users")
+//   var propRef = e.data.adminRef.parent.child("basic").child("properties")
+//   var fameRef= e.data.adminRef.parent.parent.parent.child("fameList")
+//   // adminRef.once('value').then(function(snap){
+//   //   var uzs=snap.val()
+//   //   pplRef.once('value').then(function(snaps){
+//   //      var frns=snaps.val()
+//   //
+//   //      propRef.once('value').then(function(sn){
+//   //         var props=sn.val()
+//   //         sgRef.once('value').then(function(sg){
+//   //           var pps=sg.val()
+//   //           var suggestions=pick(uz,uzs,frns,pps)
+//   //
+//   //           return sgRef.set(suggestions)
+//   //         })
+//   //      })
+//   //
+//   //   })
+//   // })
+//   const pick2=function(uid,list){
+//     var k = Object.keys(list)
+//     var scrd;
+//     var uids=[]
+//     var num;
+//     for(var i=0;i<k.length;i++){
+//       var key=k[i]
+//       if(key!=="cache"){
+//         if(list[key].uid===uid){
+//           scrd=key
+//           break
+//         }
+//       }else{
+//         break
+//       }
+//     }
+//     if(scrd){
+//       var num=Number(scrd)
+//     }
+//     console.log("num num",num)
+//     if(num){
+//       var l=num-10
+//       var m=num+10
+//       var n=num-1
+//       var o =num+1
+//       while(n>=l&&o<=m){
+//         if(list[n]){
+//           uids.unshift(list[n].uid)
+//         }
+//         if(list[o]){
+//           uids.push(list[o].uid)
+//         }
+//         n=n-1
+//         o=o+1
+//
+//       }
+//     }
+//     console.log(uids)
+//     return uids
+//
+//   }
+//   var uid=e.params.uid
+//   return fameRef.once('value').then(function(snap){
+//     var list=snap.val()
+//     console.log(list)
+//     var suggestList=pick2(uid,list)
+//     console.log(suggestList)
+//     if(suggestList.length!==0){
+//       var lob={}
+//       for (var i=0;i<suggestList.length;i++){
+//         lob[i]=suggestList[i]
+//       }
+//       lob["cache"]=Date.now()
+//       console.log(lob)
+//       return sgRef.set(lob)
+//     }else{
+//       return sgRef.set(0)
+//     }
+//   })
+//
+// })
+exports.updateprops=functions.database.ref("/users/{uid}/basic").onWrite(e=>{
+  var uid=e.params.uid
+  var val=e.data.val()
+  return e.data.adminRef.parent.parent.parent.child("adminsLists").child("users").child(uid).set(val)
+})
+exports.choice=functions.database.ref("/users/{uid}/basic/online").onWrite(e=>{
+  console.log("in choice")
+  var val=e.data.val()
+  var online=val.on;
+  var pRef=e.data.adminRef.parent.parent.parent.child("adminsLists").child("users")
+  var sp=[]
+  if(!online||!e.data.previous.exists()){
+    pRef.once('value').then((snap)=>{
+      var vl=snap.val()
+      var i=0
+      var ls={}
+      var list=Object.keys(vl)
+      while(i<15&&i<list.length){
+        var random=Math.floor((Math.random()*list.length))
+        if(!ls[random]){
+          var foo=list[random]
+          sp.push(val[foo])
+          ls[random]=true
         }
+        i++
       }
-      if(scrd){
-        var num=Number(scrd)
-      }
-      console.log("num num",num)
-      if(num){
-        var l=num-10
-        var m=num+10
-        var n=num-1
-        var o =num+1
-        while(n>=l&&o<=m){
-          if(list[n]){
-            uids.unshift(list[n].uid)
-          }
-          if(list[o]){
-            uids.push(list[o].uid)
-          }
-          n=n-1
-          o=o+1
-
-        }
-      }
-      console.log(uids)
-      return uids
-
-    }
-    var uid=e.params.uid
-    return fameRef.once('value').then(function(snap){
-      var list=snap.val()
-      console.log(list)
-      var suggestList=pick2(uid,list)
-      console.log(suggestList)
-      if(suggestList.length!==0){
-        var lob={}
-        for (var i=0;i<suggestList.length;i++){
-          lob[i]=suggestList[i]
-        }
-        lob["cache"]=Date.now()
-        console.log(lob)
-        return sgRef.set(lob)
-      }else{
-        return sgRef.set(0)
+      if(sp.length!=0){
+        console.log(sp)
+        return e.data.adminRef.parent.child("suggestedPeople").set(sp)
       }
     })
   }
@@ -810,10 +950,12 @@ exports.summariess=functions.database.ref("/chats/{cid}/summary/{sid}").onWrite(
   }
 })
 exports.basicss=functions.database.ref("/users/{uid}/basic/{whatever}").onWrite(e=>{
-  var mref=e.data.adminRef.parent
-  var prop=e.params.whatever
+  var mref = e.data.adminRef.parent
+  var prop = e.params.whatever
+  console.log("basicss",prop)
   if (prop!=="cache"){
-    mref.once("value").then(function(snap){
+    mref.once('value').then((snap)=>{
+      console.log("jgjgj")
       var messages=snap.val()
       messages["cache"]=Date.now();
       return mref.set(messages)
@@ -858,11 +1000,11 @@ exports.readables=functions.database.ref("/chats/{cid}/content/messages/{mid}/re
   if(e.data.previous.exists()){
     console.log(e.data.val())
     var mid=e.params.mid
-    if(e.data.val()===true){
+    if(e.data.val()==true){
       var mRef=e.data.adminRef.parent
       mRef.once("value").then(function(snap){
         var ruid=snap.val().resUid
-        var uRef=mRef.parent.parent.parent.child("summary/users").child(ruid).child("unread")
+        var uRef=mRef.parent.parent.parent.parent.child("summary/users").child(ruid).child("unread")
         uRef.once("value").then(function(snaps){
           var arr=snaps.val()
           var key=Object.keys(arr)
@@ -925,10 +1067,11 @@ exports.reachs= functions.database.ref("/posts/{pid}/content/reach").onWrite(e =
   var then=e.data.previous.val()
   console.log("reachs",nowe, then)
   return reach.transaction(current=>{
+    console.log(current)
     if(Object.keys(nowe).length!==Object.keys(then).length){
       return (current||0)+1
     }else{
-      return current
+      return (current||0)
     }
   })
 })
@@ -965,12 +1108,16 @@ exports.senseAuthForRefer= functions.database.ref("/users/{uid}/basic/referrer")
   }
 })
 exports.senseRefer=functions.database.ref("/users/{uid}/refers").onWrite(e =>{
-  if(e.data.previous.val()!==0){
+  if(e.data.previous.val()!==0&e.data.val()!==0){
     if(Object.keys(e.data.val()).length>Object.keys(e.data.previous.val()).length){
       return e.data.adminRef.parent.child("fame").transaction(current =>{
         return(current||0)+0.05
       })
     }
+  }else if(e.data.previous.val()==0&&e.data.val()!=0){
+    return e.data.adminRef.parent.child("fame").transaction(current =>{
+      return(current||0)+0.05
+    })
   }
 })
 // exports.actualAuth=functions.auth.user().onCreate(e =>{
@@ -994,7 +1141,7 @@ exports.proPic=functions.database.ref("/users/{uid}/basic/currentPic").onWrite(e
   if(e.data.val()===""){
     return e.data.adminRef.set("https://firebasestorage.googleapis.com/v0/b/dahlaq-c7e0f.appspot.com/o/defaults%2Fplaceholder.png?alt=media&token=9ccd76a4-b182-47db-9115-13ff2cd72137").then((res)=>{
       return admin.auth().updateUser(e.params.uid,{
-        photoURL: "https://firebasestorage.googleapis.com/v0/b/dahlaq-c7e0f.appspot.com/o/defaults%2Fplaceholder.png?alt=media&token=9ccd76a4-b182-47db-9115-13ff2cd72137"
+        "photoURL": "https://firebasestorage.googleapis.com/v0/b/dahlaq-c7e0f.appspot.com/o/defaults%2Fplaceholder.png?alt=media&token=9ccd76a4-b182-47db-9115-13ff2cd72137"
       })
     })
 
@@ -1152,62 +1299,66 @@ exports.checkUserV=functions.database.ref("/users/{uid}/properties/digits").onCr
   var num=e.data.val()
   return admin.auth().getUser(uid).then(function(res){
     var number=res.phoneNumber
-    if(number){
-      if(num!==number){
-        console.log("number 1",num)
-        console.log("number 2",number)
-        return admin.auth().deleteUser(uid).then(function(res){
-          return e.data.adminRef.parent.parent.remove()
-        })
+    if(number!=="+19174127058"&&num!=="+251931605471"){
+      if(number){
+        if(num!==number){
+          console.log("number 1",num)
+          console.log("number 2",number)
+          return admin.auth().deleteUser(uid).then(function(res){
+            return e.data.adminRef.parent.parent.remove()
+          })
+        }
       }
     }
+
   })
 })
 exports.proPic2=functions.database.ref("/users/{uid}/basic/currentPic").onWrite(e =>{
   if(e.data.val()!==""){
     var uid=e.params.uid
     var url=e.data.val()
-    return admin.auth().updateUser(uid,{
-      photoURL:url
+    e.data.adminRef.parent.parent.child("properties").child("profilePics").push(url).then(()=>{
+      return admin.auth().updateUser(uid,{
+        photoURL:url
+      })
     })
+
   }
 })
 
-////Newly added SYNC IMMEDIATELY
-exports.digitVerify=functions.database.ref("/users/{uid}/properties/digits/{dg}").onWrite(e=>{
-  // admin.auth().getUser(e.params.uid).then((res)=>{
-  //   var num=res.phoneNumber
-  //   if(num){
-  //     if(e.data.val()!==num){
-  //       return e.data.adminRef.set(num)
-  //     }
-  //   }
-  // })
-  const checkify=function(num){
-    if ((num.length===10&&num[0]==='0'&&num[1]!=='0')||(num.length===9&&num[0]==='9')){
-      if(num.length===10){
-        return "+251"+num.substring(1,num.lastIndexOf(''))
-      }
-      else{
-        return "+251"+num
+////Verify do
+exports.digitVerify=functions.database.ref("/users/{uid}/properties/digits/{dg}").onCreate(e=>{
+  admin.auth().getUser(e.params.uid).then((res)=>{
+    var num=res.phoneNumber
+    if(num!=="+19174127058"){
+      if(checker(num)){
+        if(num){
+          if(e.params.dg!==num){
+            return e.data.adminRef.set(num)
+          }
+        }
+      }else{
+        admin.auth().deleteUser(e.params.uid).then(()=>{
+          return e.data.adminRef.parent.parent.parent.remove()
+        }).catch(()=>{
+          console.log("Never even supposed to happen")
+        })
       }
     }
-    else{
-      return null
-    }
-  }
-  var numbe=e.params.dg
-  var numb=numbe.substring(3,numbe.lastIndexOf(""))
-  var num=checkify(numb)
-  if(num){
-    return e.data.adminRef.set(num)
-  }else{
 
+  })
+  var checker=function(num){
+    var size=num.substring(5,num.lastIndexOf(''))
+    if(num.substring(0,4)=='+251' &&num.substring(4,5)=='9'&& size.length===8){
+      return true
+    }else{
+      return false
+    }
   }
 
 })
 
-
+//////database rules must be set so noone but the user can access each user's data
 // function loadUsers() {
 //     let dbRef = admin.database().ref('/users');
 //     let defer = new Promise((resolve, reject) => {

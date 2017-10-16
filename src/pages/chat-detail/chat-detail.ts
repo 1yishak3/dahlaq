@@ -16,6 +16,7 @@ import {Storage} from '@ionic/storage'
 import {File} from '@ionic-native/file'
 import {FileChooser} from '@ionic-native/file-chooser'
 import {Device} from '@ionic-native/device'
+import {FilePath} from  '@ionic-native/file-path'
 @Component({
   selector: 'page-content',
   templateUrl: 'chat-detail.html',
@@ -51,7 +52,7 @@ export class ChatPage implements AfterViewChecked{
   show:any=true
   conc:any
   disc:any
-  firstTime:boolean
+  firstTime:boolean=true
   spoken:boolean
   currentFile:string=""
   complete:any
@@ -67,7 +68,8 @@ export class ChatPage implements AfterViewChecked{
   cacher:any
   umessages:any={}
   picture:any=""
-  constructor(public dv:Device,
+  constructor(public fps:FilePath,
+    public dv:Device,
     public fc:FileChooser,
     public fl:File,
     public platform:Platform,
@@ -81,7 +83,7 @@ export class ChatPage implements AfterViewChecked{
     public navCtrl: NavController,
     public navParam:NavParams,
     public viewCtrl:ViewController) {
-    this.firstTime=true
+
 
 
     this.person=navParam.get('person');
@@ -108,6 +110,7 @@ export class ChatPage implements AfterViewChecked{
     })
 
     if(this.person.chatId){
+      this.chatId=this.person.chatId
       this.spoken=true
       for(let i in this.person.users){
         if(i!==this.uid){
@@ -123,20 +126,33 @@ export class ChatPage implements AfterViewChecked{
         console.log(res)
         this.cpic=res
       })
-      this.fbs.getRef("/chats/"+this.chatId+"/summary/users/"+this.uid+"/unread").on('value',(list)=>{
-        for(let i in list){
-          if(!this.umessages[list[i]]){
-            this.fbs.getDatabase("/chats/"+this.chatId+"/content/messages/"+list[i],true).then((data:any)=>{
-              var m=data.val()
-              this.umessages[list[i]].push(m)
-              this.tempMes.push(new Message(this.fbs,m,this.person.chatId,list[i]))
-            })
+      this.fbs.getRef("/chats/"+this.chatId+"/summary/users/"+this.uid+"/unread").on('value',(liste)=>{
+        var list=liste.val()
+        if(list){
+          for(let i in list){
+            if(!this.umessages[list[i]]){
+              this.fbs.getDatabase("/chats/"+this.chatId+"/content/messages/"+list[i],true).then((data:any)=>{
+                var m=data.val()
+                if(m&& typeof m!=="string" && typeof m!=="number"){
+                  this.umessages[list[i]]=m
+                  this.tempMes.push(new Message(this.fbs,m,this.person.chatId,list[i]))
+                  this.tempMes.sort((a,b)=>{
+                      return b.time-a.time
+                  })
+                }
+
+              })
+            }
           }
+          this.tempMes.sort((a,b)=>{
+              return b.time-a.time
+          })
+          console.log("tempMes",this.tempMes)
+          this.messages=this.tempMes
+          this.content.scrollToTop()
         }
-        this.tempMes.sort((a,b)=>{
-            return b.time-a.time
-        })
-        this.messages=this.tempMes
+
+
       })
       var online=this.fbs.getRef("/users/"+this.oUserUid+"/basic/online/")
       online.on('value',(res)=>{
@@ -299,11 +315,11 @@ export class ChatPage implements AfterViewChecked{
         //  vm.chat[i]=res[i]
         //}
         // vm.chat.content.messages=res
-        this.sg.set("recentFifti",res)
-        this.fbs.getDatabase("/chats/"+this.chatId+"/content/mCache",true).then((re)=>{
-          this.sg.set("recentFiftiCache",re)
-          this.cacher=re
-        })
+        // this.sg.set("recentFifti",res)
+        // this.fbs.getDatabase("/chats/"+this.chatId+"/content/mCache",true).then((re)=>{
+        //   this.sg.set("recentFiftiCache",re)
+        //   this.cacher=re
+        // })
 
         vm.tempMes=[]
         console.log(res)
@@ -312,6 +328,9 @@ export class ChatPage implements AfterViewChecked{
         for (let i in vm.umessages){
           if(i!="cache"&&(typeof vm.umessages[i]!=="string"&& typeof vm.umessages[i]!=="number")){
             vm.tempMes.push(new Message(this.fbs,vm.umessages[i],this.person.chatId,i))
+            vm.tempMes.sort((a,b)=>{
+              return b.time-a.time
+            })
           }
         }
         console.log("tempMes",vm.tempMes)
@@ -322,7 +341,7 @@ export class ChatPage implements AfterViewChecked{
         console.log(vm.messages)
 
       },(err)=>{
-          console.log("got this instead of beutifully ordered messages", err)
+          console.log("erred in messages", err)
       })
     }else{
       //about sendding a habesha hi
@@ -470,15 +489,20 @@ export class ChatPage implements AfterViewChecked{
       })
     }else{
       if(this.dv.platform.toLowerCase()==="android"){
-        if(this.dv.version.substring(0,1)=='4'){
+        if(this.dv.version.substring(0,1)==='4'){
           this.fc.open().then((filePath)=>{
-
-            var pathe="file://"+filePath.substring(7,filePath.lastIndexOf("/"))
-            var subs=filePath.substring(filePath.lastIndexOf("/")+1,filePath.lastIndexOf(""))
-            this.fl.readAsDataURL(pathe,subs).then((file)=>{
-              var url="/"+vm.currentUser().uid+"/images/"+subs
-              this.currentFile=subs
-              this.processFile(url,file)
+            console.log(filePath)
+            this.fps.resolveNativePath(filePath).then((filePath)=>{
+              console.log(filePath)
+              var pathe="file://"+filePath.substring(7,filePath.lastIndexOf("/"))
+              var subs=filePath.substring(filePath.lastIndexOf("/")+1,filePath.lastIndexOf(""))
+              this.fl.readAsDataURL(pathe,subs).then((file)=>{
+                var url="/"+vm.currentUser().uid+"/images/"+subs
+                this.currentFile=subs
+                this.processFile(url,file)
+              }).catch((err)=>{
+                console.log("experienceing, ",err)
+              })
             })
           })
         }else{

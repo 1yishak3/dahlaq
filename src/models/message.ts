@@ -28,11 +28,11 @@ export class Message {
       if(fbs.currentUser().uid!=this.senderUid){
         this.read=true
         this.fbs.setDatabase("/chats/"+cid+"/content/messages/"+mid+"/read",true,true).then(()=>{
-          
+
         })
       }
       var updater=this.fbs.getRef("/chats/"+this.cid+"/content/messages/"+this.mid)
-      updater.on('value').then(snp=>{
+      updater.on('value',snp=>{
         var m=snp.val()
         this.read=m.read
         this.sent=m.sent

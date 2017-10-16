@@ -74,7 +74,8 @@ import { IonicImageLoader } from 'ionic-image-loader'
 import {Vibration} from '@ionic-native/vibration'
 import {FileChooser} from '@ionic-native/file-chooser'
 import {Device} from '@ionic-native/device'
-
+import {FilePath} from '@ionic-native/file-path'
+import {Badge} from '@ionic-native/badge'
 const cloudSettings: CloudSettings = {
   'core': {
     'app_id': '78e6a99e'
@@ -202,6 +203,8 @@ export function provideSettings(storage: Storage) {
   providers: [
     //ItemCreatePage,
     //PopoverPage
+    Badge,
+    FilePath,
     Device,
     FileChooser,
     Vibration,

@@ -11,6 +11,7 @@ import {Ng2ImgToolsService} from 'ng2-img-tools'
 import {Keyboard} from '@ionic-native/keyboard'
 import {Device} from '@ionic-native/device'
 import {FileChooser} from '@ionic-native/file-chooser'
+import {FilePath} from '@ionic-native/file-path'
 @Component({
   selector: 'page-item-create',
   templateUrl: 'item-create.html'
@@ -41,7 +42,8 @@ export class ItemCreatePage {
   show:any=true
   max:any
   basic:any
-  constructor(public fc:FileChooser,
+  constructor(public fp:FilePath,
+    public fc:FileChooser,
     public fl:File,
     public dv:Device,
     public platform:Platform,
@@ -335,7 +337,7 @@ export class ItemCreatePage {
     if(!upload){
       var fp=this.processFile
       this.camera.takePicture(1).then((data:any)=>{
-        console.log(data,data.fullPath)
+        console.log("Concentrate here   ",data,data.fullPath)
         cam.getFile(data).then((file:any)=>{
           console.log("this is the file, ",file)
           var pic = this.generateFileName(data)
@@ -351,15 +353,20 @@ export class ItemCreatePage {
     }else{
     //  console.log(this.fileInput)
       if(this.dv.platform.toLowerCase()==="android"){
-        if(this.dv.version.substring(0,1)=='4'){
+        if(this.dv.version.substring(0,1)==='4'){
           this.fc.open().then((filePath)=>{
-
-            var pathe="file://"+filePath.substring(7,filePath.lastIndexOf("/"))
-            var subs=filePath.substring(filePath.lastIndexOf("/")+1,filePath.lastIndexOf(""))
-            this.fl.readAsDataURL(pathe,subs).then((file)=>{
-              var url="/"+vm.currentUser().uid+"/images/"+subs
-              this.currentFile=subs
-              this.processFile(url,file)
+            console.log(filePath)
+            this.fp.resolveNativePath(filePath).then((filePath)=>{
+              console.log(filePath)
+              var pathe="file://"+filePath.substring(7,filePath.lastIndexOf("/"))
+              var subs=filePath.substring(filePath.lastIndexOf("/")+1,filePath.lastIndexOf(""))
+              this.fl.readAsDataURL(pathe,subs).then((file)=>{
+                var url="/"+vm.currentUser().uid+"/images/"+subs
+                this.currentFile=subs
+                this.processFile(url,file)
+              }).catch((err)=>{
+                console.log("experienceing, ",err)
+              })
             })
           })
         }else{
@@ -408,13 +415,18 @@ export class ItemCreatePage {
       if(this.dv.platform.toLowerCase()==="android"){
         if(this.dv.version.substring(0,1)=='4'){
           this.fc.open().then((filePath)=>{
-
-            var pathe="file://"+filePath.substring(7,filePath.lastIndexOf("/"))
-            var subs=filePath.substring(filePath.lastIndexOf("/")+1,filePath.lastIndexOf(""))
-            this.fl.readAsDataURL(pathe,subs).then((file)=>{
-              var url="/"+vm.currentUser().uid+"/videos/"+subs
-              this.currentFile=subs
-              this.processFile(url,file)
+            console.log(filePath)
+            this.fp.resolveNativePath(filePath).then((filePath)=>{
+              console.log(filePath)
+              var pathe="file://"+filePath.substring(7,filePath.lastIndexOf("/"))
+              var subs=filePath.substring(filePath.lastIndexOf("/")+1,filePath.lastIndexOf(""))
+              this.fl.readAsDataURL(pathe,subs).then((file)=>{
+                var url="/"+vm.currentUser().uid+"/videos/"+subs
+                this.currentFile=subs
+                this.processFile(url,file)
+              }).catch((err)=>{
+                console.log("experiencing, ",err)
+              })
             })
           })
         }else{
@@ -427,16 +439,22 @@ export class ItemCreatePage {
   }
 
   getAttache() {
+    var vm=this.fbs
     if(this.dv.platform.toLowerCase()==="android"){
       if(this.dv.version.substring(0,1)=='4'){
         this.fc.open().then((filePath)=>{
-
-          var pathe="file://"+filePath.substring(7,filePath.lastIndexOf("/"))
-          var subs=filePath.substring(filePath.lastIndexOf("/")+1,filePath.lastIndexOf(""))
-          this.fl.readAsDataURL(pathe,subs).then((file)=>{
-            var url="/"+this.fbs.currentUser().uid+"/files/"+subs
-            this.currentFile=subs
-            this.processFile(url,file)
+          console.log(filePath)
+          this.fp.resolveNativePath(filePath).then((filePath)=>{
+            console.log(filePath)
+            var pathe="file://"+filePath.substring(7,filePath.lastIndexOf("/"))
+            var subs=filePath.substring(filePath.lastIndexOf("/")+1,filePath.lastIndexOf(""))
+            this.fl.readAsDataURL(pathe,subs).then((file)=>{
+              var url="/"+vm.currentUser().uid+"/files/"+subs
+              this.currentFile=subs
+              this.processFile(url,file)
+            }).catch((err)=>{
+              console.log("experienceing, ",err)
+            })
           })
         })
       }else{

@@ -33,31 +33,74 @@ export class MapPage {
     public platform: Platform,
     public modalCtrl: ModalController,
   public fbs:FirebaseService) {
-  this.uid=fbs.currentUser().uid
-  var vm=this
-  var disc=nw.onDisconnect().subscribe(()=>{
-    vm.connected=false
-  })
-  var conc=nw.onConnect().subscribe(()=>{
-    vm.show=true
-    vm.connected=true
-    setTimeout(function(){
-      vm.show=false
-    },5000)
-  })
-  this.getNewChats()
+    this.uid=fbs.currentUser().uid
+    var vm=this
+    var disc=nw.onDisconnect().subscribe(()=>{
+      vm.connected=false
+    })
+    var conc=nw.onConnect().subscribe(()=>{
+      vm.show=true
+      vm.connected=true
+      setTimeout(function(){
+        vm.show=false
+      },5000)
+    })
+    this.getNewChats()
+    var pRef = fbs.getRef("/users/"+this.fbs.currentUser().uid+"/people")
+    pRef.on('value',(snap)=>{
+      var pipi = snap.val();
+      if(pipi){
+        this.updateList(pipi)
+      }
+    })
   }
   //to be usesd when leaving a chat modalCtrl
+  updateList(p){
+    var vm=this
+    for(let i in p){
+      if(i!="cache"){
+        var person=p[i]
+        this.fbs.getRef("/chats/"+person+"/summary").once('value').then((cht:any)=>{
+          var chat=cht.val()
+          if(chat){
+            for(let i in chat.users){
+              if(i!==vm.uid){
+                chat["oUid"]=i
+                chat["currentPic"]=chat.users[i].image
+                if(chat.users[vm.uid].unread===0){
+                  chat["unread"]=0
+                }else{
+                  if(chat.users[vm.uid].unread){
+                    chat["unread"]=Object.keys(chat.users[vm.uid].unread).length
+                  }else{
+                    chat['unread']=0
+                  }
+                }
+
+
+              }
+            }
+
+            this.people.push(chat)
+          }
+          this.people.sort((a,b)=>{
+            return b.lastTime-a.lastTime
+          })
+        })
+      }
+    }
+  }
   refreshChats(){
     var vm=this
     return new Promise((resolve,reject)=>{
+      var people=[]
       this.fbs.getDatabase("/users/"+this.fbs.currentUser().uid+"/people",true).then((res)=>{
-        if(Object.keys(res).length===Object.keys(vm.people).length){
+
           console.log("???????")
           for(let j in this.people){
             var cid=this.people[j].chatId
             console.log(cid)
-            this.fbs.getDatabase("/chats/"+cid+"/summary",true).then((res:any)=>{
+            this.fbs.getRef("/chats/"+cid+"/summary").once('value').then((res:any)=>{
               var chat=res
               for(let i in chat.users){
                 if(i!==vm.uid){
@@ -82,10 +125,7 @@ export class MapPage {
 
             })
           }
-        }else{
 
-          this.getNewChats()
-        }
         resolve(this.people)
       })
     })
@@ -116,16 +156,17 @@ export class MapPage {
   getNewChats(){
     var vm=this
     this.uid=this.fbs.currentUser().uid
-    this.fbs.getDatabase("/users/"+this.uid+"/people",false).then((res:any)=>{
+    this.people=[]
+    this.fbs.getRef("/users/"+this.uid+"/people").once('value').then((res:any)=>{
       // for(let i in res){
       //   vm.profile[i]=res[i]
       // }
-
+      var pps=[]
 
       for(let i in res){
         if(!this.history[res[i]]){
           this.history[res[i]]=true
-          this.fbs.getDatabase("/chats/"+res[i]+"/summary", false).then(function(res){
+          this.fbs.getRef("/chats/"+res[i]+"/summary").once('value').then(function(res){
             var chat:any=res
             var oUid=""
             for(let i in chat.users){
@@ -147,20 +188,23 @@ export class MapPage {
 
               }
             }
-            vm.people.push(chat)
+            pps.push(chat)
+            if(pps.length!==0){
+              pps.sort(function(a,b){
+                return Number(b.lastTime)-Number(a.lastTime)
+              })
+
+            }
           }).catch(function(err){
             console.log("Couldn't get chat, ",err)
           })
+
         }
       }
-      if(vm.people.length!==0){
-        vm.people.sort(function(a,b){
-          return Number(b.lastTime)-Number(a.lastTime)
-        })
-        console.log(vm.people)
-      }
+      vm.people=pps
+
       vm.sorted=true
-      this.fbs.getDatabase("/users/"+this.uid+"/suggestedPeople",true).then((res:any)=>{
+      this.fbs.getRef("/users/"+this.uid+"/suggestedPeople").once('value').then((res:any)=>{
         console.log('kjhgfd')
         if(!(typeof res === 'string' || res instanceof String)){
           for(let k in res){
@@ -170,7 +214,7 @@ export class MapPage {
           }
           vm.refreshList()
         }
-      
+
       })
     }).catch(function(err){
       console.log("Error getting profile, ",err)
@@ -179,7 +223,7 @@ export class MapPage {
   refreshList(){
     //var prev=-1
     var vm=this
-    console.log("changedddd")
+    console.log("changed",this.suggestedPeople)
     if(this.suggestedPeople){
       var key = this.suggestedPeople.length
       var temp=[]
@@ -196,22 +240,14 @@ export class MapPage {
           }
           check[lucky]=true
           //prev=_.cloneDeep(lucky)
-          vm.fbs.getDatabase("/users/"+this.suggestedPeople[lucky]+"/basic", false).then(function(res){
-            temp.push(res)
-          }).catch(function(err){
-            console.log("unable to get the profile, sth's wong :P ", err)
-          })
+          temp.push(this.suggestedPeople[lucky])
           if(i===4){
             vm.miniList=temp
           }
         }else{
           if(i<key.length){
             console.log("hello world",i)
-            vm.fbs.getDatabase("/users/"+this.suggestedPeople[i]+"/basic",false).then((res)=>{
-              temp.push(res)
-            }).catch((err)=>{
-              console.log("Error hereeee")
-            })
+            temp.push(this.suggestedPeople[i])
           }
           if(i===4){
             console.log("this is temp",temp)

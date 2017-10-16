@@ -30,14 +30,14 @@ export class TutorialPage {
             //image: 'assets/img/ica-slidebox-img-2.png',
           },
           {
-            title: "We know what you want, and we specialize in serving your needs!",
-            description: "As Ethiopians who eat the food you eat and have the experience you have, we know what you prefer. And we are here to get you your desires.",
+            title: "We know what you want, and we are here to make sure you have it!",
+            description: "As Ethiopians who eat the Shiro you eat and drink the Tej ;) you drink, we know what you prefer. And we are here to get you your wildest desires.",
           //  image: 'assets/img/ica-slidebox-img-3.png',
           },
           {
             title:"Remember when we said we know what you go through? No? Well...",
-            description:  "With Dahlaq, it's always efficient! We know every Ethiopian avoids the pains of internet costs in any way they can. Honestly, it's horrible. With Dahlaq, we are comitted to making sure you get the smoothest possible experience while saving a FORTUNE in internet money."+
-            "We are continuously implementing new ways to make the price of visiting Dahlaq a bare minimum." ,
+            description:  "With Dahlaq, it's always efficient! We know every Ethiopian avoids the pains of internet costs in any way they can. Honestly, it's horrible. With Dahlaq, we are committed to making sure you get the smoothest possible experience while saving a FORTUNE in internet money."+
+            "We are continuously researching and implementing new ways to make the price of visiting Dahlaq a bare minimum." ,
           //  image: 'assets/img/ica-slidebox-img-3.png',
           },
           {
@@ -48,7 +48,7 @@ export class TutorialPage {
           },
           {
             title: "But wait, there's more...",
-            description: "The logic is: THE MORE YOU POST, THE LARGER YOUR FAME AND THE HIGHER YOU WILL RANK. You can view your rank by going to the Ranks tab! There, you can search people, view profiles and even start chats as well.",
+            description: "Simple logic: The more you post and react to posts, the higher your rank will be(as long as you beat everybody else). When your posts are disliked or reported, your rank will be negatively affected, and likes will positively affect your rank.",
           //  image: 'assets/img/ica-slidebox-img-3.png',
           },
           {
@@ -61,7 +61,11 @@ export class TutorialPage {
             description: "Getting to decide how many people you can reach is a huge power, and poeple may abuse it. So it is up to you to simply click the Report button when you see a thing that you think is an ADVERTISEMENT or INAPPROPRIATE.\
             It's just like Liking and Disliking but if a lot of people  click the REPORT button on a post, the post will be deleted!",
           //  image: 'assets/img/ica-slidebox-img-3.png',
-        }
+        },  {
+            title: "Do you have an idea for Dahlaq? Do you want something added?",
+            description: "We are open to any form of suggestions! We love them. Reach out to us (you can find our info on our About page) and we'll do whatever we can.",
+          //  image: 'assets/img/ica-slidebox-img-3.png',
+          },
         ];
   }
 

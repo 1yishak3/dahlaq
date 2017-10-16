@@ -34,6 +34,8 @@ export class ListMasterPage {
   master={}
   connected:boolean
   keeper:any
+  nada:boolean=false
+  peopled:boolean=false
   constructor(public sg:Storage,public lc:LoadingController,public nw:Network,public fbs:FirebaseService,public http:Http,public navCtrl: NavController, public items: Items, public modalCtrl: ModalController) {
     this.searchCtrl=new FormControl()
     this.keeper={}
@@ -65,6 +67,7 @@ export class ListMasterPage {
     // }
 
 
+
   }
 
   /**
@@ -94,6 +97,18 @@ export class ListMasterPage {
               vm.ranks=vm.fam
               if(vm.fam){
                 vm.getItems();
+                if(vm.people.length<=1){
+                  vm.nada=true
+                  vm.peopled=false
+                }else{
+                  vm.nada=false
+                  if(vm.people.length<15){
+                    vm.peopled=true
+                  }else{
+                    vm.peopled=false
+                  }
+
+                }
               }else{
                 console.log("fam is undefined? Why??", vm.fam)
               }
@@ -144,12 +159,9 @@ export class ListMasterPage {
         console.log(vm.ranks)
 
         vm.viewList=vm.ranks.filter((person) => {
-            console.log("filter? Person", person,"  jhgjg  ",person.username.toLowerCase().indexOf(searchTerm.toLowerCase()))
-            if(person.username.toLowerCase().indexOf(searchTerm.toLowerCase())!==-1){
-              return true
-            }else{
-              return false
-            }
+
+              return (person.username.toLowerCase().indexOf(searchTerm.toLowerCase())!=-1)
+
             // console.log(car,car>-1)
             // if(car>-1){
             //   if(!vm.keeper[person.username]){
@@ -167,7 +179,7 @@ export class ListMasterPage {
             //   return car>-1
             // }
         });
-        console.log("viewlist? ",vm.viewList)
+
         vm.loadIt(vm.viewList).then(()=>{
           resolve("done")
         }).catch(()=>{
@@ -177,7 +189,7 @@ export class ListMasterPage {
       }else{
         console.log(searchTerm)
         console.log("emptyyyy")
-        vm.viewList=_.cloneDeep(vm.ranks)
+        vm.viewList=vm.ranks
         vm.loadIt(vm.viewList).then(()=>{
           resolve()
         }).catch(()=>{
@@ -198,21 +210,23 @@ export class ListMasterPage {
           dat["currentPic"]=res.currentPic
           dat["bio"]=res.bio
           dat["username"]=res.username
-          dat["rank"]=Number(res.rank)+1
+          dat["rank"]=Number(res.rank)
           console.log("About to push ranks")
           news.push(dat)
+          news.sort((a,b)=>{
+            return a.rank-b.rank
+          })
+          if(Number(i)>=25||Number(i)===data.length-1){
+            vm.people=news
+          }
           //console.log(vm.people)
         }).catch(function(err){
           console.log("sadd...unable to bring basics of guy")
           reject()
         })
-        if(Number(i)===25||Number(i)===data.length-1){
+        if(Number(i)>=25||Number(i)===data.length-1){
           this.startAt=Number(i)
-          news.sort((a,b)=>{
 
-            return a.rank-b.rank
-          })
-          vm.people=news
           resolve()
           break
 
