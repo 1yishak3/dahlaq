@@ -33,7 +33,7 @@
   </ion-fab>
   <div style="background:#1a1a1a;color:white" padding>
     <ion-row>
-      <ion-col>
+      <ion-col style="position:initial">
         <a *ngIf="!uploading" (click)=showChoices($event)>
           <div text-center>
             <img *ngIf="!uploading" style="border-radius:100%;height:150px;width:150px" [src]="currentPic"/>
@@ -41,15 +41,15 @@
           </div>
         </a>
       </ion-col>
-      <ion-col>
+      <ion-col style="position:initial">
         <ion-row><ion-col></ion-col></ion-row>
         <ion-row>
-          <ion-col>
+          <ion-col style="position:initial">
             <h2>{{ profilec.basic.username }}</h2>
           </ion-col>
         </ion-row>
         <ion-row>
-          <ion-col>
+          <ion-col style="position:initial">
             <ion-textarea [(ngModel)]="profilec.basic.bio" item-content #textt id="textarea" block ([ngModel])="post.content.desciption" autosize style="background:#121212;color:white;overflow:auto;max-height:200px;min-height:100px">
             </ion-textarea>
           </ion-col>
@@ -60,23 +60,23 @@
   <div>
     <ion-list style="color:white">
       <!--there will be an *ngFor here once you finish building the whole user. You will list the title and then the info provided.-->
-      <ion-item no-lines style="color:white">
+      <ion-item no-lines style="color:white;position:static">
         <ion-label stacked>Sefer | Mender</ion-label>
         <ion-input no-lines type="text" [(ngModel)]="profilec.properties['sefer']"></ion-input>
       </ion-item>
-      <ion-item no-lines style="color:white">
+      <ion-item no-lines style="color:white;position:static">
         <ion-label stacked>Fews | Food</ion-label>
         <ion-input no-lines type="text" [(ngModel)]="profilec.properties['fews']"></ion-input>
       </ion-item>
-      <ion-item no-lines style="color:white">
+      <ion-item no-lines style="color:white;position:static">
         <ion-label stacked>Relationship Status</ion-label>
         <ion-input no-lines type="text" [(ngModel)]="profilec.properties['relationshipStatus']"></ion-input>
       </ion-item>
-      <ion-item no-lines style="color:white">
+      <ion-item no-lines style="color:white;position:static">
         <ion-label stacked>Interested In</ion-label>
         <ion-input no-lines type="text" [(ngModel)]="profilec.properties['interestedIn']"></ion-input>
       </ion-item>
-      <ion-item no-lines style="color:white">
+      <ion-item no-lines style="color:white;position:static">
         <ion-label stacked>Timirt Dereja | Education</ion-label>
         <ion-input no-lines type="text" [(ngModel)]="profilec.properties['education']"></ion-input>
       </ion-item>

@@ -17,7 +17,10 @@
 
 
   <ion-list padding style="color:white;text-color:white">
-
+    <ion-item no-lines style="color:white">
+      <ion-label fixed>SMS Code</ion-label>
+      <ion-input no-lines type="text" [(ngModel)]="account.code" name="code" placeholder="The code we just sent you"></ion-input>
+    </ion-item>
     <ion-item no-lines style="color:white">
       <ion-label fixed>Username</ion-label>
       <ion-input no-lines #name type="text" [(ngModel)]="account.username" name="name" placeholder="Pick a username"></ion-input>
@@ -29,14 +32,16 @@
     </ion-item>
   </ion-list>
   <div padding>
+    <ion-note style="text-align:center;color:grey">*Username should be 5 characters or more (but less than 23) without spaces.</ion-note>
+  </div>
+  <div padding>
     <button ion-button (click)="doSignup()" color="light" block>{{ 'SIGNUP_BUTTON' | translate }}</button>
   </div>
-
-  <ion-footer text-center>
+  <!-- <ion-footer text-center>
     <ion-note style="text-align:center;color:grey">
       Be sure to note down your password in case you have to log in again. Final reminder: {{pass}}
     </ion-note>
-  </ion-footer>
+  </ion-footer> -->
 
 </ion-content>
 <!--

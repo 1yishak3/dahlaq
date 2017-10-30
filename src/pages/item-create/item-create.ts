@@ -103,6 +103,7 @@ export class ItemCreatePage {
 
       this.fbs.getDatabase("/users/"+this.uid+"/basic",true).then((res)=>{
         vm.max=max
+        vm.reach=vm.max/2
         this.basic=res
 
       })

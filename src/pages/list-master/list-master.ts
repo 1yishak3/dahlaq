@@ -36,6 +36,7 @@ export class ListMasterPage {
   keeper:any
   nada:boolean=false
   peopled:boolean=false
+  story:any={}
   constructor(public sg:Storage,public lc:LoadingController,public nw:Network,public fbs:FirebaseService,public http:Http,public navCtrl: NavController, public items: Items, public modalCtrl: ModalController) {
     this.searchCtrl=new FormControl()
     this.keeper={}
@@ -86,7 +87,6 @@ export class ListMasterPage {
         this.sg.get("/fameList/cache").then((c)=>{
           if(c!=cc||this.ranks.length===0){
             this.fbs.getDatabase("/fameList",true).then(function(res){
-              console.log("Got fameList...time to display", res)
               for (let i=0;i<Object.keys(res).length;i++){
                 console.log("in for loop rank")
                 var key=Object.keys(res)[i]
@@ -97,12 +97,12 @@ export class ListMasterPage {
               vm.ranks=vm.fam
               if(vm.fam){
                 vm.getItems();
-                if(vm.people.length<=1){
+                if(vm.ranks.length<=1){
                   vm.nada=true
                   vm.peopled=false
                 }else{
                   vm.nada=false
-                  if(vm.people.length<15){
+                  if(vm.ranks.length<50){
                     vm.peopled=true
                   }else{
                     vm.peopled=false
@@ -201,6 +201,7 @@ export class ListMasterPage {
   }
   loadIt(data){
     return new Promise((resolve,reject)=>{
+      this.startAt=0
       var vm=this
       vm.people=[]
       var news=[]
@@ -213,6 +214,7 @@ export class ListMasterPage {
           dat["rank"]=Number(res.rank)
           console.log("About to push ranks")
           news.push(dat)
+
           news.sort((a,b)=>{
             return a.rank-b.rank
           })
@@ -237,21 +239,39 @@ export class ListMasterPage {
   }
   pullToAddMore(e){
     var vm=this
+    var j=this.startAt+1
+    var dis=true
     for(let i in this.viewList){
-      var j=Number(i)+this.startAt
-      this.fbs.getDatabase("/users/"+this.viewList[j].uid+"/basic",false).then(function(res:any){
-        var dat=this.viewList[j]
-        dat["currentPic"]=res.currentPic
-        dat["bio"]=res.bio
+      dis=false
+      if(Number(i)>=j){
+      this.fbs.getDatabase("/users/"+this.viewList[i].uid+"/basic",false).then((res:any)=>{
+        var dat=this.viewList[i]
+        dat["currentPic"] = res.currentPic
+        dat["bio"] = res.bio
+        dat["username"] = res.username
+        dat["rank"] = Number(res.rank)
         vm.people.push(dat)
-      }).catch(function(err){
+        vm.people.sort((a,b)=>{
+          return a.rank - b.rank
+        })
+        if(Number(i) - j >= 14||Number(i) === this.viewList.length - 1){
 
-      })
-      if(Number(i)===25||Number(i)===this.viewList.length-1){
-        this.startAt=Number(i)+this.startAt
+          e.complete()
+        }
+      }).catch(function(err){
         e.complete()
+      })
+      }
+      if(Number(i) - j >= 14||Number(i) >= this.viewList.length - 1){
+        dis=true
+        this.startAt=Number(i)
         break
       }
+
     }
+    if(dis){
+      e.complete()
+    }
+
   }
 }

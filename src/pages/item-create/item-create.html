@@ -1,7 +1,7 @@
 <ion-header>
 
   <ion-navbar>
-    <ion-title>Author a post</ion-title>
+    <ion-title>Tell a moment</ion-title>
     <ion-buttons start>
       <button ion-button (click)="cancel()">
         <span color="primary" showWhen="ios">
@@ -87,7 +87,7 @@
         <div class="profile-image" [style.backgroundImage]="getProfileImageStyle()" *ngIf="this.form.controls.profilePic.value"></div>
       </div-->
       <ion-item style="color:white;background:clear" no-lines>
-          <ion-label>Maximum Reach</ion-label>
+          <ion-label>How many poeple do you want to tell this to?</ion-label>
           <ion-range [(ngModel)]="reach" [min]=0 [max]="max" pin="true" color="primary">
             <ion-label range-left>1</ion-label>
             <ion-label range-right>{{max}}</ion-label>
@@ -97,6 +97,9 @@
         </ion-item-->
       </ion-item>
     </ion-grid>
+  </div>
+  <div padding>
+    <ion-note style="text-align:center;color:#363636">*Don't forget to choose how many people you want to reach with this post.</ion-note>
   </div>
 </ion-content>
 <ion-footer>

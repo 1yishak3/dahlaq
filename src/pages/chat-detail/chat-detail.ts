@@ -47,7 +47,10 @@ export class ChatPage implements AfterViewChecked{
   oUserUid:any
   uid:any
   toggled:boolean=false
-  online:any
+  online:any={
+    "on":null,
+    "time":null
+  }
   connected:boolean
   show:any=true
   conc:any
@@ -129,11 +132,12 @@ export class ChatPage implements AfterViewChecked{
       this.fbs.getRef("/chats/"+this.chatId+"/summary/users/"+this.uid+"/unread").on('value',(liste)=>{
         var list=liste.val()
         if(list){
+          var prom=[]
           for(let i in list){
             if(!this.umessages[list[i]]){
-              this.fbs.getDatabase("/chats/"+this.chatId+"/content/messages/"+list[i],true).then((data:any)=>{
-                var m=data.val()
-                if(m&& typeof m!=="string" && typeof m!=="number"){
+              prom.push(this.fbs.getDatabase("/chats/"+this.chatId+"/content/messages/"+list[i],true).then((data:any)=>{
+                var m=data
+                if(m&& typeof m!=="string" && typeof m!=="number"&&Object.keys(m).length>=8){
                   this.umessages[list[i]]=m
                   this.tempMes.push(new Message(this.fbs,m,this.person.chatId,list[i]))
                   this.tempMes.sort((a,b)=>{
@@ -141,25 +145,31 @@ export class ChatPage implements AfterViewChecked{
                   })
                 }
 
-              })
+              }))
             }
           }
-          this.tempMes.sort((a,b)=>{
-              return b.time-a.time
+          Promise.all(prom).then(()=>{
+            this.tempMes.sort((a,b)=>{
+                return b.time-a.time
+            })
+            console.log("tempMes",this.tempMes)
+            this.messages=this.tempMes
+            this.content.scrollToTop()
           })
-          console.log("tempMes",this.tempMes)
-          this.messages=this.tempMes
-          this.content.scrollToTop()
+
         }
 
 
       })
-      var online=this.fbs.getRef("/users/"+this.oUserUid+"/basic/online/")
+      var online=this.fbs.getRef("/users/"+this.oUserUid+"/basic/online")
       online.on('value',(res)=>{
+        console.log("anything??",res.val())
         this.online=res.val()
+        console.log("what the actual fuck",this.online)
       })
       this.sub=this.fbs.getRef("/chats/"+this.person.chatId+"/summary/users/"+this.oUserUid+"/typing")
       this.sub.on('value',(snap)=>{
+        console.log("anything? typer",snap.val())
         this.typing=snap.val()
       })
 
@@ -168,7 +178,7 @@ export class ChatPage implements AfterViewChecked{
       this.oUser=this.person.username
       this.oUserUid=this.person.uid
       this.spoken=false
-      var online=this.fbs.getRef("/users/"+this.oUserUid+"/basic/online/")
+      var online=this.fbs.getRef("/users/"+this.oUserUid+"/basic/online")
       online.on('value',(res)=>{
         this.online=res.val()
       })
@@ -218,7 +228,6 @@ export class ChatPage implements AfterViewChecked{
          this.text._elementRef.nativeElement.style.height = (this.text._elementRef.nativeElement.scrollHeight-22) +"px";
       }
     }
-
 
 
   }
@@ -280,8 +289,9 @@ export class ChatPage implements AfterViewChecked{
     if(unread!==0){
       for(let i in unread){
         this.fbs.getDatabase("/chats/"+this.person.chatId+"/content/messages/"+unread[i],true).then((res:any)=>{
-
-          this.tempMes.push(new Message(this.fbs,res,this.person.chatId,unread[i]))
+          if(Object.keys(res).length>=8){
+            this.tempMes.push(new Message(this.fbs,res,this.person.chatId,unread[i]))
+          }
         })
       }
       this.tempMes.sort((a,b)=>{
@@ -308,41 +318,66 @@ export class ChatPage implements AfterViewChecked{
 
         }
       }
-      this.messages.push(this.person.lastMessage)
-      this.fbs.getLimited("/chats/"+this.person.chatId+"/content/messages",100,"time").then((res)=>{
-        //chat arrangments here
-        //for(let i in res){
-        //  vm.chat[i]=res[i]
-        //}
-        // vm.chat.content.messages=res
-        // this.sg.set("recentFifti",res)
-        // this.fbs.getDatabase("/chats/"+this.chatId+"/content/mCache",true).then((re)=>{
-        //   this.sg.set("recentFiftiCache",re)
-        //   this.cacher=re
-        // })
+      this.sg.get("eMes").then((f)=>{
+        if(f&&vm.tempMes.length===0){
+          vm.tempMes=[]
+          console.log(f)
 
-        vm.tempMes=[]
-        console.log(res)
-
-        vm.umessages=res
-        for (let i in vm.umessages){
-          if(i!="cache"&&(typeof vm.umessages[i]!=="string"&& typeof vm.umessages[i]!=="number")){
-            vm.tempMes.push(new Message(this.fbs,vm.umessages[i],this.person.chatId,i))
-            vm.tempMes.sort((a,b)=>{
-              return b.time-a.time
-            })
+          vm.umessages=f
+          for (let i in vm.umessages){
+            if(i!="cache"&&(typeof vm.umessages[i]!=="string"&& typeof vm.umessages[i]!=="number"&&Object.keys(vm.umessages[i]).length>=8)){
+              vm.tempMes.push(new Message(this.fbs,vm.umessages[i],this.person.chatId,i))
+              vm.tempMes.sort((a,b)=>{
+                return b.time-a.time
+              })
+            }
           }
+          console.log("tempMeseMesesesesees",vm.tempMes)
+          vm.tempMes.sort((a,b)=>{
+            return b.time-a.time
+          })
+          vm.messages=vm.tempMes
+          console.log(vm.messages)
         }
-        console.log("tempMes",vm.tempMes)
-        vm.tempMes.sort((a,b)=>{
-          return b.time-a.time
-        })
-        vm.messages=vm.tempMes
-        console.log(vm.messages)
+        this.fbs.getLimited("/chats/"+this.person.chatId+"/content/messages",100,"time").then((res)=>{
+          //chat arrangments here
+          //for(let i in res){
+          //  vm.chat[i]=res[i]
+          //}
+          // vm.chat.content.messages=res
+          // this.sg.set("recentFifti",res)
+          // this.fbs.getDatabase("/chats/"+this.chatId+"/content/mCache",true).then((re)=>{
+          //   this.sg.set("recentFiftiCache",re)
+          //   this.cacher=re
+          // })
 
-      },(err)=>{
-          console.log("erred in messages", err)
+          vm.tempMes=[]
+          console.log(res)
+
+          vm.umessages=res
+          for (let i in vm.umessages){
+            if(i!="cache"&&(typeof vm.umessages[i]!=="string"&& typeof vm.umessages[i]!=="number"&&Object.keys(vm.umessages[i]).length>=8)){
+              vm.tempMes.push(new Message(this.fbs,vm.umessages[i],this.person.chatId,i))
+              vm.tempMes.sort((a,b)=>{
+                return b.time-a.time
+              })
+            }
+          }
+          console.log("tempMes",vm.tempMes)
+          vm.tempMes.sort((a,b)=>{
+            return b.time-a.time
+          })
+          vm.messages=vm.tempMes
+          this.sg.set("eMes",vm.umessages)
+          console.log(vm.messages)
+
+        },(err)=>{
+            console.log("erred in messages", err)
+        })
+
       })
+
+      //this.messages.push(new Message(this.fbs,this.person.lastMessage,this.person.chatId,))
     }else{
       //about sendding a habesha hi
       vm.spoken=false
@@ -558,7 +593,7 @@ export class ChatPage implements AfterViewChecked{
   }
   createChat(){
     this.chat=new Chat()
-    var lo=this.lc.create({content:'Creating new chat'})
+    var lo=this.lc.create({content:'Creating new chat...'})
     lo.present()
     console.log("hello")
     return new Promise((resolve,reject)=>{
@@ -587,6 +622,7 @@ export class ChatPage implements AfterViewChecked{
       }
       console.log("I have reached here")
 
+
       this.chat.summary.chatId=this.chatId
 
       this.chat.summary.lastTime=this.sendable.time
@@ -602,6 +638,7 @@ export class ChatPage implements AfterViewChecked{
         thi["senderUid"]=vm.messages[i].senderUid
         thi["resUid"]=vm.messages[i].resUid
         this.chat.content.messages[i]=thi
+
         if(vm.messages.length-1===Number(i)){
           this.chat.summary.lastMessage= thi
         }
@@ -613,6 +650,7 @@ export class ChatPage implements AfterViewChecked{
       this.chat.summary["users"]=users
       console.log("At setDatabase...gud fela",this.chatId, this.chat)
       this.fbs.setDatabase("/chats/"+this.chatId,this.chat,true).then(function(res){
+        vm.messages[0].sent=true
         lo.dismiss()
         vm.registered=true
         console.log("Gotten sent?")
@@ -624,27 +662,27 @@ export class ChatPage implements AfterViewChecked{
       })
     })
   }
-  readAll(){
-    var j=0
-    var vm=this
-    var updates={}
-    if(this.person.unread!==0){
-      for(let i in this.person.users[vm.uid].unread){
-        var m=this.person.users[vm.uid].unread[i]
-        updates["/chats/"+this.chatId+"/content/messages/"+m+"/read"]=true
-      }
-      updates["/chats/"+this.chatId+"/summary/users/"+this.fbs.currentUser().uid+"/unread"]=0
-      this.fbs.setDatabase("/dummybase",updates,false).then(function(res){
-        vm.fbs.getDatabase("/chats/"+this.chatId+"/summary",true).then(function(res){
-          this.person=res
-        }).catch(function(err){
-
-        })
-      }).catch(function(err){
-
-      })
-    }
-  }
+  // readAll(){
+  //   var j=0
+  //   var vm=this
+  //   var updates={}
+  //   if(this.person.unread!==0){
+  //     for(let i in this.person.users[vm.uid].unread){
+  //       var m=this.person.users[vm.uid].unread[i]
+  //       updates["/chats/"+this.chatId+"/content/messages/"+m+"/read"]=true
+  //     }
+  //     updates["/chats/"+this.chatId+"/summary/users/"+this.fbs.currentUser().uid+"/unread"]=0
+  //     this.fbs.setDatabase("/dummybase",updates,false).then(function(res){
+  //       vm.fbs.getDatabase("/chats/"+this.chatId+"/summary",true).then(function(res){
+  //         this.person=res
+  //       }).catch(function(err){
+  //
+  //       })
+  //     }).catch(function(err){
+  //
+  //     })
+  //   }
+  // }
   deleteChat(){
     var vm=this
     var lc=this.lc.create({
@@ -686,19 +724,33 @@ export class ChatPage implements AfterViewChecked{
         this.cont._elementRef.nativeElement.scrollTop=0
       }
       if(!this.person.users){
+        var vm=this
 
-        this.messages.unshift(this.sendable)
+        var thi={}
+        thi["sender"]=vm.sendable.sender
+        thi["receiver"]=vm.sendable.receiver
+        thi["content"]=vm.sendable.content
+        thi["time"]=vm.sendable.time
+        thi["picture"]=vm.sendable.picture
+        thi["read"]=vm.sendable.read
+        thi["sent"]=vm.sendable.sent
+        thi["senderUid"]=vm.sendable.senderUid
+        thi["resUid"]=vm.sendable.resUid
+        this.messages.unshift(new Message(this.fbs,thi,this.person.chatId))
+
+
         if (this.content.scrollToTop) {
             this.content.scrollToTop();
         }
         console.log(this.message,this.sendable)
         console.log(this.messages)
+
         this.createChat().then((res)=>{
           console.log("chat created")
           this.spoken=true
         })
       }else{
-        this.messages.unshift(this.sendable)
+
         if (this.content.scrollToTop) {
             this.content.scrollToTop();
         }
@@ -734,6 +786,7 @@ export class ChatPage implements AfterViewChecked{
       thi["sent"]=vm.sendable.sent
       thi["senderUid"]=vm.sendable.senderUid
       thi["resUid"]=vm.sendable.resUid
+      this.messages.unshift(new Message(this.fbs,thi,this.person.chatId))
       if(this.person.users[this.uid].firstMessage===null){
         this.fbs.setDatabase("/chats/"+this.chatId+"/users/"+this.uid+"/firstMessage",thi,true).then(function(res){
           // this.fbs.setList("/users/"+this.uid+"/people",this.chatId).then(function(res){
@@ -744,6 +797,8 @@ export class ChatPage implements AfterViewChecked{
       }
       this.fbs.setList("/chats/"+this.chatId+"/content/messages/",thi)
       .then((res)=>{
+        console.log("FROM SENDING:  ",res)
+        this.messages[0].sent=true
         if(vm.person.users[vm.oUserUid].unread===0){
           vm.person.users[vm.oUserUid].unread={}
           vm.person.users[vm.oUserUid].unread[Object.keys(vm.person.users[vm.oUserUid].unread).length]=res
@@ -756,9 +811,14 @@ export class ChatPage implements AfterViewChecked{
         value["/chats/"+vm.chatId+"/summary/lastMessage/"]=thi
         value["/chats/"+vm.chatId+"/summary/lastTime/"]=vm.sendable.time
 
-        this.fbs.setDatabase("/seceretFiles/",value,false).then(function(res){
-            vm.sendable= new Message()
-            resolve()
+        this.fbs.setDatabase("/chats/"+vm.chatId+"/summary/users/"+vm.oUserUid+"/unread",vm.person.users[vm.oUserUid].unread,true).then((res)=>{
+          this.fbs.setDatabase("/chats/"+vm.chatId+"/summary/lastMessage/",thi,true).then(()=>{
+            this.fbs.setDatabase("/chats/"+vm.chatId+"/summary/lastTime/", this.sendable.time,true).then(()=>{
+              vm.sendable= new Message()
+              resolve()
+            })
+          })
+
         }).catch(function(err){
           console.log("error sending message",err)
           reject(err)

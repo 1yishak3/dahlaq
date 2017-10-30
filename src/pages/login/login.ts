@@ -27,7 +27,7 @@ export class LoginPage {
   // Our translated text strings
   private loginErrorString: string;
   fbs:  any
-  cCode: any
+  vid: any
   connected:boolean
   show:any=true
   phone:any
@@ -44,7 +44,7 @@ export class LoginPage {
       this.loginErrorString = value;
     })
     this.fbs=fbss
-    this.cCode = this.nvp.get("cCode")
+    this.vid = this.nvp.get("vid")
     this.phone= this.nvp.get("num")
     var vm=this
     this.nw=new Network
@@ -64,6 +64,13 @@ export class LoginPage {
   }
 
   // Attempt to login in through our User service
+  cv(str:string){
+    if(str!=""&&str){
+      return true
+    }else{
+      return false
+    }
+  }
   doLogin() {
   //  var cCode=this.nvp.get("confirm")
     //this.navCtrl.push(MainPage);
@@ -72,20 +79,19 @@ export class LoginPage {
     })
     load.present()
     var vm=this
-    this.once=this.once+1
-    if (this.once<2){
-      //this.navCtrl.push(MainPage);
-      this.cCode.confirm(this.account.code).then((res)=>{
+    if(this.cv(this.account.code)){
+      var credential = this.fbss.auther().PhoneAuthProvider.credential(this.vid,this.account.code)
+      this.fbss.getAuth().signInWithCredential(credential).then((res)=>{
         if(vm.fbss.currentUser().displayName===""){
           load.dismiss()
-            let toast = this.toastCtrl.create({
-              message: "It looks like you don't have an account with us yet, please signup for an account to enjoy Dahlaq",
-              duration: 3333,
-              position: 'top'
-            });
-            toast.present();
-            vm.fbss.currentUser().delete()
-            this.navCtrl.pop()
+          let toast = this.toastCtrl.create({
+            message: "It looks like you don't have an account with us yet, please signup for an account to use Dahlaq",
+            duration: 3333,
+            position: 'top'
+          });
+          toast.present();
+          vm.fbss.currentUser().delete()
+          this.navCtrl.pop()
 
         }else{
           console.log("Login Successful")
@@ -110,6 +116,14 @@ export class LoginPage {
         toast.present();
         this.navCtrl.pop()
       })
+    }else{
+      load.dismiss()
+      let toast = this.toastCtrl.create({
+        message: "Please make sure you enter the right SMS code.",
+        duration: 2017,
+        position: 'top'
+      });
+      toast.present();
     }
   }
 }

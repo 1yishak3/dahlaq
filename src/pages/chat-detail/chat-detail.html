@@ -15,11 +15,14 @@
       <ion-col>
         <div no-padding style="position:absolute;bottom:5px;left:10px" style="color:white">
           <h5>{{oUser}}</h5>
-          <div end style="color:grey" *ngIf="online&&online.on">
-            Online
+          <div end style="color:grey" *ngIf="online.on&&!typing">
+            online
           </div>
-          <div no-padding style="color:grey" *ngIf="online&&!online.on">
-            Last seen {{online.time | momentjs}}
+          <div no-padding style="color:grey" *ngIf="!online.on">
+            last seen {{online.time | momentjs}}
+          </div>
+          <div no-padding style="color:grey" *ngIf="online.on&&typing">
+            typing...
           </div>
         </div>
       </ion-col>
@@ -49,12 +52,12 @@
   <!--  -->
 
   <div class="message-wrap">
-    <div class="message" [class.left]="true" [class.right]="false" *ngIf="typing">
+    <!-- <div class="message" [class.left]="true" [class.right]="false" *ngIf="typing">
       <div class="msg-content">
         <span class="triangle"></span>
         ...
       </div>
-    </div>
+    </div> -->
     <div
     class="message"
     [class.left]="message.sender === oUser"
