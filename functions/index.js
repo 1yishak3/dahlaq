@@ -4,6 +4,69 @@ admin.initializeApp(functions.config().firebase)
 //add cache
 //incorporate the phone auth again. Hopefully, you haven't deleted much
 //about page/s
+exports.simpleLike = functions.database.ref("/posts/{pid}/content/likes").onWrite(e=>{
+  var l= e.data.previous.val()
+  var w= e.data.val()
+  var likesCount = e.data.adminRef.parent.parent.child("likes")
+  return likesCount.transaction(cr=>{
+
+    if(l&&w){
+      if(Object.keys(w).length>Object.keys(l).length){
+        return (cr||0)+1
+      }else if(Object.keys(w).length<Object.keys(l).length){
+        return (cr||0)-1
+      }else{
+        return (cr||0)
+      }
+    }else if(l&&!w){
+      return (cr||0)-1
+    }else if (!l&&w){
+      return (cr||0)+1
+    }
+  })
+})
+exports.simpleDislike = functions.database.ref("/posts/{pid}/content/dislikes").onWrite(e=>{
+  var l= e.data.previous.val()
+  var w= e.data.val()
+  var likesCount = e.data.adminRef.parent.parent.child("dislikes")
+  return likesCount.transaction(cr=>{
+
+    if(l&&w){
+      if(Object.keys(w).length>Object.keys(l).length){
+        return (cr||0)+1
+      }else if(Object.keys(w).length<Object.keys(l).length){
+        return (cr||0)-1
+      }else{
+        return (cr||0)
+      }
+    }else if(l&&!w){
+      return (cr||0)-1
+    }else if (!l&&w){
+      return (cr||0)+1
+    }
+  })
+})
+exports.simpleReport = functions.database.ref("/posts/{pid}/content/reports").onWrite(e=>{
+  var l= e.data.previous.val()
+  var w= e.data.val()
+  var likesCount = e.data.adminRef.parent.parent.child("reports")
+  return likesCount.transaction(cr=>{
+
+    if(l&&w){
+      if(Object.keys(w).length>Object.keys(l).length){
+        return (cr||0)+1
+      }else if(Object.keys(w).length<Object.keys(l).length){
+        return (cr||0)-1
+      }else{
+        return (cr||0)
+      }
+    }else if(l&&!w){
+      return (cr||0)-1
+    }else if (!l&&w){
+      return (cr||0)+1
+    }
+  })
+})
 exports.senseLike = functions.database.ref("/posts/{pid}/content/likes/{lid}").onWrite(e => {
   var uid = e.params.lid
   var pid = e.params.pid
@@ -20,17 +83,7 @@ exports.senseLike = functions.database.ref("/posts/{pid}/content/likes/{lid}").o
     }else{
       personal[pid]=Date.now()
     }
-    likerRef.set(personal).then((res)=>{
-      return likesCount.transaction(data=>{
-        if(e.data.exists()&&!e.data.previous.exists()){
-          return (data||0)+1
-        }else if(!e.data.exists()&&e.data.previous.exists()){
-          return (data||0)-1
-        }else{
-          return data
-        }
-      })
-    })
+    return likerRef.set(personal)
   })
 })
 exports.senseDislike = functions.database.ref("/posts/{pid}/content/dislikes/{did}").onWrite(e => {
@@ -49,17 +102,7 @@ exports.senseDislike = functions.database.ref("/posts/{pid}/content/dislikes/{di
     }else{
       personal[pid]=Date.now()
     }
-    dislikerRef.set(personal).then((res)=>{
-      return dislikesCount.transaction(data=>{
-        if(e.data.exists()&&!e.data.previous.exists()){
-          return (data||0)+1
-        }else if(!e.data.exists()&&e.data.previous.exists()){
-          return (data||0)-1
-        }else{
-          return data
-        }
-      })
-    })
+    return dislikerRef.set(personal)
   })
 })
 exports.senseReport = functions.database.ref("/posts/{pid}/content/reports/{rid}").onWrite(e => {
@@ -78,17 +121,7 @@ exports.senseReport = functions.database.ref("/posts/{pid}/content/reports/{rid}
     }else{
       personal[pid]=Date.now()
     }
-    reporterRef.set(personal).then((res)=>{
-      return reportsCount.transaction(data=>{
-        if(e.data.exists()&&!e.data.previous.exists()){
-          return (data||0)+1
-        }else if(!e.data.exists()&&e.data.previous.exists()){
-          return (data||0)-1
-        }else{
-          return data
-        }
-      })
-    })
+    return reporterRef.set(personal)
   })
 })
 exports.onPostCreate=functions.database.ref("/posts/{pid}/poster/desiredReach").onCreate(e=>{
