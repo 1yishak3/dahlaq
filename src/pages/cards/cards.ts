@@ -227,7 +227,7 @@ export class CardsPage {
 
               vm.fbs.getDatabase("/posts/"+vm.newList[i],true).then(function(res:any){
                 console.log("post from base?",res)
-                var post = new Post(vm.fbs,vm.navCtrl,vm.newList[i],false,res)
+                var post = new Post(vm.fbs,vm.navCtrl,vm.newList[i],true,res)
 
                 vm.liste.push(post)
                 if(Number(i)===14||Number(i)===vm.newList.length-1){
@@ -355,7 +355,7 @@ export class CardsPage {
         if(vm.newList[i]!==undefined){
           vm.fbs.getDatabase("/posts/"+vm.newList[i],true).then((res)=>{
             if(res){
-              var post = new Post(vm.fbs,vm.navCtrl,vm.newList[i],false,res)
+              var post = new Post(vm.fbs,vm.navCtrl,vm.newList[i],true,res)
               for(let i in res){
                 post[i]=res[i]
               }
