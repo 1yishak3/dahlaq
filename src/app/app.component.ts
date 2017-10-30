@@ -77,6 +77,7 @@ export class MyApp {
     this.initTranslate();
     this.user = this.fbs.currentUser()
     console.log(ItemDetailPage)
+    this.deploy.channel='dev'
     this.stg.get("log").then((res)=>{
       this.status=res
       if(res){
@@ -86,6 +87,10 @@ export class MyApp {
       }else{
         this.rootPage=WelcomePage
       }
+    })
+    this.requestPermission().then(()=>{
+      this.clearBadges()
+      this.setBadges(0)
     })
 
     platform.ready().then(()=>{
@@ -119,6 +124,7 @@ export class MyApp {
         if(data.wasTapped){
           this.requestPermission().then(()=>{
             this.clearBadges()
+            this.setBadges(0)
           })
 
         }else{
@@ -217,6 +223,7 @@ export class MyApp {
       if(user){
 
         this.onNotification()
+        this.fbs.snap()
       }
       if(!this.status){
         if(user){

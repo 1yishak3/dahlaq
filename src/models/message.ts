@@ -33,9 +33,13 @@ export class Message {
       }
       var updater=this.fbs.getRef("/chats/"+this.cid+"/content/messages/"+this.mid)
       updater.on('value',snp=>{
+
+        console.log("lolol",snp.val())
         var m=snp.val()
-        this.read=m.read
-        this.sent=m.sent
+        if(m){
+          this.read=m.read
+          this.sent=m.sent
+        }
       })
     }
 

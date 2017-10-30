@@ -1,4 +1,4 @@
-import { Component, ViewChild } from '@angular/core';
+import { Component, ViewChild,AfterViewChecked } from '@angular/core';
 import { NavController, Platform , ModalController,LoadingController} from 'ionic-angular';
 import { ChatPage } from '../chat-detail/chat-detail'
 import { ItemDetailPage } from '../item-detail/item-detail'
@@ -6,12 +6,14 @@ import { FirebaseService } from '../../providers/firebase'
 import { Uzer } from '../../models/uzer'
 import * as _ from "lodash"
 import {Network} from '@ionic-native/network'
+import {Storage} from '@ionic/storage'
+import {Badge} from '@ionic-native/badge'
 
 @Component({
   selector: 'page-map',
   templateUrl: 'map.html'
 })
-export class MapPage {
+export class MapPage implements AfterViewChecked{
 
 //  @ViewChild('map') map;
   uid:any
@@ -27,12 +29,17 @@ export class MapPage {
   history:any={}
   totit:number=0
   already:any={}
-  constructor(public lc:LoadingController,
+  go:any
+  promises:any=[]
+  pps:any={}
+  constructor(public badge:Badge,
+    public stg:Storage,
+    public lc:LoadingController,
     public nw:Network,
     public navCtrl: NavController,
     public platform: Platform,
     public modalCtrl: ModalController,
-  public fbs:FirebaseService) {
+    public fbs:FirebaseService) {
     this.uid=fbs.currentUser().uid
     var vm=this
     var disc=nw.onDisconnect().subscribe(()=>{
@@ -45,18 +52,26 @@ export class MapPage {
         vm.show=false
       },5000)
     })
-    this.getNewChats()
-    var pRef = fbs.getRef("/users/"+this.fbs.currentUser().uid+"/people")
-    pRef.on('value',(snap)=>{
-      var pipi = snap.val();
-      if(pipi){
-        this.updateList(pipi)
+    stg.get("ppap").then((f)=>{
+      if(f){
+        this.people=f
       }
     })
+    console.log("bebebebebe")
+    this.getNewChats()
+    console.log("like can you not see me?")
+    //var pRef = fbs.getRef("/users/"+this.fbs.currentUser().uid+"/people")
+    // pRef.on('value',(snap)=>{
+    //   var pipi = snap.val();
+    //   if(pipi){
+    //     this.updateList(pipi)
+    //   }
+    // })
   }
   //to be usesd when leaving a chat modalCtrl
   updateList(p){
     var vm=this
+    var empty=[]
     for(let i in p){
       if(i!="cache"){
         var person=p[i]
@@ -81,134 +96,286 @@ export class MapPage {
               }
             }
 
-            this.people.push(chat)
+            empty.push(chat)
           }
-          this.people.sort((a,b)=>{
+          empty.sort((a,b)=>{
             return b.lastTime-a.lastTime
           })
         })
       }
     }
+    this.people=empty
   }
   refreshChats(){
     var vm=this
     return new Promise((resolve,reject)=>{
       var people=[]
-      this.fbs.getDatabase("/users/"+this.fbs.currentUser().uid+"/people",true).then((res)=>{
+      this.fbs.getDatabase("/users/"+this.fbs.currentUser().uid+"/people",true).then((res:any)=>{
+          if(this.people.length!==Object.keys(res).length-1){
+            console.log("1  ",res)
+            var empty=[]
+            for(let j in res){
+              console.log("jj ",j)
+              if(j!='cache'){
+                var cid=res[j]
+                console.log(cid)
+                console.log("/chats/"+cid+"/summary")
+                this.fbs.getRef("/chats/"+cid+"/summary").once('value').then((res:any)=>{
 
-          console.log("???????")
-          for(let j in this.people){
-            var cid=this.people[j].chatId
-            console.log(cid)
-            this.fbs.getRef("/chats/"+cid+"/summary").once('value').then((res:any)=>{
-              var chat=res
-              for(let i in chat.users){
-                if(i!==vm.uid){
-                  chat["oUid"]=i
-                  chat["currentPic"]=chat.users[i].image
-                  if(chat.users[vm.uid].unread===0){
-                    chat["unread"]=0
-                  }else{
-                    if(chat.users[vm.uid].unread){
-                      chat["unread"]=Object.keys(chat.users[vm.uid].unread).length
-                    }else{
-                      chat['unread']=0
+
+                  var chat=res.val()
+                  console.log(res, res.val(),"nana")
+                  for(let i in chat.users){
+                    if(i!==vm.uid){
+                      chat["oUid"]=i
+                      chat["currentPic"]=chat.users[i].image
+                      if(chat.users[vm.uid].unread===0){
+                        chat["unread"]=0
+                      }else{
+                        if(chat.users[vm.uid].unread){
+                          chat["unread"]=Object.keys(chat.users[vm.uid].unread).length
+                        }else{
+                          chat['unread']=0
+                        }
+                      }
+
+
                     }
+
                   }
+                  empty.push(chat)
+                  empty.sort((a,b)=>{
+                    return b.lastTime-a.lastTime
+                  })
 
 
-                }
+
+                })
               }
 
-              this.people[j]=chat
-              console.log("what ",this.people)
+            }
 
-            })
+
+          }else{
+            console.log("2  ",res)
+            var empty=[]
+            for(let j in this.people){
+              var cid=this.people[j].chatId
+              console.log(cid)
+              if(typeof res[j]!=='string' && !(res[j] instanceof String &&res[j])){
+              this.fbs.getRef("/chats/"+cid+"/summary").once('value').then((res:any)=>{
+                var chat=res.val()
+                console.log(res, res.val(),"nana")
+                for(let i in chat.users){
+                  if(i!==vm.uid){
+                    chat["oUid"]=i
+                    chat["currentPic"]=chat.users[i].image
+                    if(chat.users[vm.uid].unread===0){
+                      chat["unread"]=0
+                    }else{
+                      if(chat.users[vm.uid].unread){
+                        chat["unread"]=Object.keys(chat.users[vm.uid].unread).length
+                      }else{
+                        chat['unread']=0
+                      }
+                    }
+
+
+                  }
+                }
+
+                empty.push(chat)
+
+
+              })
+            }
+            }
+
           }
 
-        resolve(this.people)
+
+        resolve(empty)
       })
     })
 
 
   }
+  ionViewDidLeave(){
 
-  ionViewWillEnter() {
+  }
+  async requestPermission() {
+    try {
+      let hasPermission = await this.badge.hasPermission();
+      console.log(hasPermission);
+      if (!hasPermission) {
+        let permission = await this.badge.registerPermission();
+        console.log(permission);
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  }
+  async setBadges(badgeNumber: number) {
+    try {
+      let badges = await this.badge.set(badgeNumber);
+      console.log(badges);
+    } catch (e) {
+      console.error(e);
+    }
+  }
+  async getBadges() {
+    try {
+      let badgeAmount = await this.badge.get();
+      console.log(badgeAmount);
+    }
+    catch (e) {
+      console.error(e);
+    }
+  }
+  async increaseBadges(badgeNumber: string) {
+    try {
+      let badge = await this.badge.increase(Number(badgeNumber));
+      console.log(badge);
+    } catch (e) {
+      console.error(e);
+    }
+  }
+  async decreaseBadges(badgeNumber: string) {
+    try {
+      let badge = await this.badge.decrease(Number(badgeNumber));
+      console.log(badge);
+    } catch (e) {
+      console.error(e);
+    }
+  }
+  async clearBadges(){
+    try {
+      let badge = await this.badge.clear();
+      console.log(badge);
+    }
+    catch(e){
+      console.error(e);
+    }
+  }
+
+
+  ionViewDidEnter() {
+    this.requestPermission().then(()=>{
+      this.clearBadges()
+      this.setBadges(0)
+    })
+
+
     // if(this.firstTime){
     //   var ch=this.lc.create({
     //     content:"Loading chats..."
     //   })
     //   ch.present()
     // }
-    this.refreshChats().then((d)=>{
-      // if(this.firstTime){  ch.dismiss()}
-      this.firstTime=false
-      console.log("refreshList: ",d)
+    // this.refreshChats().then((d:any)=>{
+    //   // if(this.firstTime){  ch.dismiss()}
+    //   this.people=d
+    //   this.firstTime=false
+    //
+    // })
+    if(Math.random()>=0.5){
+      this.refreshList()
+    }
 
-    })
-    this.refreshList()
+  }
+  ngAfterViewChecked(){
+    // this.refreshChats().then((d:any)=>{
+    //   this.people=d
+    // })
   }
   /*openItem(number: string) {
     this.navCtrl.push(ChatPage, {
       chatWith: number
     });
   }*/
+  updatest(ras){
+
+
+  }
   getNewChats(){
+    console.log("in get new chats")
     var vm=this
     this.uid=this.fbs.currentUser().uid
     this.people=[]
-    this.fbs.getRef("/users/"+this.uid+"/people").once('value').then((res:any)=>{
+  
+    this.fbs.getRef("/users/"+this.uid+"/people").on('value',(rese:any)=>{
       // for(let i in res){
       //   vm.profile[i]=res[i]
       // }
-      var pps=[]
-
+      var pps={}
+      var res=rese.val()
+      this.promises=[]
       for(let i in res){
-        if(!this.history[res[i]]){
-          this.history[res[i]]=true
-          this.fbs.getRef("/chats/"+res[i]+"/summary").once('value').then(function(res){
-            var chat:any=res
-            var oUid=""
-            for(let i in chat.users){
-              if(i!==vm.uid){
-                chat["oUid"]=i
-                chat["currentPic"]=chat.users[i].image
-                if(chat.users[vm.uid].unread===0){
-                  chat["unread"]=0
-                }else{
-                  if(chat.users[vm.uid].unread){
-                    chat["unread"]=Object.keys(chat.users[vm.uid].unread).length
-                    vm.totit=vm.totit+Object.keys(chat.users[vm.uid].unread).length
-                  }else{
-                    chat["unread"]=0
+        console.log("resss",res, res[i])
+          //this.history[res[i]]=true
+          if(i!=="cache"&&res[i]){
+            this.promises.push(
+              this.fbs.getRef("/chats/"+res[i]+"/summary").on('value',(resd)=>{
+                  var chat:any=resd.val()
+                  var oUid=""
+                  for(let i in chat.users){
+                    if(i!==this.uid){
+                      chat["oUid"]=i
+                      chat["currentPic"]=chat.users[i].image
+                      if(chat.users[this.uid].unread===0){
+                        chat["unread"]=0
+                      }else{
+                        if(chat.users[this.uid].unread){
+                          chat["unread"]=Object.keys(chat.users[this.uid].unread).length
+                        }else{
+                          chat["unread"]=0
+                        }
+
+                      }
+
+
+                    }
                   }
-
-                }
-
-
-              }
-            }
-            pps.push(chat)
-            if(pps.length!==0){
-              pps.sort(function(a,b){
-                return Number(b.lastTime)-Number(a.lastTime)
+                  this.pps[res[i]]=chat
+                  var g=[]
+                  for(let i in this.pps){
+                    g.push(this.pps[i])
+                  }
+                  g.sort((a,b)=>{
+                    return b.lastTime-a.lastTime
+                  })
+                  this.people=g
+                  this.stg.set("ppap",this.people)
+              },(err)=>{
+                console.log(err)
               })
-
-            }
-          }).catch(function(err){
-            console.log("Couldn't get chat, ",err)
-          })
-
-        }
+            )
+          }
       }
-      vm.people=pps
+      Promise.all(this.promises).then((results:any)=>{
+        console.log("rrrrr",results)
+        console.log("dfdgd",g)
+        var g=[]
+        for(let i in this.pps){
+          g.push(this.pps[i])
+        }
+        g.sort((a,b)=>{
+          return b.lastTime - a.lastTime
+        })
+
+        vm.people=g
+
+
+      })
+
 
       vm.sorted=true
-      this.fbs.getRef("/users/"+this.uid+"/suggestedPeople").once('value').then((res:any)=>{
-        console.log('kjhgfd')
+      this.fbs.getRef("/users/"+this.uid+"/suggestedPeople").once('value').then((rese:any)=>{
+        var res=rese.val()
+        console.log('kjhgfd',res)
         if(!(typeof res === 'string' || res instanceof String)){
           for(let k in res){
-            if(k!=="cache"){
+            if(k!=="cache"&&res[k].uid!==this.uid&&res[k].uid){
               vm.suggestedPeople.push(res[k])
             }
           }
@@ -216,8 +383,6 @@ export class MapPage {
         }
 
       })
-    }).catch(function(err){
-      console.log("Error getting profile, ",err)
     })
   }
   refreshList(){
@@ -230,12 +395,12 @@ export class MapPage {
       var check={}
       for(let i=0;i<5;i++){
         console.log("this what it would have been,",key)
-        if(key.length>5){
+        if(key>5){
           console.log("why is key > 5??",key)
-          var lucky=Math.floor(Math.random()*key.length)
+          var lucky=Math.floor(Math.random()*key)
           console.log(lucky)
           while(check[lucky]){
-            lucky=Math.floor(Math.random()*key.length)
+            lucky=Math.floor(Math.random()*key)
             console.log("This is ljsjucky ",lucky)
           }
           check[lucky]=true
@@ -245,7 +410,7 @@ export class MapPage {
             vm.miniList=temp
           }
         }else{
-          if(i<key.length){
+          if(i<key){
             console.log("hello world",i)
             temp.push(this.suggestedPeople[i])
           }
@@ -269,11 +434,8 @@ export class MapPage {
     return summary.users[summary.oUid].username
   }
   openPerson(data) {
-    let addModal = this.modalCtrl.create(ItemDetailPage,{person:data});
-    addModal.onDidDismiss(item => {
-      //maybe set it in storage  for safe keeping?
-    })
-    addModal.present();
+    this.navCtrl.push(ItemDetailPage,{person:data.uid});
+
   }
   openChat(data) {
     let addModal = this.modalCtrl.create(ChatPage,{person:data,fbs:this.fbs});

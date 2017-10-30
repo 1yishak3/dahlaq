@@ -53,10 +53,10 @@
         <!-- <div item-end icon-right><ion-icon color="light" name="star" >{{3*1/i}}</ion-icon></div> -->
         <ion-badge color="light"item-end>{{item.rank}}</ion-badge>
       </a>
-    <ion-infinite-scroll (ionInfinite)="pullToAddMore($event)">
-      <ion-infinite-scroll-content
-      loadingSpinner="circles"
-      loadingText="Loading more ranks..."></ion-infinite-scroll-content>
-    </ion-infinite-scroll>
   </ion-list>
+  <ion-infinite-scroll (ionInfinite)="pullToAddMore($event)">
+    <ion-infinite-scroll-content
+    loadingSpinner="circles"
+    loadingText="Loading more ranks..."></ion-infinite-scroll-content>
+  </ion-infinite-scroll>
 </ion-content>

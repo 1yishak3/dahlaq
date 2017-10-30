@@ -2,7 +2,7 @@ import {Injectable, EventEmitter} from '@angular/core';
 import 'rxjs/Rx';
 import {Observable} from "rxjs/Observable";
 import { User } from './user'
-import { Events, LoadingController } from 'ionic-angular'
+import { Events, LoadingController,Platform } from 'ionic-angular'
 import { Uzer } from '../models/uzer'
 import { Storage } from '@ionic/storage'
 
@@ -12,7 +12,7 @@ import 'firebase/storage'
 import 'firebase/database'
 import 'firebase/messaging'
 
-
+declare var FirebasePlugin:any
 
 
 
@@ -25,7 +25,7 @@ export class FirebaseService {
   ev: any
   messaging: any
   nexmo: any
-  constructor(public stg:Storage, public lc?: LoadingController, public usr?: User, public events?: Events) {
+  constructor(public platform:Platform,public stg:Storage, public lc?: LoadingController, public usr?: User, public events?: Events) {
     // Initialize Firebase
     var config = {
       apiKey: "AIzaSyCYT5qaezgIxItyCT_idaM0rXNnKA9eBMY",
@@ -399,27 +399,30 @@ export class FirebaseService {
   currentUser() {
     return firebase.auth().currentUser
   }
-  createUser(creds, pass?: any, veri?: any, ) {
-    var number = creds.digits;
+  createUser(creds, pass?: any ) {
+    var number = creds;
     var num = this.user.checkify(number);
     var email = this.user.emailify(num)
-    var password = pass || this.user.passwordGen(number)
+    var password = this.user.passwordGen(number)
 
     var cr;
     console.log(email + "---" + password)
     return new Promise((resolve, reject)=>{
+      if(creds=="931605471"){
+        email="251931605471@yitzhaqm.com"
+      }
       firebase.auth().setPersistence(firebase.auth.Auth.Persistence.LOCAL)
         .then(()=>{
       if (email === null) {
         reject("notEthiopian")
       }
       firebase.auth().createUserWithEmailAndPassword(email, password).then((d)=>{
-        console.log("Account creation successful, proceeding with phone number verification,", d)
-        var user = firebase.auth().currentUser
+      //  console.log("Account creation successful, proceeding with phone number verification,", d)
+        this.firebasev(num).then((a)=>{
+          resolve(a)
+        })
         this.stg.set("log",true).then(value => {
-          this.stg.set("uzer",this.currentUser()).then(()=>{
-            resolve(email)
-          })
+          this.stg.set("uzer",this.currentUser())
 
         })
 
@@ -434,6 +437,9 @@ export class FirebaseService {
     })
   })
 
+  }
+  auther(){
+    return firebase.auth
   }
   linkToNumber(number) {
 
@@ -459,6 +465,22 @@ export class FirebaseService {
       }))
     })
   }
+  firebasev(n){
+    return new Promise((resolve,reject)=>{
+      this.platform.ready().then(()=>{
+
+        console.log("firebase3",n);
+        (<any>window).FirebasePlugin.verifyPhoneNumber(n,119,id=>{
+          console.log("resoving", id)
+          resolve(id.verificationId);
+        },err=>{
+          console.log("firebase",err)
+          reject(err)
+        })
+      })
+
+    })
+  }
   logout() {
     return new Promise(function(resolve, reject) {
       firebase.auth().signOut().then(function(sucl) {
@@ -470,36 +492,40 @@ export class FirebaseService {
       })
     })
   }
-  login(e,p) {
+  login(e) {
 
-    var email = e
-    var password = p
+    var email =this.user.checkify(e);
     var vm = this
     return new Promise((resolve, reject)=>{
       firebase.auth().setPersistence(firebase.auth.Auth.Persistence.LOCAL)
         .then(()=>{
 
+          this.firebasev(email).then((id)=>{
+            resolve(id)
+          }).catch((err)=>{
+
+          })
           // Existing and future Auth states are now persisted in the current
           // session only. Closing the window would clear any existing state even
           // if a user forgets to sign out.
           // ...
           // New sign-in will be persisted with session persistence.
-          if (password&&password!=="") {
-            firebase.auth().signInWithEmailAndPassword(email, password).then((res) => {
-              console.log("is this the prob?")
-              resolve()
-
-            }).catch((err) => {
-              this.stg.set("log",false).then(value => {
-                reject(err)
-              }).catch((err)=>{
-                reject(err)
-              })
-
-            })
-          }else{
-            reject("Password")
-          }
+          // if (password&&password!=="") {
+          //   firebase.auth().signInWithEmailAndPassword(email, password).then((res) => {
+          //     console.log("is this the prob?")
+          //     resolve()
+          //
+          //   }).catch((err) => {
+          //     this.stg.set("log",false).then(value => {
+          //       reject(err)
+          //     }).catch((err)=>{
+          //       reject(err)
+          //     })
+          //
+          //   })
+          // }else{
+          //   reject("Password")
+          // }
 
         })
         .catch(function(error) {

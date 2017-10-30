@@ -42,138 +42,8 @@ export class WelcomePage {
 
    ngAfterViewInit(){
    }
-   set(x,y){
-    return this.sg.set(x,y)
-  }
-  get(x){
-    return this.sg.get(x)
-  }
-  logins(what){
-    var num=this.c.checkify(this.creds.digits)
-    if(whats){clearInterval(whats)}
-    var hello=what
-    if(num){
-      if(this.creds.password){
-      num=String(num)
-      num=num.substring(num.indexOf('1')+1,num.lastIndexOf(""))
-      var whats
-      var url="https://dahlaq.yitzhaqm.com/"
-      var str1="localforage.setItem('request','"+String(hello)+"')"
-      var str2="localforage.setItem('password','"+String(this.creds.password)+"')"
-      //  if(this.creds.digits!=="931605471"){
-        var gugu= this.bros.create(url,"_blank",{location:'no',clearcache:'yes',clearsessioncache:'yes'});
-        gugu.on('loadstop').subscribe(()=>{
-          gugu.executeScript({
-            code:str1
-          }).then((res)=>{
-            console.log("this is from the whole setting process",res)
-          })
-          gugu.executeScript({
-            code:"localforage.setItem('num',"+String(num)+")"
-          })
-          gugu.executeScript({
-            code:str2
-          })
 
-          whats=setInterval(()=>{
-            gugu.executeScript({code:"hell"}).then((ready)=>{
-              console.log("everything here hell?",ready)
-              var val=ready[0]
-
-
-              if(val==='login'||val==='signup'||val==='nono'){
-                  // gugu.executeScript({code:"localforage.getItem('confirmationCoder')"}).then((conf)=>{
-                  //   console.log(conf[0])
-                  //   if(conf[0]){
-                  //     console.log("What the fuck just happened")
-                  //     this.confirmationResult=conf
-                  //     clearInterval(what)
-                  //     gugu.close()
-                  //
-                  //   }
-                  // })
-                  gugu.executeScript({code:"email"}).then((email)=>{
-                    gugu.executeScript({code:"pastor"}).then((pastor)=>{
-                      console.log("email and password",email, pastor)
-                      switch(val){
-                        case 'login':
-                          clearInterval(whats)
-                          if(!this.loaderu){
-                            this.login(email[0],pastor[0]).then(()=>{
-                              gugu.close()
-                            }).catch(()=>{
-                              gugu.close()
-                            })
-                          }
-
-
-                          break
-                        case 'signup':
-                          clearInterval(whats)
-                          gugu.close()
-                          if(!this.loaderu){
-                          this.signup(email[0],pastor[0]).then(()=>{
-                            gugu.close()
-                          }).catch(()=>{
-                            gugu.close()
-                          })
-                          }
-                          break
-                        case 'nono':
-                          clearInterval(whats)
-                          gugu.close()
-                          if(!this.loaderu){
-                          var toast=this.tc.create({
-                            message: "Something went wrong, please retry.",
-                            duration: 5000,
-                            position: 'top'
-                          })
-                          toast.present()
-                          }
-                          break
-                      }
-                    })
-                  })
-
-
-              }
-
-            })
-          },100)
-          gugu.on('exit').subscribe(()=>{
-            if(whats){clearInterval(whats)}
-
-          })
-
-        })
-      // }else{
-      //   var email="251"+this.creds.digits+"@yitzhaqm.com"
-      //   var pastor=this.creds.password
-      //   this.login(email,pastor)
-      // }
-    }else{
-      var toast=this.tc.create({
-        message: "Please make sure you have entered a password first.",
-        duration: 5000,
-        position: 'top'
-      })
-      toast.present()
-
-    }
-
-    }else{
-      var toast=this.tc.create({
-        message: "Please make sure you have entered an Ethiopian phone number first.",
-        duration: 5000,
-        position: 'top'
-      })
-      toast.present()
-    }
-
-
-  }
-
-  login(e,p) {
+  login() {
     return new Promise((resolve,reject)=>{
       var navCtrl=this.navCtrl
       var vm=this
@@ -184,11 +54,12 @@ export class WelcomePage {
 
       load1.present()
       this.loaderu=true
+      console.log(this.creds.digits)
+      vm.fbs.login(this.creds.digits).then((res)=>{
 
-      vm.fbs.login(e,p).then((res)=>{
         load1.dismiss()
         this.loaderu=false
-        this.navCtrl.push(MainPage)
+        this.navCtrl.push(LoginPage,{num:this.creds.digits,vid:res})
         resolve()
 
       }).catch(function(err){
@@ -207,7 +78,7 @@ export class WelcomePage {
     })
   }
 
-  signup(e,p) {
+  signup() {
     return new Promise((resolve,reject)=>{
       var navCtrl=this.navCtrl
       var vm=this
@@ -219,11 +90,11 @@ export class WelcomePage {
       load1.present()
       this.loaderu=true
 
-      vm.fbs.login(e,p).then((res)=>{
+      vm.fbs.createUser(this.creds.digits).then((res)=>{
 
         load1.dismiss()
         this.loaderu=false
-        this.navCtrl.push(SignupPage,{pass:vm.creds.password,num:vm.creds.digits})
+        this.navCtrl.push(SignupPage,{pass:vm.creds.password,num:vm.creds.digits,vid:res})
         resolve()
 
       }).catch((err)=>{

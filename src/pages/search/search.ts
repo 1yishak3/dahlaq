@@ -67,7 +67,7 @@ export class SearchPage {
             //console.log(this.listP[post.postId])
             if(!this.listP[post.postId]){
               console.log("post",post)
-              var pst=new Post(this.fbs,this.navCtrl,this.postList[i],true,post)
+              var pst=new Post(this.fbs,this.navCtrl,post.postId,true,post)
               // for(let k in post){
               //   pst[k]=post[k]
               //   //console.log(k,pst[k],post[k])

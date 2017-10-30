@@ -152,6 +152,13 @@ export class SignupPage {
   //     })
   // })
   }
+  cv(str:string){
+    if(str!=""&&str){
+      return true
+    }else{
+      return false
+    }
+  }
   doSignup() {
     var load1=this.loadCtrl.create({
       content:"Verifying..."
@@ -159,122 +166,126 @@ export class SignupPage {
     load1.present()
     //this.person=new Uzer()
 
+    var vid = this.nvp.get("vid")
+    if(this.cv(this.account.code)){
+      var credential = this.fbs.auther().PhoneAuthProvider.credential(vid,this.account.code)
+      this.fbs.currentUser().linkWithCredential(credential).then(()=>{
 
+        var vm=this.fbs
+        var vm1=this
+        var name=this.account.username
 
-    this.once=this.once+1
-    var vm=this.fbs
-    var vm1=this
-    var name=this.account.username
-
-    // Attempt to login in through our User service
-    if(this.account.username!==""){
-      if (this.once<2){
-        console.log("I got here...then something happened")
-        if(name.indexOf(" ")===-1&&name.length>=5 && name.length<=23){
-          this.fbs.getDatabase("/ref",true).then((data)=>{
-            var tata=data
-            if(!tata){
-              tata={}
-            }
-            if(!tata[name]){
-              load1.dismiss()
-              load1=this.loadCtrl.create({content:"Creating your account..."})
-              load1.present()
-              this.person.properties.digits=vm.currentUser().phoneNumber||""
-              //console.log(this.person.properties.digits)
-              this.person.basic.uid=vm.currentUser().uid
-              this.person.basic.referrer=this.account.refer
-              //console.log(this.person.basic.uid)
-              vm.currentUser().updateProfile({
-                displayName: this.account.username,
-                photoURL:""
-              }).then(function() {
-                // Update successful.
-                console.log("displayName updated to: ",vm1.account.username)
-              }).catch(function(error) {
-                // An error happened.
-                console.log("Unable to update user name for auth()",error)
-              });
-
-              console.log(vm.currentUser().displayName)
-              this.person.basic.username=this.account.username
-              var prsn={}
-              prsn["basic"]=this.person.basic
-              prsn["stats"]=this.person.stats
-              prsn["properties"]=this.person.properties
-              prsn["suggestedPeople"]=this.person.suggestedPeople
-              prsn["viewables"]=this.person.viewables
-              prsn["people"]=this.person.people
-              prsn["refers"]=this.person.refers
-              prsn["token"]=this.person.token
-              prsn["connections"]=this.person.connections
-              prsn["fame"]=this.person.fame
-              prsn["reachLimit"]=this.person.reachLimit
-              prsn["userPosts"]=this.person.userPosts
-              prsn["dislikes"]=this.person.dislikes
-              prsn["likes"]=this.person.likes
-              prsn["reports"]=this.person.reports
-
-              this.fbs.setDatabase("/users/"+vm.currentUser().uid,prsn,true).then((res)=>{
-                vm.setDatabase("/ref/"+vm1.account.username,vm.currentUser().uid,true).then((res)=>{
-                  vm1.navCtrl.push(FirstRunPage);
+        // Attempt to login in through our User service
+        if(this.account.username!==""){
+            console.log("I got here...then something happened")
+            if(name.indexOf(" ")===-1&&name.length>=5 && name.length<=23){
+              this.fbs.getDatabase("/ref",true).then((data)=>{
+                var tata=data
+                if(!tata){
+                  tata={}
+                }
+                if(!tata[name]){
                   load1.dismiss()
-                })
+                  load1=this.loadCtrl.create({content:"Creating your account..."})
+                  load1.present()
+                  this.person.properties.digits=vm.currentUser().phoneNumber||""
+                  //console.log(this.person.properties.digits)
+                  this.person.basic.uid=vm.currentUser().uid
+                  this.person.basic.referrer=this.account.refer
+                  //console.log(this.person.basic.uid)
+                  vm.currentUser().updateProfile({
+                    displayName: this.account.username,
+                    photoURL:""
+                  }).then(function() {
+                    // Update successful.
+                    console.log("displayName updated to: ",vm1.account.username)
+                  }).catch(function(error) {
+                    // An error happened.
+                    console.log("Unable to update user name for auth()",error)
+                  });
+                  console.log(vm.currentUser().displayName)
+                  this.person.basic.username=this.account.username
+                  var prsn={}
+                  prsn["basic"]=this.person.basic
+                  prsn["stats"]=this.person.stats
+                  prsn["properties"]=this.person.properties
+                  prsn["suggestedPeople"]=this.person.suggestedPeople
+                  prsn["viewables"]=this.person.viewables
+                  prsn["people"]=this.person.people
+                  prsn["refers"]=this.person.refers
+                  prsn["token"]=this.person.token
+                  prsn["connections"]=this.person.connections
+                  prsn["fame"]=this.person.fame
+                  prsn["reachLimit"]=this.person.reachLimit
+                  prsn["userPosts"]=this.person.userPosts
+                  prsn["dislikes"]=this.person.dislikes
+                  prsn["likes"]=this.person.likes
+                  prsn["reports"]=this.person.reports
+
+                  this.fbs.setDatabase("/users/"+vm.currentUser().uid,prsn,true).then((res)=>{
+                    vm.setDatabase("/ref/"+vm1.account.username,vm.currentUser().uid,true).then((res)=>{
+                      vm1.navCtrl.push(FirstRunPage);
+                      load1.dismiss()
+                    })
 
 
-                console.log("Login Succesful!")
-              }).catch(function(err){
-                console.log("User Creation ERROR in Database",err)
-                  vm.currentUser().delete()
-                  vm1.navCtrl.pop()
-              })
-              vm.setDatabase("/adminsLists/users/"+vm.currentUser().uid,vm1.person.properties,true).then(function(res){
-                console.log("Successfully added to admin's list")
-              }).catch(function(err){
-                console.log("Sorry, couldn't add you to the list", err)
-              })
-            }else{
-              load1.dismiss()
+                    console.log("Login Succesful!")
+                  }).catch(function(err){
+                    console.log("User Creation ERROR in Database",err)
+                      vm.currentUser().delete()
+                      vm1.navCtrl.pop()
+                  })
+                  vm.setDatabase("/adminsLists/users/"+vm.currentUser().uid,vm1.person.properties,true).then(function(res){
+                    console.log("Successfully added to admin's list")
+                  }).catch(function(err){
+                    console.log("Sorry, couldn't add you to the list", err)
+                  })
+                }else{
+                  load1.dismiss()
 
-              this.once=0
 
-              let toast = this.toastCtrl.create({
-                message: "Username is being used by another person. Please pick another.",//+this.available+".",
-                duration: 3000,
-                position: 'top'
-              });
-              toast.present();
 
-            }
-        }).catch((err)=>{
-          console.log("freshly caught fishy: ",err)
-          vm.currentUser().delete()
-          vm1.navCtrl.pop()
-        })
-      }else{
-        load1.dismiss()
-        let toast = this.toastCtrl.create({
-          message: "Make sure your username is at least 5 characters long and without spaces.",//+this.available+".",
-          duration: 3000,
-          position: 'top'
-        });
-        toast.present();
-      }
-      }else{
-        if(load1){
+                  let toast = this.toastCtrl.create({
+                    message: "Username is being used by another person. Please pick another.",//+this.available+".",
+                    duration: 3000,
+                    position: 'top'
+                  });
+                  toast.present();
+
+                }
+            }).catch((err)=>{
+              console.log("freshly caught fishy: ",err)
+              vm.currentUser().delete()
+              vm1.navCtrl.pop()
+            })
+          }else{
+            load1.dismiss()
+            let toast = this.toastCtrl.create({
+              message: "Make sure your username is at least 5 characters long and without spaces.",//+this.available+".",
+              duration: 3000,
+              position: 'top'
+            });
+            toast.present();
+          }
+
+        }else{
           load1.dismiss()
+          this.once=0
+          let toast = this.toastCtrl.create({
+            message: "You must enter a username.``",//+this.available+".",
+            duration: 3000,
+            position: 'top'
+          });
+          toast.present();
         }
-      }
+      })
     }else{
-      load1.dismiss()
-      this.once=0
       let toast = this.toastCtrl.create({
-        message: "You must enter a username.``",//+this.available+".",
-        duration: 3000,
+        message: "Make sure you have inserted the right code!",//+this.available+".",
+        duration: 2222,
         position: 'top'
       });
       toast.present();
     }
-
   }
 }

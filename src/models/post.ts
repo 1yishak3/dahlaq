@@ -137,6 +137,7 @@ export class Post {
 }*/
 
   like(){
+    console.log("liked",this.postId)
     this.likes++
     this.liked=true
     if(this.disliked){
@@ -147,9 +148,9 @@ export class Post {
       this.reported=false
       this.reports--
     }
-    this.fbs.setDatabase("/posts/"+this.pId+"/likes/"+this.uid,true,true).then(()=>{
-      this.fbs.setDatabase("/posts/"+this.pId+"/dislikes/"+this.uid,null,true).then(()=>{
-        this.fbs.setDatabase("/posts/"+this.pId+"/reports/"+this.uid,null,true)
+    this.fbs.setDatabase("/posts/"+this.postId+"/content/likes/"+this.uid,true,true).then(()=>{
+      this.fbs.setDatabase("/posts/"+this.postId+"/content/dislikes/"+this.uid,null,true).then(()=>{
+        this.fbs.setDatabase("/posts/"+this.postId+"/content/reports/"+this.uid,null,true)
       })
     })
   }
@@ -157,7 +158,7 @@ export class Post {
     this.likes--
     this.liked=false
 
-    this.fbs.setDatabase("/posts/"+this.pId+"/likes/"+this.uid,null,true).then(()=>{
+    this.fbs.setDatabase("/posts/"+this.postId+"/content/likes/"+this.uid,null,true).then(()=>{
 
     })
   }
@@ -170,8 +171,8 @@ export class Post {
       this.likes--
     }
 
-    this.fbs.setDatabase("/posts/"+this.pId+"/dislikes/"+this.uid,true,true).then(()=>{
-      this.fbs.setDatabase("/posts/"+this.pId+"/likes/"+this.uid,null,true).then(()=>{
+    this.fbs.setDatabase("/posts/"+this.postId+"/content/dislikes/"+this.uid,true,true).then(()=>{
+      this.fbs.setDatabase("/posts/"+this.postId+"/content/likes/"+this.uid,null,true).then(()=>{
 
       })
     })
@@ -179,7 +180,7 @@ export class Post {
   undislike(){
     this.dislikes--
     this.disliked=false
-    this.fbs.setDatabase("/posts/"+this.pId+"/dislikes/"+this.uid,null,true).then(()=>{
+    this.fbs.setDatabase("/posts/"+this.postId+"/content/dislikes/"+this.uid,null,true).then(()=>{
 
     })
   }
@@ -190,8 +191,8 @@ export class Post {
       this.liked=false
       this.likes--
     }
-    this.fbs.setDatabase("/posts/"+this.pId+"/reports/"+this.uid,true, true).then(()=>{
-      this.fbs.setDatabase("/posts/"+this.pId+"/likes/"+this.uid,null,true).then(()=>{
+    this.fbs.setDatabase("/posts/"+this.postId+"/content/reports/"+this.uid,true, true).then(()=>{
+      this.fbs.setDatabase("/posts/"+this.postId+"/content/likes/"+this.uid,null,true).then(()=>{
 
       })
     })
@@ -199,8 +200,8 @@ export class Post {
   unreport(){
     this.reported=false
     this.reports--
-    this.fbs.setDatabase("/posts/"+this.pId+"/reports/"+this.uid,null,true).then(()=>{
-      
+    this.fbs.setDatabase("/posts/"+this.postId+"/content/reports/"+this.uid,null,true).then(()=>{
+
     })
   }
   // like(){
