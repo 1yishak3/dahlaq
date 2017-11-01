@@ -812,8 +812,8 @@ export class ChatPage implements AfterViewChecked{
         value["/chats/"+vm.chatId+"/summary/lastTime/"]=vm.sendable.time
 
         this.fbs.setDatabase("/chats/"+vm.chatId+"/summary/users/"+vm.oUserUid+"/unread",vm.person.users[vm.oUserUid].unread,true).then((res)=>{
-          this.fbs.setDatabase("/chats/"+vm.chatId+"/summary/lastMessage/",thi,true).then(()=>{
-            this.fbs.setDatabase("/chats/"+vm.chatId+"/summary/lastTime/", this.sendable.time,true).then(()=>{
+          this.fbs.setDatabase("/chats/"+vm.chatId+"/summary/lastMessage",thi,true).then(()=>{
+            this.fbs.setDatabase("/chats/"+vm.chatId+"/summary/lastTime", this.sendable.time,true).then(()=>{
               vm.sendable= new Message()
               resolve()
             })

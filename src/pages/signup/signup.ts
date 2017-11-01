@@ -1,5 +1,5 @@
 import { ViewChild,Component,ElementRef,AfterViewInit } from '@angular/core';
-import { NavController, ToastController, NavParams,LoadingController } from 'ionic-angular';
+import { NavController, ToastController, NavParams,LoadingController,Nav } from 'ionic-angular';
 import { Observable } from 'rxjs/Rx';
 import { MainPage } from '../../pages/pages';
 import {FirstRunPage} from '../../pages/pages'
@@ -9,6 +9,7 @@ import { TranslateService } from '@ngx-translate/core';
 import { FirebaseService } from '../../providers/firebase'
 import { Uzer } from '../../models/uzer'
 import { Network } from '@ionic-native/network'
+import {Storage} from '@ionic/storage'
 @Component({
   selector: 'page-signup',
   templateUrl: 'signup.html'
@@ -17,6 +18,7 @@ export class SignupPage {
   // The account fields for the login form.
   // If you're using the username field with or without email, make
   // sure to add it to the type
+  @ViewChild(Nav) nav: Nav;
   @ViewChild('name') name :any
   person:Uzer
   account: { username: string, refer: string, code: string } = {
@@ -35,7 +37,8 @@ export class SignupPage {
   timer:any
   pass:any
   phone:any
-  constructor(public nw:Network,
+  constructor(public stg:Storage,
+    public nw:Network,
     public fbs:FirebaseService,
     public navCtrl: NavController,
     public user: User,
@@ -224,7 +227,12 @@ export class SignupPage {
 
                   this.fbs.setDatabase("/users/"+vm.currentUser().uid,prsn,true).then((res)=>{
                     vm.setDatabase("/ref/"+vm1.account.username,vm.currentUser().uid,true).then((res)=>{
-                      vm1.navCtrl.push(FirstRunPage);
+                      this.stg.set("log",true).then(value => {
+                        vm1.navCtrl.push(FirstRunPage);
+                        //this.nav.setRoot(MainPage)
+
+                      })
+
                       load1.dismiss()
                     })
 

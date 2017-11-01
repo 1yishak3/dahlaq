@@ -77,7 +77,7 @@ export class MyApp {
     this.initTranslate();
     this.user = this.fbs.currentUser()
     console.log(ItemDetailPage)
-    this.deploy.channel='dev'
+    this.deploy.channel="production"
     this.stg.get("log").then((res)=>{
       this.status=res
       if(res){
@@ -220,24 +220,29 @@ export class MyApp {
     var auth=this.fbs.getAuth()
     console.log("Doing on init")
     auth.onAuthStateChanged(user=>{
-      if(user){
-
-        this.onNotification()
-        this.fbs.snap()
-      }
-      if(!this.status){
+      this.stg.get("signup").then((v)=>{
         if(user){
-          console.log("This is auth state changed")
 
-          this.nav.setRoot(TabsPage)
-          this.stg.set("log",true)
-
-        }else{
-          this.nav.setRoot(WelcomePage)
-          this.stg.set("log",false)
-
+          this.onNotification()
+          this.fbs.snap()
         }
-      }
+        if(!this.status){
+          if(user){
+            if(!v){
+              this.nav.setRoot(TabsPage)
+              this.stg.set("log",true)
+            }else{
+              this.stg.set("signup",false)
+            }
+
+          }else{
+            this.nav.setRoot(WelcomePage)
+            this.stg.set("log",false)
+
+          }
+        }
+      })
+
     })
 
     // this.user=fbs.currentUser()
@@ -259,21 +264,49 @@ export class MyApp {
       this.ilc.enableSpinner(false)
       this.update().then((res:any)=>{
           console.log("in the then")
-          var ac=this.ac.create({
-            title: 'Dahlaq be like,',
-            message: "We have an update! Your app will restart now.",
-            buttons: [
-              {
-                text: 'Yimechachu',
-                role: 'cancel',
-                handler: () => {
-                  //console.log('Cancel clicked');
-                  this.reload()
+          this.stg.get("signup").then((f)=>{
+            if(!f){
+              var ac=this.ac.create({
+                title: 'Dahlaq be like,',
+                message: "We have an update! Your app will restart now.",
+                buttons: [
+                  {
+                    text: 'Yimechachu',
+                    role: 'cancel',
+                    handler: () => {
+                      //console.log('Cancel clicked');
+                      this.reload()
+                    }
+                  }
+                ]
+              })
+              ac.present()
+
+            }else{
+              var g=setInterval(()=>{
+                if(!f){
+                  var ac=this.ac.create({
+                    title: 'Dahlaq be like,',
+                    message: "We have an update! Your app will restart now.",
+                    buttons: [
+                      {
+                        text: 'Yimechachu',
+                        role: 'cancel',
+                        handler: () => {
+                          //console.log('Cancel clicked');
+                          this.reload()
+                        }
+                      }
+                    ]
+                  })
+                  ac.present()
+                  clearInterval(g)
                 }
-              }
-            ]
+              },300)
+            }
+
           })
-          ac.present()
+
 
       })
 

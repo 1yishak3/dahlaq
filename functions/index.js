@@ -8,64 +8,36 @@ exports.simpleLike = functions.database.ref("/posts/{pid}/content/likes").onWrit
   var l= e.data.previous.val()
   var w= e.data.val()
   var likesCount = e.data.adminRef.parent.parent.child("likes")
-  return likesCount.transaction(cr=>{
+  console.log("www.", w)
+  if(w){
+    return likesCount.set(Object.keys(w).length)
+  }else{
+    return likesCount.set(0)
+  }
 
-    if(l&&w){
-      if(Object.keys(w).length>Object.keys(l).length){
-        return (cr||0)+1
-      }else if(Object.keys(w).length<Object.keys(l).length){
-        return (cr||0)-1
-      }else{
-        return (cr||0)
-      }
-    }else if(l&&!w){
-      return (cr||0)-1
-    }else if (!l&&w){
-      return (cr||0)+1
-    }
-  })
+
 })
 exports.simpleDislike = functions.database.ref("/posts/{pid}/content/dislikes").onWrite(e=>{
   var l= e.data.previous.val()
   var w= e.data.val()
   var likesCount = e.data.adminRef.parent.parent.child("dislikes")
-  return likesCount.transaction(cr=>{
-
-    if(l&&w){
-      if(Object.keys(w).length>Object.keys(l).length){
-        return (cr||0)+1
-      }else if(Object.keys(w).length<Object.keys(l).length){
-        return (cr||0)-1
-      }else{
-        return (cr||0)
-      }
-    }else if(l&&!w){
-      return (cr||0)-1
-    }else if (!l&&w){
-      return (cr||0)+1
-    }
-  })
+  console.log("www.", w)
+  if(w){
+    return likesCount.set(Object.keys(w).length)
+  }else{
+    return likesCount.set(0)
+  }
 })
 exports.simpleReport = functions.database.ref("/posts/{pid}/content/reports").onWrite(e=>{
   var l= e.data.previous.val()
   var w= e.data.val()
   var likesCount = e.data.adminRef.parent.parent.child("reports")
-  return likesCount.transaction(cr=>{
-
-    if(l&&w){
-      if(Object.keys(w).length>Object.keys(l).length){
-        return (cr||0)+1
-      }else if(Object.keys(w).length<Object.keys(l).length){
-        return (cr||0)-1
-      }else{
-        return (cr||0)
-      }
-    }else if(l&&!w){
-      return (cr||0)-1
-    }else if (!l&&w){
-      return (cr||0)+1
-    }
-  })
+  console.log("www.", w)
+  if(w){
+    return likesCount.set(Object.keys(w).length)
+  }else{
+    return likesCount.set(0)
+  }
 })
 exports.senseLike = functions.database.ref("/posts/{pid}/content/likes/{lid}").onWrite(e => {
   var uid = e.params.lid
@@ -317,19 +289,20 @@ exports.famous= functions.database.ref("/users/{uid}/fame").onWrite(e=>{
 
   })
 })
-exports.listS=functions.database.ref("/fameList/{c}").onWrite(e=>{
-  var val=e.data.val()
-  var t = e.params.c
-  console.log(val)
-  if(val&&t!="cache"){
-    for(let i in val){
-      if(i!="cache"){
-        e.data.adminRef.parent.child("users").child(val[i].uid).child("/basic/rank").set(Number(i)+1)
+exports.listS=functions.database.ref("/fameList").onWrite(e=>{
+  if(Math.random()>0.4){
+    var val=e.data.val()
+    console.log(val)
+    if(val){
+      for(let i in val){
+        if(i!=="cache"){
+          e.data.adminRef.parent.child("users").child(val[i].uid).child("/basic/rank").set(Number(i)+1)
+        }
+
       }
+      return e.data.adminRef.parent.child("cache").set(Date.now())
 
     }
-    return e.data.adminRef.parent.child("cache").set(Date.now())
-
   }
 })
 exports.promise=functions.database.ref("/posts/{pid}/content/reports").onWrite(e=>{
@@ -341,26 +314,26 @@ exports.promise=functions.database.ref("/posts/{pid}/content/reports").onWrite(e
     }
   }
 })
-exports.recaller=functions.database.ref("/posts/{pid}/content/likes").onWrite(e=>{
-  var b=e.data.val()
-  if(typeof b!="number"&&b){
-    return e.data.adminRef.parent.parent.child("likes").set(Object.keys(v).length)
-  }
-})
-
-exports.recaller2=functions.database.ref("/posts/{pid}/content/dislikes").onWrite(e=>{
-  var b=e.data.val()
-  console.log("From changes")
-  if(typeof b!="number"&&b){
-    return e.data.adminRef.parent.parent.child("dislikes").set(Object.keys(v).length)
-  }
-})
-exports.recaller3=functions.database.ref("/posts/{pid}/content/reports").onWrite(e=>{
-  var b=e.data.val()
-  if(typeof b!="number"&&b){
-    return e.data.adminRef.parent.parent.child("reports").set(Object.keys(v).length)
-  }
-})
+// exports.recaller=functions.database.ref("/posts/{pid}/content/likes").onWrite(e=>{
+//   var b=e.data.val()
+//   if(typeof b!="number"&&b){
+//     return e.data.adminRef.parent.parent.child("likes").set(Object.keys(b).length)
+//   }
+// })
+//
+// exports.recaller2=functions.database.ref("/posts/{pid}/content/dislikes").onWrite(e=>{
+//   var b=e.data.val()
+//   console.log("From changes")
+//   if(typeof b!="number"&&b){
+//     return e.data.adminRef.parent.parent.child("dislikes").set(Object.keys(b).length)
+//   }
+// })
+// exports.recaller3=functions.database.ref("/posts/{pid}/content/reports").onWrite(e=>{
+//   var b=e.data.val()
+//   if(typeof b!="number"&&b){
+//     return e.data.adminRef.parent.parent.child("reports").set(Object.keys(b).length)
+//   }
+// })
 //REORDER THE ADMINSLIST
 // exports.senseFame = functions.database.ref("/users/{uid}/fame").onWrite(e => {
 //   //reorder the adminsList users list accordingly
@@ -811,7 +784,13 @@ exports.fillUp= functions.database.ref("/posts/{pid}/poster/uid").onCreate((e)=>
     var userz=[]
     if(users){
       for(let i in users){
-        userz.push(users[i])
+        if(Object.keys(users[i]).length>7&&users[i].basic.uid){
+          userz.push(users[i])
+        }else{
+          if(i!=="cache"){
+            usersRef.child(i).set(null)
+          }
+        }
       }
       userz.sort((a,b)=>{
         if(a.viewables && b.viewables){
@@ -865,6 +844,7 @@ exports.fillUp= functions.database.ref("/posts/{pid}/poster/uid").onCreate((e)=>
               obj[i]=fresh[i]
             }
             obj["cache"]=Date.now()
+            console.log(uzr.basic.uid)
             usersRef.child(uzr.basic.uid).child("viewables").set(obj)
           }else{
             break;
@@ -879,12 +859,15 @@ exports.fillUp= functions.database.ref("/posts/{pid}/poster/uid").onCreate((e)=>
   })
 
 })
-exports.paint=functions.database.ref("/chats/{cid}/content/messages/{mid}").onCreate(e=>{
-  return e.data.adminRef.parent.parent.parent.child("summary").child("lastMessage").set(e.data.val()).then(()=>{
-    e.data.adminRef.parent.parent.parent.child("summary").child("lastTime").set(Date.now()).then(()=>{
-      return e.data.adminRef.child("time").set(Date.now())
+exports.paint=functions.database.ref("/chats/{cid}/content/messages/{mid}/content").onCreate(e=>{
+  e.data.adminRef.parent.once('value').then((val)=>{
+    return e.data.adminRef.parent.parent.parent.parent.child("summary").child("lastMessage").set(val.val()).then(()=>{
+      e.data.adminRef.parent.parent.parent.parent.child("summary").child("lastTime").set(Date.now()).then(()=>{
+        return e.data.adminRef.parent.child("time").set(Date.now())
+      })
     })
   })
+
 })
 // exports.chooseUp = functions.database.ref("/users/{uid}/suggestedPeople").onWrite(e => {
 //   var t=e.data.val()
@@ -1016,11 +999,11 @@ exports.choice=functions.database.ref("/users/{uid}/basic/online").onWrite(e=>{
     })
   }
 })
-exports.messagess=functions.database.ref("/chats/{cid}/content/messages/{mid}").onWrite(e=>{
-  var mref=e.data.adminRef.parent
+exports.messagess=functions.database.ref("/chats/{cid}/content/messages/{mid}/content").onWrite(e=>{
+  var mref=e.data.adminRef.parent.parent
   var prop=e.params.mid
   if(prop!=="cache"){
-    mref.once("value").then(function(snap){
+    mref.once("value").then((snap)=>{
       var messages=snap.val()
       messages["cache"]=Date.now();
       return mref.set(messages)
@@ -1201,23 +1184,29 @@ exports.reachs= functions.database.ref("/posts/{pid}/content/reach").onWrite(e =
   var nowe=e.data.val()
   var then=e.data.previous.val()
   console.log("reachs",nowe, then)
-  return reach.transaction(current=>{
-    if(then){
-      if(Object.keys(nowe).length!==Object.keys(then).length){
-        return (current||0)+(Object.keys(nowe).length-Object.keys(then).length)
-      }else{
-        return (current||0)
-      }
-    }else{
-      if(nowe){
-        return Object.keys(nowe).length
-      }else{
-        return 0
-      }
-    }
+  if(nowe){
+    return reach.set(Object.keys(nowe).length)
+  }else{
+    return reach.set(0)
+  }
 
-
-  })
+  //reach.transaction(current=>{
+  //   if(then){
+  //     if(Object.keys(nowe).length!==Object.keys(then).length){
+  //       return (current||0)+(Object.keys(nowe).length-Object.keys(then).length)
+  //     }else{
+  //       return (current||0)
+  //     }
+  //   }else{
+  //     if(nowe){
+  //       return Object.keys(nowe).length
+  //     }else{
+  //       return 0
+  //     }
+  //   }
+  //
+  //
+  // })
 })
 exports.senseReach= functions.database.ref("/posts/{pid}/reach").onWrite(e =>{
   return e.data.adminRef.parent.child("poster/uid").once('value').then(function(snap){
@@ -1422,11 +1411,8 @@ exports.sendPush1 = functions.database.ref('/chats/{cid}/content/messages/{messa
 //       })
 //     }
 // });
-exports.sent=functions.database.ref("/chats/{cid}/content/messages/{mid}").onWrite(e =>{
-  if(!e.data.previous.exists()){
-    return e.data.adminRef.child("sent").set(true)
-  }
-
+exports.sent=functions.database.ref("/chats/{cid}/content/messages/{mid}/content").onCreate(e =>{
+  return e.data.adminRef.parent.child("sent").set(true)
 })
 
 // exports.checkValidityOfUser=functions.auth.user().onCreate(ev=>{

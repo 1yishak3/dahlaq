@@ -416,21 +416,21 @@ export class FirebaseService {
       if (email === null) {
         reject("notEthiopian")
       }
-      firebase.auth().createUserWithEmailAndPassword(email, password).then((d)=>{
-      //  console.log("Account creation successful, proceeding with phone number verification,", d)
-        this.firebasev(num).then((a)=>{
-          resolve(a)
+      this.stg.set("signup",true).then(value => {
+        firebase.auth().createUserWithEmailAndPassword(email, password).then((d)=>{
+        //  console.log("Account creation successful, proceeding with phone number verification,", d)
+          this.firebasev(num).then((a)=>{
+            resolve(a)
+          })
+
+
+
+        }).catch(function(err) {
+          console.log("Account not created", err)
+          reject(err)
         })
-        this.stg.set("log",true).then(value => {
-          this.stg.set("uzer",this.currentUser())
-
-        })
-
-
-      }).catch(function(err) {
-        console.log("Account not created", err)
-        reject(err)
       })
+
     }).catch((err)=>{
       reject(err)
       console.log("created account")
