@@ -9,4 +9,4 @@ For more information, contact me: contact@yitzhaqm.com || yishaktofik@gmail.com
 Enjoy!
 
 
-Copyright Yishak Tofik Mohammed 2017
+Copyright © 2017 Yishak Tofik Mohammed 
