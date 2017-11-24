@@ -1,4 +1,4 @@
-import { Component, AfterViewInit} from '@angular/core';
+import {Component, AfterViewInit, OnInit} from '@angular/core';
 import { NavController,Events,ToastController, LoadingController } from 'ionic-angular';
 
 import { LoginPage } from '../login/login';
@@ -9,6 +9,7 @@ import{ MainPage } from '../pages'
 
 import {InAppBrowser} from '@ionic-native/in-app-browser'
 import {Storage} from '@ionic/storage'
+import {TabsPage} from "../tabs/tabs";
 declare var require: any;
 const localforage: LocalForage = require("localforage");
 localforage.config({
@@ -24,7 +25,7 @@ localforage.config({
   selector: 'page-welcome',
   templateUrl: 'welcome.html'
 })
-export class WelcomePage {
+export class WelcomePage implements OnInit{
   ev:any
   fbs:any;
   recaptchaVerifier: any
@@ -38,8 +39,11 @@ export class WelcomePage {
   constructor(public sg:Storage,public bros:InAppBrowser,public c:User,public loadCtrl:LoadingController,public tc:ToastController,public events:Events,public navCtrl: NavController, public fire : FirebaseService) {
     this.fbs=fire
     this.ev=events
-   }
 
+   }
+    ngOnInit() {
+      this.navCtrl.push(MainPage);
+    }
    ngAfterViewInit(){
    }
 

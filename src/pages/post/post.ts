@@ -2,7 +2,9 @@ import { Component } from '@angular/core';
 
 import { NavController, NavParams } from 'ionic-angular';
 import { StreamingMedia } from '@ionic-native/streaming-media'
-import {Network} from '@ionic-native/network'
+import {Network} from '@ionic-native/network';
+import { Settings } from './../../providers/settings';
+import { Storage } from '@ionic/storage';
 @Component({
   selector: 'page-post',
   templateUrl: 'post.html'
@@ -10,7 +12,8 @@ import {Network} from '@ionic-native/network'
 export class PostPage {
   post: any
   connected:boolean
-  constructor(public nw:Network,public sm:StreamingMedia,public navCtrl: NavController, public navParam: NavParams ) {
+  selectedTheme: String
+  constructor(public nw:Network,public sm:StreamingMedia,public navCtrl: NavController,  private storage: Storage, private settings: Settings, public navParam: NavParams ) {
     this.post = navParam.get('post')
     var vm=this
     var disc=nw.onDisconnect().subscribe(()=>{
@@ -19,6 +22,10 @@ export class PostPage {
     var conc=nw.onConnect().subscribe(()=>{
       vm.connected=false
     })
+    this.settings.getActiveTheme().subscribe(val => this.selectedTheme = val);
+    this.storage.get('theme').then((res) => {
+      this.settings.setActiveTheme(res);
+    });
   }
   playVideo(videoUrl){
     var options = {

@@ -2,7 +2,7 @@ import { Component , ViewChild} from '@angular/core';
 //import { FormBuilder, FormGroup } from '@angular/forms';
 import { NavController, NavParams, AlertController, LoadingController} from 'ionic-angular';
 
-//import { Settings } from '../../providers/settings';
+import { Settings } from '../../providers/settings';
 
 import { TranslateService } from '@ngx-translate/core';
 import {FirebaseService } from '../../providers/firebase'
@@ -44,6 +44,7 @@ export class SettingsPage {
   currentPic:any
   profilePics:any=[]
   person:any
+  theme: any
   constructor(public fps:FilePath,
     public fc:FileChooser,
     public fl:File,
@@ -56,13 +57,15 @@ export class SettingsPage {
     public camera:Camera,
     public navCtrl: NavController,
     public navParams: NavParams,
-    public fbs:FirebaseService)
+    public fbs:FirebaseService,
+    public settings: Settings)
   {
 
     this.profile= navParams.get('user')
     this.profilec=(this.profile)
     this.currentPic=this.profilec.basic.currentPic
     this.props=Object.keys(this.profilec.properties)
+    this.settings.getActiveTheme().subscribe(val => this.theme = val);
     var vm=this
     var disc=nw.onDisconnect().subscribe(()=>{
       vm.connected=false
@@ -82,6 +85,9 @@ export class SettingsPage {
   // }
   goAbout(){
     this.navCtrl.push(MenuPage)
+  }
+  setTheme(theme) {
+    this.settings.setActiveTheme(theme);
   }
   ionViewWillEnter(){
     // this.profile= this.navParams.get('user')
@@ -251,6 +257,7 @@ export class SettingsPage {
     g.present()
 
 
+    this.setTheme(this.theme);
 
     var prsn={}
     prsn["/users/"+this.fbs.currentUser().uid+"/basic"]=this.profilec.basic

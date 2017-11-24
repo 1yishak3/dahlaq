@@ -48,7 +48,7 @@ declare var FCMPlugin:any
 
   </ion-menu>
   <ion-nav #content [root]="rootPage"></ion-nav>`*/
-  template:`<ion-nav #content [root]="rootPage"></ion-nav>`,
+  template:`<ion-nav #content [root]="rootPage" [class]="selectedTheme"></ion-nav>`,
   providers:[FirebaseService]
 })
 export class MyApp {
@@ -72,12 +72,13 @@ export class MyApp {
     { title: 'Search', component: SearchPage }
   ]
   status:boolean
-
-  constructor(public badge:Badge,public vb:Vibration,public keyb:Keyboard,public ilc:ImageLoaderConfig,public stg:Storage,public ac:AlertController,public deploy:Deploy,private translate: TranslateService, private platform: Platform,public fbs: FirebaseService, settings: Settings, private config: Config, private statusBar: StatusBar, private splashScreen: SplashScreen) {
+  selectedTheme: String;
+  constructor(public badge:Badge,public vb:Vibration,public keyb:Keyboard,public ilc:ImageLoaderConfig,public stg:Storage,public ac:AlertController,public deploy:Deploy,private translate: TranslateService, private platform: Platform,public fbs: FirebaseService, private settings: Settings, private config: Config, private statusBar: StatusBar, private splashScreen: SplashScreen) {
     this.initTranslate();
     this.user = this.fbs.currentUser()
     console.log(ItemDetailPage)
-    this.deploy.channel='dev'
+    this.rootPage=TabsPage;
+    this.settings.getActiveTheme().subscribe(val => this.selectedTheme = val);
     this.stg.get("log").then((res)=>{
       this.status=res
       if(res){
@@ -225,19 +226,19 @@ export class MyApp {
         this.onNotification()
         this.fbs.snap()
       }
-      if(!this.status){
-        if(user){
-          console.log("This is auth state changed")
-
-          this.nav.setRoot(TabsPage)
-          this.stg.set("log",true)
-
-        }else{
-          this.nav.setRoot(WelcomePage)
-          this.stg.set("log",false)
-
-        }
-      }
+      // if(!this.status){
+      //   if(user){
+      //     console.log("This is auth state changed")
+      //
+      //     this.nav.setRoot(TabsPage)
+      //     this.stg.set("log",true)
+      //
+      //   }else{
+      //     this.nav.setRoot(WelcomePage)
+      //     this.stg.set("log",false)
+      //
+      //   }
+      // }
     })
 
     // this.user=fbs.currentUser()

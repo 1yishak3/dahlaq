@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-
+import { BehaviorSubject } from 'rxjs/Rx';
 import { Storage } from '@ionic/storage';
 
 /**
@@ -10,12 +10,24 @@ export class Settings {
   private SETTINGS_KEY: string = '_settings';
 
   settings: any;
-
+  private theme: BehaviorSubject<String>;
   _defaults: any;
   _readyPromise: Promise<any>;
 
   constructor(public storage: Storage, defaults: any) {
     this._defaults = defaults;
+    this.theme = new BehaviorSubject('light-theme');
+  }
+
+  setActiveTheme(val) {
+    this.storage.set('theme', val);
+    // localforage.setItem('theme', val);
+    this.theme.next(val);
+    // console.log(this.storage.get('theme'), val);
+  }
+
+  getActiveTheme() {
+    return this.theme.asObservable();
   }
 
   load() {

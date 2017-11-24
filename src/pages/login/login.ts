@@ -40,6 +40,7 @@ export class LoginPage {
     public nvp: NavParams,
     public nw:Network) {
 
+
     this.translateService.get('LOGIN_ERROR').subscribe((value) => {
       this.loginErrorString = value;
     })
