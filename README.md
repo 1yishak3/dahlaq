@@ -1,6 +1,6 @@
 (Note that README isn't elaborate because of my lack of experience in writing readmes. Will be updated soon)
 
-"Built solely to help mend back to gether a divided nation."
+"Built solely to help mend back together a divided nation."
 
 First ever social platform by and for Ethiopians. Built using the Ionic Framework version 3 and and Google's Angular version 4. 
 
