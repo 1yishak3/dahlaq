@@ -1,4 +1,3 @@
-(Note that README isn't elaborate because of my lack of experience in writing readmes. Will be updated soon)
 
 "Built solely to help mend back together a divided nation."
 
@@ -9,6 +8,6 @@ Android application can be installed from https://play.google.com/store/apps/det
 For more information, contact me: contact@yitzhaqm.com || yishaktofik@gmail.com 
 
 Enjoy!
-
+[More Info Coming Soon...]
 
 Copyright © 2017 Yishak Tofik Mohammed 
