@@ -4,6 +4,7 @@
 First ever social platform by and for Ethiopians. Built using the Ionic Framework version 3 and and Angular version 4. 
 
 Android application can be installed from https://play.google.com/store/apps/details?id=com.yitzhaqm.app1
+
 iOS application coming soon (when I get a Mac :D)
 
 For more information, contact me: contact@yitzhaqm.com || yishaktofik@gmail.com 
