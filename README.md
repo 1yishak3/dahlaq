@@ -1,4 +1,6 @@
 
+***UPDATE: SERVICE ON THE DISTRIBUTED APP MAY SEE SOME INTERRUPTION AS WE PREPARE TO MOVE TO IONIC PRO UP UNTIL JANUARY 31. WE APOLOGIZE FOR ANY INCONVENIENCE THIS MAY CAUSE IN ADVANCE***
+
 "Built solely to help mend back together a divided nation and bring down a corrupt firewall."
 
 First ever social networking platform by and for Ethiopians. Built using the Ionic Framework version 3 and and Angular version 4. 
